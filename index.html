@@ -927,7 +927,9 @@
             totalDamage: 0,
             hasRolled: false,
             hasAttacked: false,
-            damageClaimedPhase: false
+            damageClaimedPhase: false,
+            currentHitIndex: 0,
+            attackLog: []
         };
 
         const COLORS = [
@@ -1127,6 +1129,8 @@
             state.damageClaimedPhase = false;
             state.hits = [];
             state.totalDamage = 0;
+            state.currentHitIndex = 0;
+            state.attackLog = [];
             rollDiceBtn.disabled = false;
             disableTargetSelection();
         }
@@ -1297,18 +1301,60 @@
             });
         }
 
-        // Phase 2: Choose target to deal damage to
+        // Phase 2: Deal each hit individually to chosen opponents
         function showTargetSelection() {
             const currentPlayer = getCurrentPlayer();
             state.damageClaimedPhase = true;
+            state.currentHitIndex = 0;
+            state.attackLog = [];
             
-            attackPrompt.innerHTML = `<strong>Step 2:</strong> You have <span style="color: #feca57; font-size: 1.3rem;">${state.totalDamage}</span> damage points! Click an opponent to attack.`;
+            showNextHitToAssign();
+        }
+
+        function showNextHitToAssign() {
+            const currentPlayer = getCurrentPlayer();
             
+            // Check if all hits have been assigned
+            if (state.currentHitIndex >= state.hits.length) {
+                finishAttackPhase();
+                return;
+            }
+
+            // Check if any opponents are still alive
+            const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
+            if (aliveOpponents.length === 0) {
+                finishAttackPhase();
+                return;
+            }
+
+            const currentHit = state.hits[state.currentHitIndex];
+            const remainingHits = state.hits.slice(state.currentHitIndex);
+            
+            attackPrompt.innerHTML = `<strong>Step 2:</strong> Assign hit <span style="color: #feca57; font-size: 1.3rem;">${currentHit.roll}</span> damage - Click an opponent to attack!`;
+            
+            // Show remaining hits to assign
             hitInfo.innerHTML = `
-                <div class="damage-claimed-display" style="background: rgba(46, 204, 113, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #2ecc71;">
-                    <p style="margin-bottom: 5px;">Hits: <strong>${state.hits.map(h => h.roll).join(' + ')}</strong></p>
-                    <p style="font-size: 1.5rem; color: #2ecc71;">Total Damage: <strong>${state.totalDamage}</strong></p>
+                <div class="damage-claimed-display" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px;">
+                    <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign:</p>
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        ${remainingHits.map((h, idx) => `
+                            <span style="
+                                padding: 8px 15px;
+                                border-radius: 8px;
+                                font-weight: bold;
+                                font-size: 1.2rem;
+                                background: ${idx === 0 ? '#feca57' : 'rgba(255,255,255,0.2)'};
+                                color: ${idx === 0 ? '#1a1a2e' : '#fff'};
+                                ${idx === 0 ? 'box-shadow: 0 0 10px rgba(254,202,87,0.5);' : ''}
+                            ">${h.roll}</span>
+                        `).join('')}
+                    </div>
                 </div>
+                ${state.attackLog.length > 0 ? `
+                    <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 5px;">
+                        ${state.attackLog.join('<br>')}
+                    </div>
+                ` : ''}
             `;
             
             enableTargetSelection();
@@ -1341,12 +1387,14 @@
             const playerId = parseInt(card.dataset.player);
             const targetPlayer = state.players.find(p => p.id === playerId);
             const currentPlayer = getCurrentPlayer();
+            const currentHit = state.hits[state.currentHitIndex];
 
             disableTargetSelection();
             
-            // Deal all claimed damage to the target
-            targetPlayer.hp = Math.max(0, targetPlayer.hp - state.totalDamage);
-            addLogEntry(`${currentPlayer.name} dealt ${state.totalDamage} damage to ${targetPlayer.name}!`, 'damage');
+            // Deal this specific hit's damage to the target
+            targetPlayer.hp = Math.max(0, targetPlayer.hp - currentHit.roll);
+            addLogEntry(`${currentPlayer.name} dealt ${currentHit.roll} damage to ${targetPlayer.name}!`, 'damage');
+            state.attackLog.push(`${currentHit.roll} → ${targetPlayer.name}`);
             
             if (targetPlayer.hp <= 0) {
                 targetPlayer.eliminated = true;
@@ -1356,17 +1404,29 @@
             updatePlayersPanel();
             checkWinCondition();
             
+            // Move to next hit
+            state.currentHitIndex++;
+            
             if (state.phase === 'playing') {
-                hitInfo.innerHTML = `
-                    <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
-                        <p style="font-size: 1.2rem;">Attacked <strong style="color: ${targetPlayer.color.hex};">${targetPlayer.name}</strong></p>
-                        <p>Damage Dealt: <strong style="color: #ff6b6b; font-size: 1.3rem;">${state.totalDamage}</strong></p>
-                    </div>
-                `;
-                attackPrompt.classList.add('hidden');
-                endTurnBtn.classList.remove('hidden');
-                state.hasAttacked = true;
+                showNextHitToAssign();
             }
+        }
+
+        function finishAttackPhase() {
+            const totalDealt = state.hits.reduce((sum, h) => sum + h.roll, 0);
+            
+            hitInfo.innerHTML = `
+                <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
+                    <p style="font-size: 1.1rem; margin-bottom: 8px;">Attacks Complete!</p>
+                    <div style="font-size: 0.9rem;">
+                        ${state.attackLog.map(log => `<div>${log}</div>`).join('')}
+                    </div>
+                    <p style="margin-top: 8px;">Total Damage: <strong style="color: #ff6b6b;">${totalDealt}</strong></p>
+                </div>
+            `;
+            attackPrompt.classList.add('hidden');
+            endTurnBtn.classList.remove('hidden');
+            state.hasAttacked = true;
         }
 
         function finishTurnNoAttack() {
@@ -1475,6 +1535,8 @@
             state.hasRolled = false;
             state.hasAttacked = false;
             state.damageClaimedPhase = false;
+            state.currentHitIndex = 0;
+            state.attackLog = [];
 
             gameScreen.style.display = 'none';
             winnerScreen.style.display = 'none';
