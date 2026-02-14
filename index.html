@@ -147,6 +147,103 @@
             color: #48dbfb;
         }
 
+        /* Options Menu */
+        .options-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px 25px;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .options-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #48dbfb;
+        }
+
+        .options-toggle svg {
+            transition: transform 0.3s ease;
+        }
+
+        .options-toggle.open svg {
+            transform: rotate(180deg);
+        }
+
+        .options-menu {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .options-menu.open {
+            display: block;
+        }
+
+        .options-menu h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #feca57;
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .options-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .options-group h4 {
+            font-size: 1rem;
+            color: #48dbfb;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .options-group p,
+        .options-group ul {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+
+        .options-group ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .option-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #48dbfb;
+        }
+
+        .option-row label {
+            cursor: pointer;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+
         footer {
             text-align: center;
             margin-top: 60px;
@@ -185,6 +282,47 @@
             <span class="btn">Start Game →</span>
         </a>
 
+        <button class="options-toggle" id="options-toggle" aria-expanded="false" aria-controls="options-menu">
+            Options
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+
+        <section class="options-menu" id="options-menu" role="region" aria-label="Game options">
+            <h3>Game Defaults</h3>
+            <div class="options-group">
+                <h4>Starting HP by Player Count</h4>
+                <ul>
+                    <li>2 players: 50 HP</li>
+                    <li>3–4 players: 40 HP</li>
+                    <li>5–6 players: 60 HP</li>
+                </ul>
+            </div>
+            <div class="options-group">
+                <h4>Turn Order</h4>
+                <p>Players roll a D20 to determine turn order. Highest goes first. Ties are broken by rerolling only the tied players.</p>
+                <div class="option-row">
+                    <input type="checkbox" id="auto-roll-turn-order" aria-describedby="auto-roll-desc">
+                    <label for="auto-roll-turn-order">Automatically roll dice for turn order</label>
+                </div>
+                <p id="auto-roll-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when the turn order screen appears.</p>
+                <div class="option-row" style="margin-top: 16px;">
+                    <input type="checkbox" id="auto-begin-game" aria-describedby="auto-begin-desc">
+                    <label for="auto-begin-game">Automatically begin game after turn order</label>
+                </div>
+                <p id="auto-begin-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the game starts automatically after turn order is determined.</p>
+            </div>
+            <div class="options-group">
+                <h4>Gameplay</h4>
+                <div class="option-row">
+                    <input type="checkbox" id="auto-roll-dice" aria-describedby="auto-roll-dice-desc">
+                    <label for="auto-roll-dice">Automatically roll dice on player turn</label>
+                </div>
+                <p id="auto-roll-dice-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when each player's turn begins.</p>
+            </div>
+        </section>
+
         <section class="info-section">
             <h3>How to Play</h3>
             <p>The physical game uses two log rounds painted with D20 patterns—one for odd numbers (1–19), one for even (2–20). Players throw real knives at the targets based on what they roll!</p>
@@ -220,5 +358,37 @@
             <p>Dagger & Die — Throw knives. Roll dice. Take names.</p>
         </footer>
     </div>
+
+    <script>
+        const AUTO_ROLL_TURN_ORDER_KEY = 'daggerdie_autoRollTurnOrder';
+        const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
+        const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
+
+        document.getElementById('options-toggle').addEventListener('click', () => {
+            const toggle = document.getElementById('options-toggle');
+            const menu = document.getElementById('options-menu');
+            toggle.classList.toggle('open');
+            menu.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', menu.classList.contains('open'));
+        });
+
+        const autoRollTurnOrderCheckbox = document.getElementById('auto-roll-turn-order');
+        autoRollTurnOrderCheckbox.checked = localStorage.getItem(AUTO_ROLL_TURN_ORDER_KEY) === 'true';
+        autoRollTurnOrderCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_ROLL_TURN_ORDER_KEY, autoRollTurnOrderCheckbox.checked);
+        });
+
+        const autoBeginGameCheckbox = document.getElementById('auto-begin-game');
+        autoBeginGameCheckbox.checked = localStorage.getItem(AUTO_BEGIN_GAME_KEY) === 'true';
+        autoBeginGameCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_BEGIN_GAME_KEY, autoBeginGameCheckbox.checked);
+        });
+
+        const autoRollDiceCheckbox = document.getElementById('auto-roll-dice');
+        autoRollDiceCheckbox.checked = localStorage.getItem(AUTO_ROLL_DICE_KEY) === 'true';
+        autoRollDiceCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_ROLL_DICE_KEY, autoRollDiceCheckbox.checked);
+        });
+    </script>
 </body>
 </html>
