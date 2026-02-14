@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dagger & Die</title>
+    <title>Dagger & Die - Game</title>
     <style>
         * {
             margin: 0;
@@ -389,8 +389,7 @@
             border-radius: 50%;
             overflow: hidden;
             /* Wood base color */
-            background: 
-                /* Wood grain texture */
+            background:
                 repeating-linear-gradient(
                     85deg,
                     transparent 0px,
@@ -400,7 +399,6 @@
                     transparent 5px,
                     transparent 12px
                 ),
-                /* Base wood color gradient */
                 radial-gradient(
                     circle at 45% 45%,
                     #d4a574 0%,
@@ -410,16 +408,14 @@
                     #8b6914 80%,
                     #6b4423 100%
                 );
-            /* Bark edge */
             border: 8px solid #3d2914;
-            box-shadow: 
+            box-shadow:
                 inset 0 0 20px rgba(0,0,0,0.3),
                 inset 0 0 40px rgba(0,0,0,0.1),
                 0 5px 15px rgba(0,0,0,0.5),
                 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        /* Bark texture on border */
         .target-image-container::before {
             content: '';
             position: absolute;
@@ -429,7 +425,7 @@
             bottom: -8px;
             border-radius: 50%;
             border: 8px solid transparent;
-            background: 
+            background:
                 repeating-conic-gradient(
                     from 0deg,
                     #2d1f0f 0deg,
@@ -438,11 +434,11 @@
                     #2d1f0f 6deg
                 );
             background-clip: padding-box;
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) content-box, 
+            -webkit-mask:
+                linear-gradient(#fff 0 0) content-box,
                 linear-gradient(#fff 0 0);
-            mask: 
-                linear-gradient(#fff 0 0) content-box, 
+            mask:
+                linear-gradient(#fff 0 0) content-box,
                 linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -777,10 +773,25 @@
                 font-size: 0.95rem;
             }
         }
+
+        /* Back to Home link */
+        .back-link {
+            display: inline-block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #48dbfb;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
         <h1>Dagger & Die</h1>
 
         <!-- Setup Screen -->
@@ -835,27 +846,17 @@
                         <div class="target-wrapper">
                             <div class="target-label">Odd Numbers (1-19)</div>
                             <div class="target-image-container">
-                                <img src="assets/odd.svg" alt="Odd Target" class="target-image">
+                                <img src="assets/ODD.svg" alt="Odd Target" class="target-image">
                                 <svg class="target-overlay" id="odd-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <!-- Center: 1 -->
                                     <polygon class="highlight-zone" data-number="1" points="50,30 35,55 65,55"/>
-                                    <!-- Top left: 17 -->
                                     <polygon class="highlight-zone" data-number="17" points="19,16 50,10 35,30"/>
-                                    <!-- Top right: 3 -->
                                     <polygon class="highlight-zone" data-number="3" points="50,10 81,16 65,30"/>
-                                    <!-- Left upper: 7 -->
                                     <polygon class="highlight-zone" data-number="7" points="19,16 35,30 20,50"/>
-                                    <!-- Right upper: 19 -->
                                     <polygon class="highlight-zone" data-number="19" points="65,30 81,16 80,50"/>
-                                    <!-- Left middle: 15 -->
                                     <polygon class="highlight-zone" data-number="15" points="8,35 19,16 20,50"/>
-                                    <!-- Right middle: 9 -->
                                     <polygon class="highlight-zone" data-number="9" points="92,35 80,50 81,16"/>
-                                    <!-- Left lower: 5 (bottom left corner) -->
                                     <polygon class="highlight-zone" data-number="5" points="20,50 35,55 25,75"/>
-                                    <!-- Right lower: 11 (bottom right corner) -->
                                     <polygon class="highlight-zone" data-number="11" points="65,55 80,50 75,75"/>
-                                    <!-- Bottom center: 13 -->
                                     <polygon class="highlight-zone" data-number="13" points="35,55 65,55 50,85"/>
                                 </svg>
                             </div>
@@ -863,27 +864,17 @@
                         <div class="target-wrapper">
                             <div class="target-label">Even Numbers (2-20)</div>
                             <div class="target-image-container">
-                                <img src="assets/even.svg" alt="Even Target" class="target-image">
+                                <img src="assets/EVEN.svg" alt="Even Target" class="target-image">
                                 <svg class="target-overlay" id="even-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <!-- Center: 20 -->
                                     <polygon class="highlight-zone" data-number="20" points="50,30 35,55 65,55"/>
-                                    <!-- Top left: 18 -->
                                     <polygon class="highlight-zone" data-number="18" points="19,16 50,10 35,30"/>
-                                    <!-- Top right: 4 -->
                                     <polygon class="highlight-zone" data-number="4" points="50,10 81,16 65,30"/>
-                                    <!-- Left upper: 2 -->
                                     <polygon class="highlight-zone" data-number="2" points="19,16 35,30 20,50"/>
-                                    <!-- Right upper: 14 -->
                                     <polygon class="highlight-zone" data-number="14" points="65,30 81,16 80,50"/>
-                                    <!-- Left middle: 12 (outer left) -->
                                     <polygon class="highlight-zone" data-number="12" points="8,35 19,16 20,50"/>
-                                    <!-- Right middle: 6 (outer right) -->
                                     <polygon class="highlight-zone" data-number="6" points="92,35 80,50 81,16"/>
-                                    <!-- Left lower: 10 (bottom left) -->
                                     <polygon class="highlight-zone" data-number="10" points="20,50 35,55 25,75"/>
-                                    <!-- Right lower: 16 (bottom right) -->
                                     <polygon class="highlight-zone" data-number="16" points="65,55 80,50 75,75"/>
-                                    <!-- Bottom center: 8 -->
                                     <polygon class="highlight-zone" data-number="8" points="35,55 65,55 50,85"/>
                                 </svg>
                             </div>
@@ -921,7 +912,7 @@
         const state = {
             players: [],
             currentPlayerIndex: 0,
-            phase: 'setup', // setup, turnOrder, playing, finished
+            phase: 'setup',
             currentRoll: [],
             hits: [],
             totalDamage: 0,
@@ -973,9 +964,9 @@
         function setupPlayerInputs(count) {
             playerSetup.innerHTML = '';
             playerSetup.classList.add('visible');
-            
+
             const usedColors = new Set();
-            
+
             for (let i = 0; i < count; i++) {
                 const div = document.createElement('div');
                 div.className = 'player-input';
@@ -984,8 +975,8 @@
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}">
                     <div class="color-picker" data-player="${i}">
                         ${COLORS.map((c, idx) => `
-                            <div class="color-option ${idx === i ? 'selected' : ''}" 
-                                 data-color="${idx}" 
+                            <div class="color-option ${idx === i ? 'selected' : ''}"
+                                 data-color="${idx}"
                                  style="background: ${c.hex};"
                                  title="${c.name}"></div>
                         `).join('')}
@@ -994,7 +985,6 @@
                 playerSetup.appendChild(div);
             }
 
-            // Color picker functionality
             document.querySelectorAll('.color-picker').forEach(picker => {
                 picker.querySelectorAll('.color-option').forEach(opt => {
                     opt.addEventListener('click', () => {
@@ -1007,22 +997,28 @@
             startGameBtn.style.display = 'block';
         }
 
-        // Start game button
+        function getDefaultHp(playerCount) {
+            if (playerCount <= 2) return 50;
+            if (playerCount <= 4) return 40;
+            return 60; // 5-6 players
+        }
+
         startGameBtn.addEventListener('click', () => {
             const inputs = playerSetup.querySelectorAll('input');
             state.players = [];
-            
+            const defaultHp = getDefaultHp(inputs.length);
+
             inputs.forEach((input, idx) => {
                 const colorPicker = playerSetup.querySelector(`.color-picker[data-player="${idx}"]`);
                 const selectedColor = colorPicker.querySelector('.color-option.selected');
                 const colorIdx = parseInt(selectedColor.dataset.color);
-                
+
                 state.players.push({
                     id: idx,
                     name: input.value || `Player ${idx + 1}`,
                     color: COLORS[colorIdx],
-                    hp: 50,
-                    maxHp: 50,
+                    hp: defaultHp,
+                    maxHp: defaultHp,
                     turnOrderRoll: 0,
                     eliminated: false
                 });
@@ -1031,11 +1027,10 @@
             showTurnOrderScreen();
         });
 
-        // Turn Order Screen
         function showTurnOrderScreen() {
             setupScreen.style.display = 'none';
             turnOrderScreen.style.display = 'block';
-            
+
             const rollsDiv = document.getElementById('turn-order-rolls');
             rollsDiv.innerHTML = state.players.map(p => `
                 <div class="turn-order-player" data-player="${p.id}">
@@ -1051,28 +1046,101 @@
         document.getElementById('roll-turn-order-btn').addEventListener('click', async () => {
             const btn = document.getElementById('roll-turn-order-btn');
             btn.disabled = true;
-            
-            // Roll for each player with animation
+
             for (let player of state.players) {
                 const playerDiv = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
                 const rollValue = playerDiv.querySelector('.roll-value');
-                
-                // Animate roll
+
                 for (let i = 0; i < 10; i++) {
                     rollValue.textContent = rollD20();
                     await sleep(50);
                 }
-                
+
                 player.turnOrderRoll = rollD20();
                 rollValue.textContent = player.turnOrderRoll;
                 await sleep(300);
             }
 
-            // Sort players by roll (highest first)
             state.players.sort((a, b) => b.turnOrderRoll - a.turnOrderRoll);
-            
-            // Update display to show order
+
             const rollsDiv = document.getElementById('turn-order-rolls');
+            const tieMessage = document.createElement('p');
+            tieMessage.id = 'tie-reroll-message';
+            tieMessage.style.cssText = 'color: #feca57; margin: 15px 0; font-weight: bold;';
+            tieMessage.style.display = 'none';
+            if (!document.getElementById('tie-reroll-message')) {
+                rollsDiv.parentNode.insertBefore(tieMessage, rollsDiv.nextSibling);
+            }
+
+            function updateTurnOrderDisplay() {
+                rollsDiv.innerHTML = state.players.map((p, idx) => `
+                    <div class="turn-order-player" data-player="${p.id}">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-weight: bold; width: 25px;">#${idx + 1}</span>
+                            <div style="width: 30px; height: 30px; border-radius: 50%; background: ${p.color.hex};"></div>
+                            <span>${p.name}</span>
+                        </div>
+                        <span class="roll-value">${p.turnOrderRoll}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Find tie groups (consecutive players with same roll) - each resolves independently
+            const tieGroupsWithIndex = [];
+            for (let i = 0; i < state.players.length; i++) {
+                const startIdx = i;
+                const group = [state.players[i]];
+                while (i + 1 < state.players.length && state.players[i + 1].turnOrderRoll === state.players[i].turnOrderRoll) {
+                    group.push(state.players[++i]);
+                }
+                if (group.length > 1) {
+                    tieGroupsWithIndex.push({ startIdx, players: group });
+                }
+            }
+
+            // Resolve each tie group in isolation - only the tied players reroll for their slots
+            for (const { startIdx, players: tiedPlayers } of tieGroupsWithIndex) {
+                let hasTieInGroup;
+                do {
+                    hasTieInGroup = false;
+                    tieMessage.textContent = `Tie between ${tiedPlayers.map(p => p.name).join(', ')}! Rerolling for slot...`;
+                    tieMessage.style.display = 'block';
+                    await sleep(500);
+
+                    for (let player of tiedPlayers) {
+                        const playerDiv = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
+                        if (playerDiv) {
+                            const rollValue = playerDiv.querySelector('.roll-value');
+                            for (let i = 0; i < 8; i++) {
+                                rollValue.textContent = rollD20();
+                                await sleep(40);
+                            }
+                        }
+                        player.turnOrderRoll = rollD20();
+                        const div = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
+                        if (div) div.querySelector('.roll-value').textContent = player.turnOrderRoll;
+                        await sleep(200);
+                    }
+
+                    tiedPlayers.sort((a, b) => b.turnOrderRoll - a.turnOrderRoll);
+
+                    for (let j = 0; j < tiedPlayers.length - 1; j++) {
+                        if (tiedPlayers[j].turnOrderRoll === tiedPlayers[j + 1].turnOrderRoll) {
+                            hasTieInGroup = true;
+                            break;
+                        }
+                    }
+
+                    for (let j = 0; j < tiedPlayers.length; j++) {
+                        state.players[startIdx + j] = tiedPlayers[j];
+                    }
+                    updateTurnOrderDisplay();
+                    tieMessage.style.display = 'none';
+                    await sleep(300);
+                } while (hasTieInGroup);
+            }
+
+            tieMessage.style.display = 'none';
             await sleep(500);
             rollsDiv.innerHTML = state.players.map((p, idx) => `
                 <div class="turn-order-player" data-player="${p.id}">
@@ -1097,7 +1165,6 @@
             updateGameUI();
         });
 
-        // Game Functions
         function rollD20() {
             return Math.floor(Math.random() * 20) + 1;
         }
@@ -1114,7 +1181,6 @@
             return state.players.filter(p => !p.eliminated);
         }
 
-        // Update UI
         function updateGameUI() {
             updatePlayersPanel();
             updateCurrentPlayerDisplay();
@@ -1138,7 +1204,7 @@
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             playersPanel.innerHTML = state.players.map(p => `
-                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''}" 
+                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''}"
                      data-player="${p.id}">
                     <div class="player-avatar" style="background: ${p.color.hex};"></div>
                     <div class="player-name">${p.name}</div>
@@ -1157,10 +1223,9 @@
             currentPlayerNameEl.style.color = current.color.hex;
         }
 
-        // Roll Dice
         rollDiceBtn.addEventListener('click', async () => {
             if (state.hasRolled) return;
-            
+
             rollDiceBtn.disabled = true;
             const dice = [
                 document.getElementById('die1'),
@@ -1168,7 +1233,6 @@
                 document.getElementById('die3')
             ];
 
-            // Rolling animation
             dice.forEach(die => {
                 die.classList.add('rolling');
                 die.classList.remove('odd', 'even');
@@ -1181,7 +1245,6 @@
                 await sleep(50);
             }
 
-            // Final rolls
             state.currentRoll = [rollD20(), rollD20(), rollD20()];
             state.hits = [];
             state.totalDamage = 0;
@@ -1194,15 +1257,10 @@
                 die.classList.add(value % 2 === 0 ? 'even' : 'odd');
             });
 
-            // Highlight targets
             highlightTargets(state.currentRoll);
-
-            // Display results
             displayRollResults();
-            
+
             state.hasRolled = true;
-            
-            // Show hit recording UI (Phase 1: Claim damage)
             showHitRecorder();
         });
 
@@ -1223,7 +1281,6 @@
         }
 
         function displayRollResults() {
-            const current = getCurrentPlayer();
             diceResults.innerHTML = `
                 <p>Rolled: <strong>${state.currentRoll.join(', ')}</strong></p>
                 <p>Odd targets: <span style="color: #ff6b6b;">${state.currentRoll.filter(r => r % 2 === 1).join(', ') || 'None'}</span></p>
@@ -1231,13 +1288,12 @@
             `;
         }
 
-        // Phase 1: Record which targets were hit and claim damage points
         function showHitRecorder() {
             const currentPlayer = getCurrentPlayer();
-            
+
             attackPrompt.classList.remove('hidden');
             attackPrompt.innerHTML = `<strong>Step 1:</strong> Throw your knives! Click each number you HIT on the target to claim damage points.`;
-            
+
             hitInfo.innerHTML = `
                 <div style="width: 100%; text-align: center; margin-bottom: 15px;">
                     <p style="font-size: 1.1rem;">Click the numbers you <strong>HIT</strong> on the target:</p>
@@ -1262,7 +1318,7 @@
                 btn.addEventListener('click', () => {
                     const roll = parseInt(btn.dataset.roll);
                     const idx = parseInt(btn.dataset.idx);
-                    
+
                     if (btn.classList.contains('hit')) {
                         btn.classList.remove('hit');
                         btn.style.background = '';
@@ -1280,12 +1336,11 @@
 
             document.getElementById('confirm-hits-btn').addEventListener('click', () => {
                 state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
-                
+
                 if (state.totalDamage > 0) {
                     addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
                     showTargetSelection();
                 } else {
-                    // No hits - prompt to confirm or go back
                     if (confirm('No hits recorded. Did you miss all targets?')) {
                         addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
                         finishTurnNoAttack();
@@ -1301,26 +1356,22 @@
             });
         }
 
-        // Phase 2: Deal each hit individually to chosen opponents
         function showTargetSelection() {
-            const currentPlayer = getCurrentPlayer();
             state.damageClaimedPhase = true;
             state.currentHitIndex = 0;
             state.attackLog = [];
-            
+
             showNextHitToAssign();
         }
 
         function showNextHitToAssign() {
             const currentPlayer = getCurrentPlayer();
-            
-            // Check if all hits have been assigned
+
             if (state.currentHitIndex >= state.hits.length) {
                 finishAttackPhase();
                 return;
             }
 
-            // Check if any opponents are still alive
             const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
             if (aliveOpponents.length === 0) {
                 finishAttackPhase();
@@ -1329,10 +1380,9 @@
 
             const currentHit = state.hits[state.currentHitIndex];
             const remainingHits = state.hits.slice(state.currentHitIndex);
-            
+
             attackPrompt.innerHTML = `<strong>Step 2:</strong> Assign hit <span style="color: #feca57; font-size: 1.3rem;">${currentHit.roll}</span> damage - Click an opponent to attack!`;
-            
-            // Show remaining hits to assign
+
             hitInfo.innerHTML = `
                 <div class="damage-claimed-display" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px;">
                     <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign:</p>
@@ -1356,18 +1406,18 @@
                     </div>
                 ` : ''}
             `;
-            
+
             enableTargetSelection();
         }
 
         function enableTargetSelection() {
             const current = getCurrentPlayer();
             const cards = document.querySelectorAll('.player-card');
-            
+
             cards.forEach(card => {
                 const playerId = parseInt(card.dataset.player);
                 const player = state.players.find(p => p.id === playerId);
-                
+
                 if (!player.eliminated && player.id !== current.id) {
                     card.classList.add('targetable');
                     card.addEventListener('click', handleAttack);
@@ -1390,12 +1440,11 @@
             const currentHit = state.hits[state.currentHitIndex];
 
             disableTargetSelection();
-            
-            // Deal this specific hit's damage to the target
+
             targetPlayer.hp = Math.max(0, targetPlayer.hp - currentHit.roll);
             addLogEntry(`${currentPlayer.name} dealt ${currentHit.roll} damage to ${targetPlayer.name}!`, 'damage');
             state.attackLog.push(`${currentHit.roll} → ${targetPlayer.name}`);
-            
+
             if (targetPlayer.hp <= 0) {
                 targetPlayer.eliminated = true;
                 addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
@@ -1403,10 +1452,9 @@
 
             updatePlayersPanel();
             checkWinCondition();
-            
-            // Move to next hit
+
             state.currentHitIndex++;
-            
+
             if (state.phase === 'playing') {
                 showNextHitToAssign();
             }
@@ -1414,7 +1462,7 @@
 
         function finishAttackPhase() {
             const totalDealt = state.hits.reduce((sum, h) => sum + h.roll, 0);
-            
+
             hitInfo.innerHTML = `
                 <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
                     <p style="font-size: 1.1rem; margin-bottom: 8px;">Attacks Complete!</p>
@@ -1436,13 +1484,12 @@
             state.hasAttacked = true;
         }
 
-        // Dropped Knife
         droppedKnifeBtn.addEventListener('click', () => {
             const current = getCurrentPlayer();
             current.hp = Math.max(0, current.hp - 1);
             addLogEntry(`${current.name} dropped a knife! (-1 HP)`, 'damage');
             updatePlayersPanel();
-            
+
             if (current.hp <= 0) {
                 current.eliminated = true;
                 addLogEntry(`${current.name} has been eliminated!`, 'info');
@@ -1453,18 +1500,16 @@
             }
         });
 
-        // End Turn
         endTurnBtn.addEventListener('click', () => {
             nextTurn();
         });
 
         function nextTurn() {
             disableTargetSelection();
-            
-            // Find next alive player
+
             let nextIdx = state.currentPlayerIndex;
             const alivePlayers = getAlivePlayers();
-            
+
             if (alivePlayers.length <= 1) {
                 checkWinCondition();
                 return;
@@ -1486,14 +1531,14 @@
                 showWinner(alivePlayers[0]);
             } else if (alivePlayers.length === 0) {
                 state.phase = 'finished';
-                showWinner(null); // Draw
+                showWinner(null);
             }
         }
 
         function showWinner(winner) {
             gameScreen.style.display = 'none';
             winnerScreen.style.display = 'block';
-            
+
             if (winner) {
                 document.getElementById('winner-name').innerHTML = `
                     <div style="width: 80px; height: 80px; border-radius: 50%; background: ${winner.color.hex}; margin: 0 auto 20px;"></div>
@@ -1504,7 +1549,6 @@
             }
         }
 
-        // Reset Dice Display
         function resetDice() {
             ['die1', 'die2', 'die3'].forEach(id => {
                 const die = document.getElementById(id);
@@ -1513,7 +1557,6 @@
             });
         }
 
-        // Game Log
         function addLogEntry(message, type = 'info') {
             const entry = document.createElement('div');
             entry.className = `log-entry log-${type}`;
@@ -1521,7 +1564,6 @@
             gameLogEntries.insertBefore(entry, gameLogEntries.firstChild);
         }
 
-        // New Game / Play Again
         document.getElementById('new-game-btn').addEventListener('click', resetGame);
         document.getElementById('play-again-btn').addEventListener('click', resetGame);
 
@@ -1543,14 +1585,12 @@
             turnOrderScreen.style.display = 'none';
             setupScreen.style.display = 'block';
 
-            // Reset setup screen
             document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
             playerSetup.innerHTML = '';
             playerSetup.classList.remove('visible');
             startGameBtn.style.display = 'none';
             gameLogEntries.innerHTML = '';
-            
-            // Reset turn order screen
+
             document.getElementById('roll-turn-order-btn').classList.remove('hidden');
             document.getElementById('roll-turn-order-btn').disabled = false;
             document.getElementById('begin-game-btn').classList.add('hidden');
