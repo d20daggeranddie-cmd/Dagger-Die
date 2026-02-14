@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dagger & Die - Web Game Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Game Tile */
+        .game-tile {
+            display: block;
+            text-decoration: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 50px;
+            text-align: center;
+            border: 3px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .game-tile:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: #feca57;
+            box-shadow: 0 0 30px rgba(254, 202, 87, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .game-tile-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        .game-tile h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .game-tile p {
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+        }
+
+        .game-tile .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            font-weight: bold;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .game-tile:hover .btn {
+            box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4);
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .info-section h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #feca57;
+        }
+
+        .info-section p {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 12px;
+        }
+
+        .info-section ul {
+            margin: 15px 0;
+            padding-left: 24px;
+        }
+
+        .info-section li {
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .rule-card {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #48dbfb;
+        }
+
+        .rule-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #48dbfb;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .game-tile {
+                padding: 25px 20px;
+            }
+
+            .game-tile-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dagger & Die</h1>
+            <p class="tagline">Web-based game tracker for the physical knife-throwing dice game</p>
+        </header>
+
+        <a href="game.html" class="game-tile">
+            <div class="game-tile-icon">🎯</div>
+            <h2>Play Game Tracker</h2>
+            <p>Roll virtual D20s, track HP, and manage your knife-throwing game. Works on desktop and mobile.</p>
+            <span class="btn">Start Game →</span>
+        </a>
+
+        <section class="info-section">
+            <h3>How to Play</h3>
+            <p>The physical game uses two log rounds painted with D20 patterns—one for odd numbers (1–19), one for even (2–20). Players throw real knives at the targets based on what they roll!</p>
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <strong>Setup</strong>
+                    Select 2–6 players, choose names and colors, then roll for turn order.
+                </div>
+                <div class="rule-card">
+                    <strong>Gameplay</strong>
+                    Each player starts with 50 HP. Roll 3 D20s, throw knives at the matching targets, and deal damage for hits.
+                </div>
+                <div class="rule-card">
+                    <strong>Special Rules</strong>
+                    Dropped knife = -1 HP. Last player standing wins!
+                </div>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <h3>Features</h3>
+            <ul>
+                <li>Virtual D20 dice rolling with animations</li>
+                <li>Visual target boards with highlighted zones matching your rolls</li>
+                <li>HP tracking for all players</li>
+                <li>Turn order management</li>
+                <li>Game log to track all actions</li>
+                <li>Responsive design—works on desktop and mobile</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Dagger & Die — Throw knives. Roll dice. Take names.</p>
+        </footer>
+    </div>
+</body>
+</html>
