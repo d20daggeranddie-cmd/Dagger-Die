@@ -126,25 +126,199 @@
 
         .color-picker {
             display: flex;
-            gap: 5px;
+            align-items: center;
         }
 
-        .color-option {
-            width: 30px;
-            height: 30px;
+        .color-picker-wrap {
+            position: relative;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
         }
 
-        .color-option:hover {
-            transform: scale(1.2);
+        .color-picker-wrap:hover {
+            transform: scale(1.12);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.8);
         }
 
-        .color-option.selected {
-            border-color: #fff;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        .color-swatch {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .player-color-input {
+            position: absolute;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Custom circular color picker modal */
+        .color-picker-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .color-picker-modal-overlay.open {
+            display: flex;
+        }
+
+        .color-picker-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 100%;
+        }
+
+        .color-picker-modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .color-wheel-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 20px;
+            touch-action: none;
+        }
+
+        .color-wheel-hue {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #ff0000, #ff8800, #ffff00, #88ff00, #00ff00, #00ff88, #00ffff, #0088ff, #0000ff, #8800ff, #ff00ff, #ff0088, #ff0000);
+            padding: 12px;
+        }
+
+        .color-wheel-inner {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: #1e2a3a;
+        }
+
+        .color-wheel-sat {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--picker-gray, #808080) 0%, var(--picker-hue-color, #f00) 100%);
+            cursor: crosshair;
+        }
+
+        .color-wheel-hue-handle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            pointer-events: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .color-wheel-sat-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            pointer-events: none;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .color-picker-lightness {
+            margin-bottom: 20px;
+        }
+
+        .color-picker-lightness label {
+            display: block;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+        }
+
+        .color-picker-lightness input[type="range"] {
+            width: 100%;
+            height: 28px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+        }
+
+        .color-picker-lightness input[type="range"]::-webkit-slider-runnable-track {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #000, #fff);
+        }
+
+        .color-picker-lightness input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            margin-top: -7px;
+            cursor: pointer;
+        }
+
+        .color-picker-lightness input[type="range"]::-moz-range-track {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #000, #fff);
+        }
+
+        .color-picker-lightness input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        .color-picker-done {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #48dbfb, #0abde3);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .color-picker-done:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,171,227,0.4);
         }
 
         .btn {
@@ -522,6 +696,11 @@
             font-size: 1.2rem;
             margin-bottom: 15px;
             color: #feca57;
+        }
+
+        .editable-hits-box:hover {
+            background: rgba(46, 204, 113, 0.35) !important;
+            border-color: #27ae60 !important;
         }
 
         .hit-info {
@@ -924,6 +1103,25 @@
         </div>
     </div>
 
+    <!-- Custom circular color picker modal (must be in DOM before script runs) -->
+    <div class="color-picker-modal-overlay" id="color-picker-modal" role="dialog" aria-label="Pick color">
+        <div class="color-picker-modal">
+            <h3>Pick your color</h3>
+            <div class="color-wheel-container" id="color-wheel-container">
+                <div class="color-wheel-hue" id="color-wheel-hue"></div>
+                <div class="color-wheel-inner"></div>
+                <div class="color-wheel-sat" id="color-wheel-sat"></div>
+                <div class="color-wheel-hue-handle" id="color-hue-handle"></div>
+                <div class="color-wheel-sat-handle" id="color-sat-handle"></div>
+            </div>
+            <div class="color-picker-lightness">
+                <label for="color-lightness-input">Brightness</label>
+                <input type="range" id="color-lightness-input" min="0" max="100" value="50">
+            </div>
+            <button type="button" class="color-picker-done" id="color-picker-done">Done</button>
+        </div>
+    </div>
+
     <script>
         // Game State
         const state = {
@@ -951,6 +1149,32 @@
             { name: 'Yellow', hex: '#f1c40f' }
         ];
 
+        function hexToHSL(hex) {
+            const n = parseInt(hex.slice(1), 16);
+            const r = (n >> 16) / 255, g = ((n >> 8) & 0xff) / 255, b = (n & 0xff) / 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h = 0, s = 0, l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+                else if (max === g) h = ((b - r) / d + 2) / 6;
+                else h = ((r - g) / d + 4) / 6;
+            }
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        function hslToHex(h, s, l) {
+            s /= 100; l /= 100;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+            };
+            const r = Math.round(f(0) * 255), g = Math.round(f(8) * 255), b = Math.round(f(4) * 255);
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
         // DOM Elements
         const setupScreen = document.getElementById('setup-screen');
         const turnOrderScreen = document.getElementById('turn-order-screen');
@@ -967,6 +1191,129 @@
         const endTurnBtn = document.getElementById('end-turn-btn');
         const droppedKnifeBtn = document.getElementById('dropped-knife-btn');
         const gameLogEntries = document.getElementById('game-log-entries');
+
+        // Custom circular color picker
+        const colorPickerModal = document.getElementById('color-picker-modal');
+        const colorWheelContainer = document.getElementById('color-wheel-container');
+        const colorWheelSat = document.getElementById('color-wheel-sat');
+        const colorHueHandle = document.getElementById('color-hue-handle');
+        const colorSatHandle = document.getElementById('color-sat-handle');
+        const colorLightnessInput = document.getElementById('color-lightness-input');
+        const colorPickerDone = document.getElementById('color-picker-done');
+
+        let colorPickerState = { wrap: null, input: null, swatch: null, h: 0, s: 100, l: 50 };
+        const WHEEL_SIZE = 260;
+        const WHEEL_PADDING = 12;
+        const WHEEL_INNER_R = (WHEEL_SIZE / 2) - WHEEL_PADDING;
+
+        function openColorPicker(wrap) {
+            const input = wrap.querySelector('.player-color-input');
+            const swatch = wrap.querySelector('.color-swatch');
+            const hex = input.value || '#e74c3c';
+            const hsl = hexToHSL(hex);
+            colorPickerState = { wrap, input, swatch, h: hsl.h, s: hsl.s, l: hsl.l };
+            colorLightnessInput.value = Math.round(hsl.l);
+            colorPickerModal.classList.add('open');
+            updatePickerGradient();
+            updatePickerHandles();
+        }
+
+        function updatePickerGradient() {
+            const { h } = colorPickerState;
+            const gray = hslToHex(h, 0, 50);
+            const hueColor = hslToHex(h, 100, 50);
+            colorWheelSat.style.setProperty('--picker-gray', gray);
+            colorWheelSat.style.setProperty('--picker-hue-color', hueColor);
+        }
+
+        function updatePickerHandles() {
+            const { h, s } = colorPickerState;
+            const rad = (h - 90) * Math.PI / 180;
+            const hueR = 48;
+            colorHueHandle.style.left = (50 + hueR * Math.cos(rad)) + '%';
+            colorHueHandle.style.top = (50 + hueR * Math.sin(rad)) + '%';
+            const satR = (s / 100) * 42;
+            colorSatHandle.style.left = (50 + satR) + '%';
+            colorSatHandle.style.top = '50%';
+        }
+
+        function commitPickerColor() {
+            const { input, swatch, h, s, l } = colorPickerState;
+            const hex = hslToHex(h, s, l);
+            if (input) input.value = hex;
+            if (swatch) swatch.style.background = hex;
+        }
+
+        function getWheelXY(e) {
+            const rect = colorWheelContainer.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const x = (e.clientX ?? e.touches?.[0]?.clientX) - cx;
+            const y = (e.clientY ?? e.touches?.[0]?.clientY) - cy;
+            const dist = Math.sqrt(x * x + y * y);
+            const angle = Math.atan2(y, x);
+            return { x, y, dist, angle };
+        }
+
+        function onWheelPointerDown(e) {
+            e.preventDefault();
+            const { dist, angle } = getWheelXY(e);
+            const isHue = dist > WHEEL_INNER_R;
+            let move = (e2) => {
+                const xy = getWheelXY(e2);
+                if (isHue) {
+                    colorPickerState.h = ((xy.angle * 180 / Math.PI + 90) + 360) % 360;
+                    updatePickerGradient();
+                } else {
+                    colorPickerState.s = Math.min(100, Math.max(0, (xy.dist / WHEEL_INNER_R) * 100));
+                    updatePickerHandles();
+                }
+                updatePickerHandles();
+                commitPickerColor();
+            };
+            const up = () => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', up);
+                document.removeEventListener('touchmove', move, { passive: false });
+                document.removeEventListener('touchend', up);
+            };
+            if (isHue) {
+                colorPickerState.h = ((angle * 180 / Math.PI + 90) + 360) % 360;
+                updatePickerGradient();
+            } else {
+                colorPickerState.s = Math.min(100, Math.max(0, (dist / WHEEL_INNER_R) * 100));
+            }
+            updatePickerHandles();
+            commitPickerColor();
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup', up);
+            document.addEventListener('touchmove', move, { passive: false });
+            document.addEventListener('touchend', up);
+        }
+
+        document.addEventListener('click', (e) => {
+            const wrap = e.target.closest('.color-picker-wrap');
+            if (wrap) {
+                e.preventDefault();
+                openColorPicker(wrap);
+            }
+        });
+
+        colorWheelContainer.addEventListener('pointerdown', onWheelPointerDown);
+        colorWheelContainer.addEventListener('touchstart', onWheelPointerDown, { passive: false });
+
+        colorLightnessInput.addEventListener('input', () => {
+            colorPickerState.l = parseInt(colorLightnessInput.value, 10);
+            commitPickerColor();
+        });
+
+        colorPickerDone.addEventListener('click', () => {
+            colorPickerModal.classList.remove('open');
+        });
+
+        colorPickerModal.addEventListener('click', (e) => {
+            if (e.target === colorPickerModal) colorPickerModal.classList.remove('open');
+        });
 
         // Setup: Player count selection
         document.querySelectorAll('.player-count-btn').forEach(btn => {
@@ -992,31 +1339,21 @@
             for (let i = 0; i < count; i++) {
                 const div = document.createElement('div');
                 div.className = 'player-input';
+                const defaultHex = COLORS[i % COLORS.length].hex;
                 div.innerHTML = `
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="color-picker" data-player="${i}">
-                        ${COLORS.map((c, idx) => `
-                            <div class="color-option ${idx === i ? 'selected' : ''}"
-                                 data-color="${idx}"
-                                 style="background: ${c.hex};"
-                                 title="${c.name}"></div>
-                        `).join('')}
+                        <div class="color-picker-wrap" data-player="${i}" title="Pick your color">
+                            <span class="color-swatch" style="background: ${defaultHex};"></span>
+                            <input type="color" class="player-color-input" data-player="${i}" value="${defaultHex}" aria-hidden="true">
+                        </div>
                     </div>
                 `;
                 playerSetup.appendChild(div);
             }
 
-            document.querySelectorAll('.color-picker').forEach(picker => {
-                picker.querySelectorAll('.color-option').forEach(opt => {
-                    opt.addEventListener('click', () => {
-                        picker.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                        opt.classList.add('selected');
-                    });
-                });
-            });
-
-            playerSetup.querySelectorAll('input[data-player]').forEach(input => {
+            playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
                 input.addEventListener('input', checkDuplicateNames);
             });
 
@@ -1024,7 +1361,7 @@
         }
 
         function checkDuplicateNames() {
-            const inputs = playerSetup.querySelectorAll('input[data-player]');
+            const inputs = playerSetup.querySelectorAll('input[type="text"]');
             const errorEl = document.getElementById('setup-error');
 
             document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error-duplicate'));
@@ -1067,7 +1404,7 @@
         const NAME_MAX_LEN = 30;
 
         function validatePlayerNames() {
-            const inputs = playerSetup.querySelectorAll('input');
+            const inputs = playerSetup.querySelectorAll('input[type="text"]');
             const errorEl = document.getElementById('setup-error');
             const names = [];
             let firstInvalidInput = null;
@@ -1135,20 +1472,20 @@
         startGameBtn.addEventListener('click', () => {
             if (!validatePlayerNames()) return;
 
-            const inputs = playerSetup.querySelectorAll('input');
+            const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
             state.players = [];
-            const defaultHp = getDefaultHp(inputs.length);
+            const defaultHp = getDefaultHp(nameInputs.length);
 
-            inputs.forEach((input, idx) => {
+            nameInputs.forEach((input, idx) => {
                 const colorPicker = playerSetup.querySelector(`.color-picker[data-player="${idx}"]`);
-                const selectedColor = colorPicker.querySelector('.color-option.selected');
-                const colorIdx = parseInt(selectedColor.dataset.color);
+                const colorInput = colorPicker.querySelector('input[type="color"]');
+                const hex = colorInput ? colorInput.value : COLORS[idx % COLORS.length].hex;
                 const name = input.value.trim() || `Player ${idx + 1}`;
 
                 state.players.push({
                     id: idx,
                     name,
-                    color: COLORS[colorIdx],
+                    color: { name: 'Custom', hex },
                     hp: defaultHp,
                     maxHp: defaultHp,
                     turnOrderRoll: 0,
@@ -1443,11 +1780,15 @@
             `;
         }
 
-        function showHitRecorder() {
+        function showHitRecorder(initialHits) {
             const currentPlayer = getCurrentPlayer();
+
+            state.hits = initialHits && initialHits.length > 0 ? initialHits.slice() : [];
 
             attackPrompt.classList.remove('hidden');
             attackPrompt.innerHTML = `<strong>Step 1:</strong> Throw your knives! Click each number you HIT on the target to claim damage points.`;
+
+            const hitIdxSet = new Set(state.hits.map(h => h.idx));
 
             hitInfo.innerHTML = `
                 <div style="width: 100%; text-align: center; margin-bottom: 15px;">
@@ -1455,19 +1796,16 @@
                 </div>
                 <div class="hit-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     ${state.currentRoll.map((roll, idx) => `
-                        <button class="btn hit-toggle" data-roll="${roll}" data-idx="${idx}" style="min-width: 70px; font-size: 1.3rem;">
+                        <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''}" data-roll="${roll}" data-idx="${idx}" style="min-width: 70px; font-size: 1.3rem; ${hitIdxSet.has(idx) ? 'background: #2ecc71;' : ''}">
                             ${roll}
                         </button>
                     `).join('')}
                 </div>
                 <div style="margin-top: 20px;">
-                    <p style="font-size: 1.3rem;">Damage Claimed: <strong id="total-damage-display" style="color: #feca57; font-size: 1.5rem;">0</strong></p>
-                    <button class="btn btn-primary" id="confirm-hits-btn" style="margin-top: 15px;">Confirm Hits</button>
-                    <button class="btn btn-secondary" id="miss-all-btn" style="margin-top: 15px; margin-left: 10px;">Missed All</button>
+                    <p style="font-size: 1.3rem;">Damage Claimed: <strong id="total-damage-display" style="color: #feca57; font-size: 1.5rem;">${state.hits.reduce((sum, h) => sum + h.roll, 0)}</strong></p>
+                    <button class="btn btn-primary" id="confirm-hits-btn" style="margin-top: 15px;">Confirm</button>
                 </div>
             `;
-
-            state.hits = [];
 
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1502,19 +1840,13 @@
                     }
                 }
             });
-
-            document.getElementById('miss-all-btn').addEventListener('click', () => {
-                state.hits = [];
-                state.totalDamage = 0;
-                addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
-                finishTurnNoAttack();
-            });
         }
 
         function showTargetSelection() {
             state.damageClaimedPhase = true;
             state.currentHitIndex = 0;
             state.attackLog = [];
+            state.attackAssignments = [];
 
             showNextHitToAssign();
         }
@@ -1539,8 +1871,8 @@
             attackPrompt.innerHTML = `<strong>Step 2:</strong> Assign hit <span style="color: #feca57; font-size: 1.3rem;">${currentHit.roll}</span> damage - Click an opponent to attack!`;
 
             hitInfo.innerHTML = `
-                <div class="damage-claimed-display" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px;">
-                    <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign:</p>
+                <div class="editable-hits-box" id="editable-hits-box" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px; cursor: pointer; transition: background 0.2s, border-color 0.2s;" title="Tap to edit hits">
+                    <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign <span style="font-size: 0.8rem; opacity: 0.8;">(tap to edit)</span>:</p>
                     <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
                         ${remainingHits.map((h, idx) => `
                             <span style="
@@ -1561,6 +1893,24 @@
                     </div>
                 ` : ''}
             `;
+
+            document.getElementById('editable-hits-box').addEventListener('click', () => {
+                if (!confirm('Edit hits? You\'ll change which rolls counted as hits and confirm again. Any damage already assigned will be undone.')) return;
+                state.attackAssignments.forEach(({ playerId, roll }) => {
+                    const p = state.players.find(pl => pl.id === playerId);
+                    if (p) {
+                        p.hp += roll;
+                        if (p.hp > 0) p.eliminated = false;
+                    }
+                });
+                state.damageClaimedPhase = false;
+                state.currentHitIndex = 0;
+                state.attackLog = [];
+                state.attackAssignments = [];
+                updatePlayersPanel();
+                checkWinCondition();
+                showHitRecorder(state.hits);
+            });
 
             enableTargetSelection();
         }
@@ -1596,6 +1946,7 @@
 
             disableTargetSelection();
 
+            state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHit.roll });
             targetPlayer.hp = Math.max(0, targetPlayer.hp - currentHit.roll);
             addLogEntry(`${currentPlayer.name} dealt ${currentHit.roll} damage to ${targetPlayer.name}!`, 'damage');
             state.attackLog.push(`${currentHit.roll} → ${targetPlayer.name}`);
