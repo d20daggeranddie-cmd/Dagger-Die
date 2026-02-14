@@ -108,6 +108,22 @@
             color: rgba(255,255,255,0.5);
         }
 
+        .player-input.error input,
+        .player-input.error-duplicate input {
+            border: 2px solid #e74c3c;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+        }
+
+        .setup-error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            font-size: 0.95rem;
+        }
+
         .color-picker {
             display: flex;
             gap: 5px;
@@ -805,6 +821,7 @@
                 <button class="player-count-btn" data-count="6">6</button>
             </div>
             <div class="player-setup" id="player-setup"></div>
+            <div class="setup-error hidden" id="setup-error" role="alert"></div>
             <button class="btn btn-primary btn-center" id="start-game-btn" style="display:none;">Start Game</button>
         </div>
 
@@ -964,6 +981,11 @@
         function setupPlayerInputs(count) {
             playerSetup.innerHTML = '';
             playerSetup.classList.add('visible');
+            const setupError = document.getElementById('setup-error');
+            if (setupError) {
+                setupError.classList.add('hidden');
+                setupError.textContent = '';
+            }
 
             const usedColors = new Set();
 
@@ -972,7 +994,7 @@
                 div.className = 'player-input';
                 div.innerHTML = `
                     <span>P${i + 1}</span>
-                    <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}">
+                    <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="color-picker" data-player="${i}">
                         ${COLORS.map((c, idx) => `
                             <div class="color-option ${idx === i ? 'selected' : ''}"
@@ -994,7 +1016,45 @@
                 });
             });
 
+            playerSetup.querySelectorAll('input[data-player]').forEach(input => {
+                input.addEventListener('input', checkDuplicateNames);
+            });
+
             startGameBtn.style.display = 'block';
+        }
+
+        function checkDuplicateNames() {
+            const inputs = playerSetup.querySelectorAll('input[data-player]');
+            const errorEl = document.getElementById('setup-error');
+
+            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error-duplicate'));
+
+            const names = [];
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const raw = inputs[idx].value.trim();
+                names.push(raw || `Player ${idx + 1}`);
+            }
+
+            const nameCount = {};
+            names.forEach(n => {
+                const key = n.toLowerCase();
+                nameCount[key] = (nameCount[key] || 0) + 1;
+            });
+
+            const duplicates = new Set(Object.entries(nameCount).filter(([, c]) => c > 1).map(([k]) => k));
+
+            if (duplicates.size > 0) {
+                inputs.forEach((input, idx) => {
+                    if (duplicates.has(names[idx].toLowerCase())) {
+                        input.closest('.player-input').classList.add('error-duplicate');
+                    }
+                });
+                errorEl.textContent = `Names must be unique: ${[...duplicates].join(', ')} appears more than once.`;
+                errorEl.classList.remove('hidden');
+            } else {
+                errorEl.classList.add('hidden');
+                errorEl.textContent = '';
+            }
         }
 
         function getDefaultHp(playerCount) {
@@ -1003,7 +1063,78 @@
             return 60; // 5-6 players
         }
 
+        const NAME_MIN_LEN = 2;
+        const NAME_MAX_LEN = 30;
+
+        function validatePlayerNames() {
+            const inputs = playerSetup.querySelectorAll('input');
+            const errorEl = document.getElementById('setup-error');
+            const names = [];
+            let firstInvalidInput = null;
+
+            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error', 'error-duplicate'));
+
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const raw = inputs[idx].value.trim();
+                names.push(raw || `Player ${idx + 1}`);
+            }
+
+            const duplicateNames = new Set(
+                names.filter((n, i) => names.findIndex(x => x.toLowerCase() === n.toLowerCase()) !== i)
+                    .map(n => n.toLowerCase())
+            );
+
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const input = inputs[idx];
+                const raw = input.value.trim();
+                const name = raw || `Player ${idx + 1}`;
+                const playerInputEl = input.closest('.player-input');
+
+                if (raw) {
+                    if (raw.length < NAME_MIN_LEN) {
+                        if (!firstInvalidInput) firstInvalidInput = input;
+                        playerInputEl.classList.add('error');
+                    } else if (raw.length > NAME_MAX_LEN) {
+                        if (!firstInvalidInput) firstInvalidInput = input;
+                        playerInputEl.classList.add('error');
+                    }
+                }
+
+                if (duplicateNames.has(name.toLowerCase())) {
+                    if (!firstInvalidInput) firstInvalidInput = input;
+                    playerInputEl.classList.add('error', 'error-duplicate');
+                }
+            }
+
+            const errors = [];
+            inputs.forEach((input, idx) => {
+                const el = input.closest('.player-input');
+                if (!el.classList.contains('error')) return;
+                const raw = input.value.trim();
+                if (raw && raw.length < NAME_MIN_LEN) {
+                    errors.push(`"${raw || input.value}" is too short (min ${NAME_MIN_LEN} characters).`);
+                } else if (raw && raw.length > NAME_MAX_LEN) {
+                    errors.push(`"${input.value}" is too long (max ${NAME_MAX_LEN} characters).`);
+                }
+            });
+            if (duplicateNames.size > 0) {
+                errors.push(`Names must be unique: ${[...duplicateNames].join(', ')} appears more than once.`);
+            }
+
+            if (errors.length > 0) {
+                errorEl.textContent = errors.join(' ');
+                errorEl.classList.remove('hidden');
+                if (firstInvalidInput) firstInvalidInput.focus();
+                return false;
+            }
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+            return true;
+        }
+
         startGameBtn.addEventListener('click', () => {
+            if (!validatePlayerNames()) return;
+
             const inputs = playerSetup.querySelectorAll('input');
             state.players = [];
             const defaultHp = getDefaultHp(inputs.length);
@@ -1012,10 +1143,11 @@
                 const colorPicker = playerSetup.querySelector(`.color-picker[data-player="${idx}"]`);
                 const selectedColor = colorPicker.querySelector('.color-option.selected');
                 const colorIdx = parseInt(selectedColor.dataset.color);
+                const name = input.value.trim() || `Player ${idx + 1}`;
 
                 state.players.push({
                     id: idx,
-                    name: input.value || `Player ${idx + 1}`,
+                    name,
                     color: COLORS[colorIdx],
                     hp: defaultHp,
                     maxHp: defaultHp,
@@ -1025,11 +1157,22 @@
             });
 
             showTurnOrderScreen();
+
+            if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
+                setTimeout(() => {
+                    document.getElementById('roll-turn-order-btn')?.click();
+                }, 400);
+            }
         });
 
         function showTurnOrderScreen() {
             setupScreen.style.display = 'none';
             turnOrderScreen.style.display = 'block';
+
+            const rollBtn = document.getElementById('roll-turn-order-btn');
+            if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
+                rollBtn.classList.add('hidden');
+            }
 
             const rollsDiv = document.getElementById('turn-order-rolls');
             rollsDiv.innerHTML = state.players.map(p => `
@@ -1154,7 +1297,12 @@
             `).join('');
 
             btn.classList.add('hidden');
-            document.getElementById('begin-game-btn').classList.remove('hidden');
+            const beginBtn = document.getElementById('begin-game-btn');
+            beginBtn.classList.remove('hidden');
+            if (localStorage.getItem('daggerdie_autoBeginGame') === 'true') {
+                beginBtn.classList.add('hidden');
+                setTimeout(() => beginBtn.click(), 500);
+            }
         });
 
         document.getElementById('begin-game-btn').addEventListener('click', () => {
@@ -1199,6 +1347,13 @@
             state.attackLog = [];
             rollDiceBtn.disabled = false;
             disableTargetSelection();
+
+            if (localStorage.getItem('daggerdie_autoRollDice') === 'true') {
+                rollDiceBtn.classList.add('hidden');
+                setTimeout(() => rollDiceBtn.click(), 300);
+            } else {
+                rollDiceBtn.classList.remove('hidden');
+            }
         }
 
         function updatePlayersPanel() {
@@ -1589,6 +1744,11 @@
             playerSetup.innerHTML = '';
             playerSetup.classList.remove('visible');
             startGameBtn.style.display = 'none';
+            const setupError = document.getElementById('setup-error');
+            if (setupError) {
+                setupError.classList.add('hidden');
+                setupError.textContent = '';
+            }
             gameLogEntries.innerHTML = '';
 
             document.getElementById('roll-turn-order-btn').classList.remove('hidden');
