@@ -1,0 +1,10 @@
+{
+  "name": "dagger-die",
+  "private": true,
+  "scripts": {
+    "og-image": "node generate-og-image.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}
