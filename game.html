@@ -583,6 +583,43 @@
             width: 100%;
         }
 
+        /* Critical hit onscreen reaction */
+        .critical-reaction {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        .critical-reaction.show {
+            opacity: 1;
+            animation: critical-pulse 0.5s ease-out;
+        }
+        .critical-reaction.hide {
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+        }
+        @keyframes critical-pulse {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+        .critical-reaction-inner {
+            background: linear-gradient(135deg, rgba(254, 202, 87, 0.95) 0%, rgba(255, 107, 107, 0.9) 100%);
+            color: #1a1a2e;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 24px 48px;
+            border-radius: 16px;
+            box-shadow: 0 0 60px rgba(254, 202, 87, 0.6), 0 0 120px rgba(255, 107, 107, 0.3);
+            text-transform: uppercase;
+        }
+
         .turn-indicator {
             font-size: 1.5rem;
             padding: 10px 20px;
@@ -1470,6 +1507,7 @@
                     <div id="player-stats-status" class="player-stats-row"></div>
                     <div id="player-stats-hit-drop" class="player-stats-row"></div>
                     <div id="player-stats-rolled-claimed" class="player-stats-row"></div>
+                    <div id="player-stats-critical" class="player-stats-row"></div>
                 </div>
             </div>
             <div class="player-stats-section">
@@ -1479,6 +1517,11 @@
             </div>
             <button type="button" class="btn btn-primary" id="player-stats-close-btn">Close</button>
         </div>
+    </div>
+
+    <!-- Critical hit onscreen reaction -->
+    <div class="critical-reaction" id="critical-reaction" aria-live="polite">
+        <div class="critical-reaction-inner">Critical!</div>
     </div>
 
     <!-- Custom circular color picker modal (must be in DOM before script runs) -->
@@ -1956,7 +1999,8 @@
                     turnOrderRoll: 0,
                     eliminated: false,
                     totalRolled: 0,
-                    totalClaimed: 0
+                    totalClaimed: 0,
+                    criticals: 0
                 });
             });
 
@@ -2369,7 +2413,14 @@
                 state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
 
                 if (state.totalDamage > 0) {
-                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
+                    const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
+                    if (isCritical) {
+                        currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
+                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')}) — Critical!`, 'info');
+                        showCriticalReaction(currentPlayer.name);
+                    } else {
+                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
+                    }
                     showTargetSelection();
                 } else {
                     if (confirm('No hits recorded. Did you miss all targets?')) {
@@ -2603,6 +2654,7 @@
         const playerStatsStatus = document.getElementById('player-stats-status');
         const playerStatsHitDrop = document.getElementById('player-stats-hit-drop');
         const playerStatsRolledClaimed = document.getElementById('player-stats-rolled-claimed');
+        const playerStatsCritical = document.getElementById('player-stats-critical');
         const playerStatsDropsHint = document.getElementById('player-stats-drops-hint');
         const playerStatsUndoDropBtn = document.getElementById('player-stats-undo-drop-btn');
         const playerStatsCloseBtn = document.getElementById('player-stats-close-btn');
@@ -2646,6 +2698,8 @@
             } else {
                 playerStatsRolledClaimed.textContent = 'Points: —';
             }
+
+            playerStatsCritical.textContent = `Criticals: ${player.criticals || 0}`;
 
             const current = getCurrentPlayer();
             const undoableCount = !state.damageDealtThisTurn && current.id === player.id ? state.dropsThisTurnLogIndices.length : 0;
@@ -2791,6 +2845,7 @@
                         <tr><td>Final HP</td><td>${p.hp} / ${p.maxHp}</td></tr>
                         <tr><td>Hits dealt</td><td>${hitCount}</td></tr>
                         <tr><td>Drops (self-damage)</td><td>${dropCount}</td></tr>
+                        <tr><td>Criticals</td><td>${p.criticals || 0}</td></tr>
                         <tr><td>Efficiency</td><td>${efficiency}${efficiency !== '—' ? '%' : ''}</td></tr>
                         <tr><td>Points (claimed / rolled)</td><td>${pointsStr}</td></tr>
                     </table>
@@ -2960,6 +3015,20 @@
             gameLogEntries.insertBefore(entry, gameLogEntries.firstChild);
         }
 
+        function showCriticalReaction(playerName) {
+            const el = document.getElementById('critical-reaction');
+            if (!el) return;
+            const inner = el.querySelector('.critical-reaction-inner');
+            if (inner) inner.textContent = 'Critical!';
+            el.classList.remove('hide');
+            el.classList.add('show');
+            setTimeout(() => {
+                el.classList.remove('show');
+                el.classList.add('hide');
+                setTimeout(() => el.classList.remove('hide'), 450);
+            }, 1800);
+        }
+
         document.getElementById('new-game-btn').addEventListener('click', resetGame);
                 function playAgain() {
             const defaultHp = getDefaultHp(state.players.length);
@@ -2970,6 +3039,7 @@
                 p.turnOrderRoll = 0;
                 p.totalRolled = 0;
                 p.totalClaimed = 0;
+                p.criticals = 0;
             });
             state.currentPlayerIndex = 0;
             state.phase = 'turnOrder';
