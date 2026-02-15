@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dagger & Die</title>
+<title>Dagger & Die - Web Game Tracker</title>
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daggeranddie.us/">
 <meta property="og:title" content="Dagger & Die - Web Game Tracker">
@@ -13,528 +13,470 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://daggeranddie.us/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #0a0a12;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     min-height: 100vh;
-    overflow: hidden;
+    color: #fff;
+    line-height: 1.6;
   }
 
-  .landing-link {
+  /* ─── Cover layer (index graphic) ─── */
+  .cover {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    width: 100%;
-    text-decoration: none;
-    color: inherit;
+    background: #0a0a12;
     cursor: pointer;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  body.revealed .cover {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .cover-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 16px;
   }
 
   .preview-frame {
     width: 1200px;
+    max-width: 100%;
     height: 630px;
+    max-height: min(630px, calc(100vh - 32px));
     position: relative;
     background: linear-gradient(180deg, #0d0b1a 0%, #1a1028 30%, #0f1a2e 60%, #0a0a12 100%);
     overflow: hidden;
     border: 4px solid #2a1f4e;
     box-shadow: 0 0 0 2px #0a0a12, 0 0 0 6px #6b3fa0, 0 0 60px rgba(107, 63, 160, 0.3);
+    transform: scale(min(1, 100vw / 1200, 100vh / 630));
+    transform-origin: center;
   }
 
-  /* Pixel grid overlay */
-  .pixel-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 4px 4px;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  /* Scanline effect */
-  .scanlines {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.12) 2px,
-      rgba(0,0,0,0.12) 4px
-    );
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  /* Vignette */
-  .vignette {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
-    z-index: 9;
-    pointer-events: none;
-  }
-
-  /* Starfield background */
-  .stars {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .star {
-    position: absolute;
-    background: #fff;
-    border-radius: 0;
-    animation: twinkle 2s infinite alternate;
-  }
-  @keyframes twinkle {
-    0% { opacity: 0.2; }
-    100% { opacity: 1; }
-  }
-
-  /* Ground tiles */
-  .ground {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    z-index: 2;
-    background:
-      repeating-linear-gradient(
-        90deg,
-        #1a1428 0px, #1a1428 48px,
-        #161122 48px, #161122 50px
-      ),
-      repeating-linear-gradient(
-        0deg,
-        #1a1428 0px, #1a1428 48px,
-        #161122 48px, #161122 50px
-      );
-    border-top: 4px solid #2a1f4e;
-  }
-  .ground::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: linear-gradient(180deg, rgba(107,63,160,0.15), transparent);
-  }
-
-  /* Mountain silhouettes */
-  .mountains {
-    position: absolute;
-    bottom: 116px;
-    left: 0;
-    right: 0;
-    height: 180px;
-    z-index: 1;
-  }
-  .mountain {
-    position: absolute;
-    bottom: 0;
-    width: 0;
-    height: 0;
-    border-style: solid;
-  }
-  .mountain-1 {
-    left: -20px;
-    border-width: 0 140px 160px 140px;
-    border-color: transparent transparent #12102a transparent;
-  }
-  .mountain-2 {
-    left: 200px;
-    border-width: 0 180px 180px 180px;
-    border-color: transparent transparent #0e0c22 transparent;
-  }
-  .mountain-3 {
-    right: 100px;
-    border-width: 0 160px 140px 160px;
-    border-color: transparent transparent #100e26 transparent;
-  }
-  .mountain-4 {
-    right: -60px;
-    border-width: 0 200px 170px 200px;
-    border-color: transparent transparent #0d0b20 transparent;
-  }
-
-  /* Dagger - center piece */
-  .dagger-container {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-    filter: drop-shadow(0 0 30px rgba(107, 63, 160, 0.5));
-  }
-
-  .dagger-svg {
-    width: 80px;
-    height: 320px;
-    animation: float 3s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-
-  /* Dice */
-  .dice-left, .dice-right {
-    position: absolute;
-    z-index: 5;
-    top: 52%;
-  }
-  .dice-left {
-    left: 28%;
-    transform: rotate(-15deg);
-    animation: dice-bounce-l 2.5s ease-in-out infinite;
-  }
-  .dice-right {
-    right: 28%;
-    transform: rotate(12deg);
-    animation: dice-bounce-r 2.8s ease-in-out infinite;
-  }
-  @keyframes dice-bounce-l {
-    0%, 100% { transform: rotate(-15deg) translateY(0); }
-    50% { transform: rotate(-15deg) translateY(-8px); }
-  }
-  @keyframes dice-bounce-r {
-    0%, 100% { transform: rotate(12deg) translateY(0); }
-    50% { transform: rotate(12deg) translateY(-8px); }
-  }
-
-  /* Title */
-  .title-area {
-    position: absolute;
-    top: 40px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 6;
-  }
-
-  .title-main {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 52px;
-    color: #f0c040;
-    text-shadow:
-      4px 4px 0 #8b4513,
-      -2px -2px 0 #f5d060,
-      0 0 20px rgba(240, 192, 64, 0.5),
-      0 0 60px rgba(240, 192, 64, 0.2);
-    letter-spacing: 4px;
-    line-height: 1.3;
-    animation: title-glow 2s ease-in-out infinite alternate;
-  }
-
-  .title-amp {
-    font-size: 36px;
-    color: #e04040;
-    text-shadow:
-      3px 3px 0 #6b1a1a,
-      0 0 20px rgba(224, 64, 64, 0.6);
-    display: inline-block;
-    margin: 0 8px;
-    vertical-align: middle;
-  }
-
-  @keyframes title-glow {
-    0% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 20px rgba(240, 192, 64, 0.4), 0 0 60px rgba(240, 192, 64, 0.15); }
-    100% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 30px rgba(240, 192, 64, 0.7), 0 0 80px rgba(240, 192, 64, 0.3); }
-  }
-
-  .subtitle {
-    font-family: 'Silkscreen', monospace;
-    font-size: 14px;
-    color: #8af;
-    letter-spacing: 8px;
-    margin-top: 12px;
-    text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(136, 170, 255, 0.5);
-    animation: subtitle-pulse 3s ease-in-out infinite;
-  }
-
-  @keyframes subtitle-pulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-
-  /* Bottom HUD bar */
-  .hud-bar {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 8;
-    display: flex;
-    gap: 32px;
-    align-items: center;
-  }
-
-  .stat-block {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    color: #aaa;
-    text-align: center;
-    line-height: 1.6;
-  }
-  .stat-label {
-    color: #6b3fa0;
-    font-size: 8px;
-    letter-spacing: 2px;
-  }
-  .stat-value {
-    color: #f0c040;
-    font-size: 11px;
-  }
-
-  .press-start {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
-    color: #fff;
-    animation: blink 1.2s step-end infinite;
-    letter-spacing: 2px;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* Corner decorations */
-  .corner-deco {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    z-index: 7;
-  }
+  .pixel-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px); background-size: 4px 4px; z-index: 1; pointer-events: none; }
+  .scanlines { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px); z-index: 10; pointer-events: none; }
+  .vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%); z-index: 9; pointer-events: none; }
+  .stars { position: absolute; inset: 0; z-index: 0; }
+  .star { position: absolute; background: #fff; border-radius: 0; animation: twinkle 2s infinite alternate; }
+  @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 1; } }
+  .ground { position: absolute; bottom: 0; left: 0; right: 0; height: 120px; z-index: 2; background: repeating-linear-gradient(90deg, #1a1428 0px, #1a1428 48px, #161122 48px, #161122 50px), repeating-linear-gradient(0deg, #1a1428 0px, #1a1428 48px, #161122 48px, #161122 50px); border-top: 4px solid #2a1f4e; }
+  .ground::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 40px; background: linear-gradient(180deg, rgba(107,63,160,0.15), transparent); }
+  .mountains { position: absolute; bottom: 116px; left: 0; right: 0; height: 180px; z-index: 1; }
+  .mountain { position: absolute; bottom: 0; width: 0; height: 0; border-style: solid; }
+  .mountain-1 { left: -20px; border-width: 0 140px 160px 140px; border-color: transparent transparent #12102a transparent; }
+  .mountain-2 { left: 200px; border-width: 0 180px 180px 180px; border-color: transparent transparent #0e0c22 transparent; }
+  .mountain-3 { right: 100px; border-width: 0 160px 140px 160px; border-color: transparent transparent #100e26 transparent; }
+  .mountain-4 { right: -60px; border-width: 0 200px 170px 200px; border-color: transparent transparent #0d0b20 transparent; }
+  .dagger-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; filter: drop-shadow(0 0 30px rgba(107, 63, 160, 0.5)); }
+  .dagger-svg { width: 80px; height: 320px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .dice-left, .dice-right { position: absolute; z-index: 5; top: 52%; }
+  .dice-left { left: 28%; transform: rotate(-15deg); animation: dice-bounce-l 2.5s ease-in-out infinite; }
+  .dice-right { right: 28%; transform: rotate(12deg); animation: dice-bounce-r 2.8s ease-in-out infinite; }
+  @keyframes dice-bounce-l { 0%, 100% { transform: rotate(-15deg) translateY(0); } 50% { transform: rotate(-15deg) translateY(-8px); } }
+  @keyframes dice-bounce-r { 0%, 100% { transform: rotate(12deg) translateY(0); } 50% { transform: rotate(12deg) translateY(-8px); } }
+  .title-area { position: absolute; top: 40px; left: 0; right: 0; text-align: center; z-index: 6; }
+  .title-main { font-family: 'Press Start 2P', monospace; font-size: 52px; color: #f0c040; text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 20px rgba(240, 192, 64, 0.5), 0 0 60px rgba(240, 192, 64, 0.2); letter-spacing: 4px; line-height: 1.3; animation: title-glow 2s ease-in-out infinite alternate; }
+  .title-amp { font-size: 36px; color: #e04040; text-shadow: 3px 3px 0 #6b1a1a, 0 0 20px rgba(224, 64, 64, 0.6); display: inline-block; margin: 0 8px; vertical-align: middle; }
+  @keyframes title-glow { 0% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 20px rgba(240, 192, 64, 0.4), 0 0 60px rgba(240, 192, 64, 0.15); } 100% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 30px rgba(240, 192, 64, 0.7), 0 0 80px rgba(240, 192, 64, 0.3); } }
+  .subtitle { font-family: 'Silkscreen', monospace; font-size: 14px; color: #8af; letter-spacing: 8px; margin-top: 12px; text-transform: uppercase; text-shadow: 0 0 10px rgba(136, 170, 255, 0.5); animation: subtitle-pulse 3s ease-in-out infinite; }
+  @keyframes subtitle-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+  .hud-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 8; display: flex; gap: 32px; align-items: center; }
+  .stat-block { font-family: 'Press Start 2P', monospace; font-size: 9px; color: #aaa; text-align: center; line-height: 1.6; }
+  .stat-label { color: #6b3fa0; font-size: 8px; letter-spacing: 2px; }
+  .stat-value { color: #f0c040; font-size: 11px; }
+  .press-start { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; animation: blink 1.2s step-end infinite; letter-spacing: 2px; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .corner-deco { position: absolute; width: 40px; height: 40px; z-index: 7; }
   .corner-deco.tl { top: 12px; left: 12px; border-top: 3px solid #6b3fa0; border-left: 3px solid #6b3fa0; }
   .corner-deco.tr { top: 12px; right: 12px; border-top: 3px solid #6b3fa0; border-right: 3px solid #6b3fa0; }
   .corner-deco.bl { bottom: 12px; left: 12px; border-bottom: 3px solid #6b3fa0; border-left: 3px solid #6b3fa0; }
   .corner-deco.br { bottom: 12px; right: 12px; border-bottom: 3px solid #6b3fa0; border-right: 3px solid #6b3fa0; }
-
-  /* Decorative runes along sides */
-  .rune-strip {
-    position: absolute;
-    z-index: 4;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    color: rgba(107, 63, 160, 0.3);
-    writing-mode: vertical-rl;
-    letter-spacing: 12px;
-  }
+  .rune-strip { position: absolute; z-index: 4; font-family: 'Press Start 2P', monospace; font-size: 10px; color: rgba(107, 63, 160, 0.3); writing-mode: vertical-rl; letter-spacing: 12px; }
   .rune-strip.left { left: 24px; top: 60px; }
   .rune-strip.right { right: 24px; top: 60px; }
+  .orb { position: absolute; border-radius: 50%; z-index: 3; filter: blur(2px); }
+  .orb-1 { width: 6px; height: 6px; background: #f0c040; top: 30%; left: 15%; animation: orb-float 4s ease-in-out infinite; box-shadow: 0 0 12px #f0c040; }
+  .orb-2 { width: 4px; height: 4px; background: #e04040; top: 45%; right: 18%; animation: orb-float 5s ease-in-out infinite 1s; box-shadow: 0 0 10px #e04040; }
+  .orb-3 { width: 5px; height: 5px; background: #8af; top: 60%; left: 20%; animation: orb-float 3.5s ease-in-out infinite 0.5s; box-shadow: 0 0 10px #8af; }
+  @keyframes orb-float { 0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; } 25% { transform: translateY(-15px) translateX(5px); opacity: 1; } 50% { transform: translateY(-5px) translateX(-5px); opacity: 0.8; } 75% { transform: translateY(-20px) translateX(3px); opacity: 1; } }
+  .m3-badge { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); z-index: 8; font-family: 'Silkscreen', monospace; font-size: 10px; color: #666; letter-spacing: 3px; }
+  .m3-badge span { color: #6b3fa0; }
 
-  /* Glowing orbs */
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    z-index: 3;
-    filter: blur(2px);
-  }
-  .orb-1 {
-    width: 6px; height: 6px;
-    background: #f0c040;
-    top: 30%; left: 15%;
-    animation: orb-float 4s ease-in-out infinite;
-    box-shadow: 0 0 12px #f0c040;
-  }
-  .orb-2 {
-    width: 4px; height: 4px;
-    background: #e04040;
-    top: 45%; right: 18%;
-    animation: orb-float 5s ease-in-out infinite 1s;
-    box-shadow: 0 0 10px #e04040;
-  }
-  .orb-3 {
-    width: 5px; height: 5px;
-    background: #8af;
-    top: 60%; left: 20%;
-    animation: orb-float 3.5s ease-in-out infinite 0.5s;
-    box-shadow: 0 0 10px #8af;
+  /* ─── Main content (startscreen) ─── */
+  .main-content {
+    position: relative;
+    min-height: 100vh;
   }
 
-  @keyframes orb-float {
-    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
-    25% { transform: translateY(-15px) translateX(5px); opacity: 1; }
-    50% { transform: translateY(-5px) translateX(-5px); opacity: 0.8; }
-    75% { transform: translateY(-20px) translateX(3px); opacity: 1; }
+  .container {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
   }
 
-  /* M3 Badge */
-  .m3-badge {
-    position: absolute;
-    bottom: 56px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 8;
-    font-family: 'Silkscreen', monospace;
-    font-size: 10px;
-    color: #666;
-    letter-spacing: 3px;
-  }
-  .m3-badge span {
-    color: #6b3fa0;
+  .resources-wrap { position: absolute; top: 20px; right: 20px; }
+  .resources-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.95); font-size: 0.9rem; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+  .resources-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+  .resources-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; min-width: 220px; background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 8px 0; z-index: 100; }
+  .resources-dropdown.open { display: block; }
+  .resources-dropdown a, .resources-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; color: rgba(255,255,255,0.95); font-size: 0.95rem; text-align: left; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .resources-dropdown a:hover, .resources-dropdown button:hover { background: rgba(255,255,255,0.1); }
+  .resources-dropdown .icon { width: 18px; height: 18px; opacity: 0.9; }
+
+  header { text-align: center; margin-bottom: 50px; }
+  h1 { font-size: 3.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .tagline { font-size: 1.2rem; opacity: 0.9; color: rgba(255,255,255,0.9); }
+
+  .game-tile { display: block; text-decoration: none; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; margin-bottom: 50px; text-align: center; border: 3px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
+  .game-tile:hover { background: rgba(255,255,255,0.15); border-color: #feca57; box-shadow: 0 0 30px rgba(254, 202, 87, 0.3); transform: translateY(-4px); }
+  .game-tile-icon { font-size: 4rem; margin-bottom: 15px; line-height: 1; }
+  .game-tile h2 { font-size: 1.8rem; margin-bottom: 10px; color: #fff; }
+  .game-tile p { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
+  .game-tile .btn { display: inline-block; padding: 15px 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; font-weight: bold; border-radius: 10px; font-size: 1.1rem; transition: all 0.3s; }
+  .game-tile:hover .btn { box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4); }
+
+  .options-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px 25px; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 25px; }
+  .options-toggle:hover { background: rgba(255,255,255,0.1); border-color: #48dbfb; }
+  .options-toggle svg { transition: transform 0.3s ease; }
+  .options-toggle.open svg { transform: rotate(180deg); }
+  .options-menu { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; display: none; border: 1px solid rgba(255,255,255,0.15); }
+  .options-menu.open { display: block; }
+  .options-menu h3 { font-size: 1.4rem; margin-bottom: 20px; color: #feca57; }
+  .options-group { margin-bottom: 20px; }
+  .options-group:last-child { margin-bottom: 0; }
+  .options-group h4 { font-size: 1rem; color: #48dbfb; margin-bottom: 10px; font-weight: 600; }
+  .options-group p, .options-group ul { color: rgba(255,255,255,0.9); font-size: 0.95rem; }
+  .options-group ul { padding-left: 20px; margin-top: 5px; }
+  .option-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .option-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #48dbfb; }
+  .option-row label { cursor: pointer; color: rgba(255,255,255,0.9); font-size: 0.95rem; }
+
+  .info-section { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; }
+  .info-section h3 { font-size: 1.4rem; margin-bottom: 15px; color: #feca57; }
+  .info-section p { color: rgba(255,255,255,0.9); margin-bottom: 12px; }
+  .info-section ul { margin: 15px 0; padding-left: 24px; }
+  .info-section li { margin-bottom: 8px; color: rgba(255,255,255,0.9); }
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+  .rule-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border-left: 4px solid #48dbfb; }
+  .rule-card strong { display: block; margin-bottom: 5px; color: #48dbfb; }
+
+  footer { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .game-tile { padding: 25px 20px; }
+    .game-tile-icon { font-size: 3rem; }
   }
 </style>
 </head>
 <body>
-<a href="startscreen.html" class="landing-link" aria-label="Enter Dagger & Die">
-<div class="preview-frame">
-  <!-- Effects layers -->
-  <div class="pixel-grid"></div>
-  <div class="scanlines"></div>
-  <div class="vignette"></div>
-
-  <!-- Starfield -->
-  <div class="stars" id="stars"></div>
-
-  <!-- Floating orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-
-  <!-- Mountains -->
-  <div class="mountains">
-    <div class="mountain mountain-1"></div>
-    <div class="mountain mountain-2"></div>
-    <div class="mountain mountain-3"></div>
-    <div class="mountain mountain-4"></div>
-  </div>
-
-  <!-- Ground -->
-  <div class="ground"></div>
-
-  <!-- Rune strips -->
-  <div class="rune-strip left">◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
-  <div class="rune-strip right">◇ ◆ ◇ ◆ ◇ ◆ ◇</div>
-
-  <!-- Corner decorations -->
-  <div class="corner-deco tl"></div>
-  <div class="corner-deco tr"></div>
-  <div class="corner-deco bl"></div>
-  <div class="corner-deco br"></div>
-
-  <!-- Title -->
-  <div class="title-area">
-    <div class="title-main">
-      DAGGER<span class="title-amp">&amp;</span>DIE
-    </div>
-    <div class="subtitle">A Knife Throwing Quest</div>
-  </div>
-
-  <!-- Center Dagger SVG -->
-  <div class="dagger-container">
-    <svg class="dagger-svg" viewBox="0 0 80 320" xmlns="http://www.w3.org/2000/svg">
-      <!-- Blade -->
-      <polygon points="40,10 52,80 52,180 40,200 28,180 28,80" fill="#c0c8d8" stroke="#8090a8" stroke-width="2"/>
-      <polygon points="40,10 46,80 46,180 40,195" fill="#d8e0f0" opacity="0.5"/>
-      <!-- Blood groove -->
-      <rect x="37" y="60" width="6" height="100" rx="2" fill="#a0a8b8" opacity="0.6"/>
-      <!-- Guard -->
-      <rect x="16" y="196" width="48" height="12" rx="2" fill="#f0c040" stroke="#b08020" stroke-width="2"/>
-      <rect x="20" y="199" width="8" height="6" rx="1" fill="#e04040"/>
-      <rect x="52" y="199" width="8" height="6" rx="1" fill="#6b3fa0"/>
-      <!-- Grip -->
-      <rect x="30" y="208" width="20" height="60" rx="3" fill="#5a3a1e" stroke="#3a2010" stroke-width="2"/>
-      <rect x="32" y="216" width="16" height="4" rx="1" fill="#7a5a3e"/>
-      <rect x="32" y="228" width="16" height="4" rx="1" fill="#7a5a3e"/>
-      <rect x="32" y="240" width="16" height="4" rx="1" fill="#7a5a3e"/>
-      <rect x="32" y="252" width="16" height="4" rx="1" fill="#7a5a3e"/>
-      <!-- Pommel -->
-      <circle cx="40" cy="278" r="12" fill="#f0c040" stroke="#b08020" stroke-width="2"/>
-      <circle cx="40" cy="278" r="5" fill="#e04040"/>
-      <!-- Glow -->
-      <ellipse cx="40" cy="100" rx="15" ry="80" fill="url(#blade-glow)" opacity="0.3"/>
-      <defs>
-        <radialGradient id="blade-glow">
-          <stop offset="0%" stop-color="#8af"/>
-          <stop offset="100%" stop-color="transparent"/>
-        </radialGradient>
-      </defs>
-    </svg>
-  </div>
-
-  <!-- Dice Left -->
-  <div class="dice-left">
-    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="4" width="72" height="72" rx="10" fill="#1a1028" stroke="#6b3fa0" stroke-width="3"/>
-      <rect x="8" y="8" width="64" height="64" rx="8" fill="#221838" opacity="0.8"/>
-      <!-- 5 pips -->
-      <circle cx="24" cy="24" r="6" fill="#f0c040"/>
-      <circle cx="56" cy="24" r="6" fill="#f0c040"/>
-      <circle cx="40" cy="40" r="6" fill="#f0c040"/>
-      <circle cx="24" cy="56" r="6" fill="#f0c040"/>
-      <circle cx="56" cy="56" r="6" fill="#f0c040"/>
-    </svg>
-  </div>
-
-  <!-- Dice Right -->
-  <div class="dice-right">
-    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="4" width="72" height="72" rx="10" fill="#1a1028" stroke="#e04040" stroke-width="3"/>
-      <rect x="8" y="8" width="64" height="64" rx="8" fill="#281820" opacity="0.8"/>
-      <!-- 3 pips -->
-      <circle cx="24" cy="24" r="6" fill="#e04040"/>
-      <circle cx="40" cy="40" r="6" fill="#e04040"/>
-      <circle cx="56" cy="56" r="6" fill="#e04040"/>
-    </svg>
-  </div>
-
-  <!-- M3 Badge -->
-  <div class="m3-badge">BY <span>M3</span> — MODERN METHODS & MATERIALS</div>
-
-  <!-- Bottom HUD -->
-  <div class="hud-bar">
-    <div class="stat-block">
-      <div class="stat-label">STR</div>
-      <div class="stat-value">18</div>
-    </div>
-    <div class="stat-block">
-      <div class="stat-label">DEX</div>
-      <div class="stat-value">20</div>
-    </div>
-    <div class="press-start">► PRESS START ◄</div>
-    <div class="stat-block">
-      <div class="stat-label">ACC</div>
-      <div class="stat-value">99</div>
-    </div>
-    <div class="stat-block">
-      <div class="stat-label">LCK</div>
-      <div class="stat-value">7</div>
+  <!-- Cover: index graphic, tap to reveal startscreen -->
+  <div class="cover" id="cover" role="button" tabindex="0" aria-label="Tap to enter Dagger & Die">
+    <div class="cover-inner">
+      <div class="preview-frame">
+        <div class="pixel-grid"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="stars" id="stars"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="mountains">
+          <div class="mountain mountain-1"></div>
+          <div class="mountain mountain-2"></div>
+          <div class="mountain mountain-3"></div>
+          <div class="mountain mountain-4"></div>
+        </div>
+        <div class="ground"></div>
+        <div class="rune-strip left">◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
+        <div class="rune-strip right">◇ ◆ ◇ ◆ ◇ ◆ ◇</div>
+        <div class="corner-deco tl"></div>
+        <div class="corner-deco tr"></div>
+        <div class="corner-deco bl"></div>
+        <div class="corner-deco br"></div>
+        <div class="title-area">
+          <div class="title-main">DAGGER<span class="title-amp">&amp;</span>DIE</div>
+          <div class="subtitle">A Knife Throwing Quest</div>
+        </div>
+        <div class="dagger-container">
+          <svg class="dagger-svg" viewBox="0 0 80 320" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="40,10 52,80 52,180 40,200 28,180 28,80" fill="#c0c8d8" stroke="#8090a8" stroke-width="2"/>
+            <polygon points="40,10 46,80 46,180 40,195" fill="#d8e0f0" opacity="0.5"/>
+            <rect x="37" y="60" width="6" height="100" rx="2" fill="#a0a8b8" opacity="0.6"/>
+            <rect x="16" y="196" width="48" height="12" rx="2" fill="#f0c040" stroke="#b08020" stroke-width="2"/>
+            <rect x="20" y="199" width="8" height="6" rx="1" fill="#e04040"/>
+            <rect x="52" y="199" width="8" height="6" rx="1" fill="#6b3fa0"/>
+            <rect x="30" y="208" width="20" height="60" rx="3" fill="#5a3a1e" stroke="#3a2010" stroke-width="2"/>
+            <rect x="32" y="216" width="16" height="4" rx="1" fill="#7a5a3e"/>
+            <rect x="32" y="228" width="16" height="4" rx="1" fill="#7a5a3e"/>
+            <rect x="32" y="240" width="16" height="4" rx="1" fill="#7a5a3e"/>
+            <rect x="32" y="252" width="16" height="4" rx="1" fill="#7a5a3e"/>
+            <circle cx="40" cy="278" r="12" fill="#f0c040" stroke="#b08020" stroke-width="2"/>
+            <circle cx="40" cy="278" r="5" fill="#e04040"/>
+            <ellipse cx="40" cy="100" rx="15" ry="80" fill="url(#blade-glow)" opacity="0.3"/>
+            <defs>
+              <radialGradient id="blade-glow"><stop offset="0%" stop-color="#8af"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="dice-left">
+          <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="72" height="72" rx="10" fill="#1a1028" stroke="#6b3fa0" stroke-width="3"/>
+            <rect x="8" y="8" width="64" height="64" rx="8" fill="#221838" opacity="0.8"/>
+            <circle cx="24" cy="24" r="6" fill="#f0c040"/><circle cx="56" cy="24" r="6" fill="#f0c040"/><circle cx="40" cy="40" r="6" fill="#f0c040"/><circle cx="24" cy="56" r="6" fill="#f0c040"/><circle cx="56" cy="56" r="6" fill="#f0c040"/>
+          </svg>
+        </div>
+        <div class="dice-right">
+          <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="72" height="72" rx="10" fill="#1a1028" stroke="#e04040" stroke-width="3"/>
+            <rect x="8" y="8" width="64" height="64" rx="8" fill="#281820" opacity="0.8"/>
+            <circle cx="24" cy="24" r="6" fill="#e04040"/><circle cx="40" cy="40" r="6" fill="#e04040"/><circle cx="56" cy="56" r="6" fill="#e04040"/>
+          </svg>
+        </div>
+        <div class="m3-badge">BY <span>M3</span> — MODERN METHODS &amp; MATERIALS</div>
+        <div class="hud-bar">
+          <div class="stat-block"><div class="stat-label">STR</div><div class="stat-value">18</div></div>
+          <div class="stat-block"><div class="stat-label">DEX</div><div class="stat-value">20</div></div>
+          <div class="press-start">► PRESS START ◄</div>
+          <div class="stat-block"><div class="stat-label">ACC</div><div class="stat-value">99</div></div>
+          <div class="stat-block"><div class="stat-label">LCK</div><div class="stat-value">7</div></div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-</a>
 
-<script>
-  // Generate pixel stars
-  const starsContainer = document.getElementById('stars');
-  for (let i = 0; i < 80; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    const size = Math.random() > 0.7 ? 3 : 2;
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 55 + '%';
-    star.style.animationDelay = Math.random() * 3 + 's';
-    star.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-    starsContainer.appendChild(star);
-  }
-</script>
+  <!-- Main content: startscreen (revealed on tap) -->
+  <main class="main-content">
+    <div class="container">
+      <div class="resources-wrap">
+        <button type="button" class="resources-btn" id="resources-btn" aria-label="Resources" aria-expanded="false" aria-haspopup="true">Resources ▾</button>
+        <div class="resources-dropdown" id="resources-dropdown" role="menu">
+          <button type="button" id="resources-download-stencil-btn" role="menuitem">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download target stencil (SVG)
+          </button>
+          <button type="button" id="resources-projector-btn" role="menuitem">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Open target face (projector)
+          </button>
+        </div>
+      </div>
+      <header>
+        <h1>Dagger & Die</h1>
+        <p class="tagline">Web-based game tracker for the physical knife-throwing dice game</p>
+      </header>
+
+      <a href="game.html" class="game-tile">
+        <div class="game-tile-icon">🎯</div>
+        <h2>Play Game Tracker</h2>
+        <p>Roll virtual D20s, track HP, and manage your knife-throwing game. Works on desktop and mobile.</p>
+        <span class="btn">Start Game →</span>
+      </a>
+
+      <button class="options-toggle" id="options-toggle" aria-expanded="false" aria-controls="options-menu">
+        Options
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+
+      <section class="options-menu" id="options-menu" role="region" aria-label="Game options">
+        <h3>Game Defaults</h3>
+        <div class="options-group">
+          <h4>Starting HP by Player Count</h4>
+          <ul>
+            <li>2 players: 50 HP</li>
+            <li>3–4 players: 40 HP</li>
+            <li>5–6 players: 60 HP</li>
+          </ul>
+        </div>
+        <div class="options-group">
+          <h4>Turn Order</h4>
+          <p>Players roll a D20 to determine turn order. Highest goes first. Ties are broken by rerolling only the tied players.</p>
+          <div class="option-row">
+            <input type="checkbox" id="auto-roll-turn-order" aria-describedby="auto-roll-desc">
+            <label for="auto-roll-turn-order">Automatically roll dice for turn order</label>
+          </div>
+          <p id="auto-roll-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when the turn order screen appears.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="auto-begin-game" aria-describedby="auto-begin-desc">
+            <label for="auto-begin-game">Automatically begin game after turn order</label>
+          </div>
+          <p id="auto-begin-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the game starts automatically after turn order is determined.</p>
+        </div>
+        <div class="options-group">
+          <h4>Gameplay</h4>
+          <div class="option-row">
+            <input type="checkbox" id="auto-roll-dice" aria-describedby="auto-roll-dice-desc">
+            <label for="auto-roll-dice">Automatically roll dice on player turn</label>
+          </div>
+          <p id="auto-roll-dice-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when each player's turn begins.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="auto-deal-damage" aria-describedby="auto-deal-damage-desc">
+            <label for="auto-deal-damage">Auto deal damage (randomly assign hits to opponents)</label>
+          </div>
+          <p id="auto-deal-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h3>How to Play</h3>
+        <p>The physical game uses two log rounds painted with D20 patterns—one for odd numbers (1–19), one for even (2–20). Players throw real knives at the targets based on what they roll!</p>
+        <div class="rules-grid">
+          <div class="rule-card"><strong>Setup</strong> Select 2–6 players, choose names and colors, then roll for turn order.</div>
+          <div class="rule-card"><strong>Gameplay</strong> Each player starts with 50 HP. Roll 3 D20s, throw knives at the matching targets, and deal damage for hits.</div>
+          <div class="rule-card"><strong>Special Rules</strong> Dropped knife = -1 HP. Last player standing wins!</div>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h3>Features</h3>
+        <ul>
+          <li>Virtual D20 dice rolling with animations</li>
+          <li>Visual target boards with highlighted zones matching your rolls</li>
+          <li>HP tracking for all players</li>
+          <li>Turn order management</li>
+          <li>Game log to track all actions</li>
+          <li>Responsive design—works on desktop and mobile</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p>Dagger & Die — Throw knives. Roll dice. Take names.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const cover = document.getElementById('cover');
+
+      function reveal() {
+        document.body.classList.add('revealed');
+      }
+
+      cover.addEventListener('click', reveal);
+      cover.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          reveal();
+        }
+      });
+    })();
+
+    // Starfield
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.width = (Math.random() > 0.7 ? 3 : 2) + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 55 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      star.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      starsContainer.appendChild(star);
+    }
+
+    // Resources dropdown
+    const resourcesBtn = document.getElementById('resources-btn');
+    const resourcesDropdown = document.getElementById('resources-dropdown');
+    const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
+    if (resourcesBtn && resourcesDropdown) {
+      resourcesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = resourcesDropdown.classList.toggle('open');
+        resourcesBtn.setAttribute('aria-expanded', open);
+      });
+      document.addEventListener('click', () => {
+        resourcesDropdown.classList.remove('open');
+        resourcesBtn.setAttribute('aria-expanded', 'false');
+      });
+      resourcesDropdown.addEventListener('click', (e) => e.stopPropagation());
+    }
+    if (resourcesProjectorBtn) {
+      resourcesProjectorBtn.addEventListener('click', () => {
+        resourcesDropdown.classList.remove('open');
+        resourcesBtn.setAttribute('aria-expanded', 'false');
+        window.open('projector.html', 'DaggerDieProjector', 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no');
+      });
+    }
+    const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
+    if (stencilDownloadBtn) {
+      stencilDownloadBtn.addEventListener('click', () => {
+        resourcesDropdown.classList.remove('open');
+        resourcesBtn.setAttribute('aria-expanded', 'false');
+        const svgUrl = new URL('assets/targetstencil.svg', window.location.href).href;
+        fetch(svgUrl).then(r => {
+          if (!r.ok) throw new Error('Fetch failed');
+          return r.blob();
+        }).then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'targetstencil.svg';
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 500);
+        }).catch(() => {
+          alert('Download failed. If you opened this page from your file system (file://), try running it through a local server instead.');
+        });
+      });
+    }
+
+    const AUTO_ROLL_TURN_ORDER_KEY = 'daggerdie_autoRollTurnOrder';
+    const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
+    const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
+    const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
+
+    document.getElementById('options-toggle').addEventListener('click', () => {
+      const toggle = document.getElementById('options-toggle');
+      const menu = document.getElementById('options-menu');
+      toggle.classList.toggle('open');
+      menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', menu.classList.contains('open'));
+    });
+
+    const autoRollTurnOrderCheckbox = document.getElementById('auto-roll-turn-order');
+    autoRollTurnOrderCheckbox.checked = localStorage.getItem(AUTO_ROLL_TURN_ORDER_KEY) === 'true';
+    autoRollTurnOrderCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_ROLL_TURN_ORDER_KEY, autoRollTurnOrderCheckbox.checked));
+
+    const autoBeginGameCheckbox = document.getElementById('auto-begin-game');
+    autoBeginGameCheckbox.checked = localStorage.getItem(AUTO_BEGIN_GAME_KEY) === 'true';
+    autoBeginGameCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_BEGIN_GAME_KEY, autoBeginGameCheckbox.checked));
+
+    const autoRollDiceCheckbox = document.getElementById('auto-roll-dice');
+    autoRollDiceCheckbox.checked = localStorage.getItem(AUTO_ROLL_DICE_KEY) === 'true';
+    autoRollDiceCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_ROLL_DICE_KEY, autoRollDiceCheckbox.checked));
+
+    const autoDealDamageCheckbox = document.getElementById('auto-deal-damage');
+    autoDealDamageCheckbox.checked = localStorage.getItem(AUTO_DEAL_DAMAGE_KEY) === 'true';
+    autoDealDamageCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_DEAL_DAMAGE_KEY, autoDealDamageCheckbox.checked));
+  </script>
 </body>
 </html>
