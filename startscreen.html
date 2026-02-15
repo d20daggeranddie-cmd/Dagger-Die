@@ -365,10 +365,10 @@
         <div class="resources-wrap">
             <button type="button" class="resources-btn" id="resources-btn" aria-label="Resources" aria-expanded="false" aria-haspopup="true">Resources ▾</button>
             <div class="resources-dropdown" id="resources-dropdown" role="menu">
-                <a href="assets/targetstencil.svg" download="targetstencil.svg" role="menuitem">
+                <button type="button" id="resources-download-stencil-btn" role="menuitem">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download target stencil (SVG)
-                </a>
+                </button>
                 <button type="button" id="resources-projector-btn" role="menuitem">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     Open target face (projector)
@@ -493,6 +493,32 @@
                 resourcesDropdown.classList.remove('open');
                 resourcesBtn.setAttribute('aria-expanded', 'false');
                 window.open('projector.html', 'DaggerDieProjector', 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no');
+            });
+        }
+        const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
+        if (stencilDownloadBtn) {
+            stencilDownloadBtn.addEventListener('click', () => {
+                resourcesDropdown.classList.remove('open');
+                resourcesBtn.setAttribute('aria-expanded', 'false');
+                const svgUrl = new URL('assets/targetstencil.svg', window.location.href).href;
+                fetch(svgUrl).then(r => {
+                    if (!r.ok) throw new Error('Fetch failed');
+                    return r.blob();
+                }).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'targetstencil.svg';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 500);
+                }).catch(() => {
+                    alert('Download failed. If you opened this page from your file system (file://), try running it through a local server instead.');
+                });
             });
         }
         const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
