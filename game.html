@@ -45,11 +45,85 @@
 
         /* Setup Screen */
         #setup-screen {
+            position: relative;
             background: rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 40px;
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        /* Resources button (top right of setup screen) */
+        .resources-wrap {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+
+        .resources-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.95);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .resources-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .resources-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 6px;
+            min-width: 220px;
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            padding: 8px 0;
+            z-index: 100;
+        }
+
+        .resources-dropdown.open {
+            display: block;
+        }
+
+        .resources-dropdown a,
+        .resources-dropdown button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .resources-dropdown a:hover,
+        .resources-dropdown button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .resources-dropdown .icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.9;
         }
 
         .setup-title {
@@ -1202,6 +1276,19 @@
 
         <!-- Setup Screen -->
         <div id="setup-screen">
+            <div class="resources-wrap">
+                <button type="button" class="resources-btn" id="resources-btn" aria-label="Resources" aria-expanded="false" aria-haspopup="true">Resources ▾</button>
+                <div class="resources-dropdown" id="resources-dropdown" role="menu">
+                    <a href="assets/targetstencil.svg" download="targetstencil.svg" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download target stencil (SVG)
+                    </a>
+                    <button type="button" id="resources-projector-btn" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        Open target face (projector)
+                    </button>
+                </div>
+            </div>
             <h2 class="setup-title">Select Number of Players</h2>
             <div class="player-count-selector">
                 <button class="player-count-btn" data-count="2">2</button>
@@ -1485,6 +1572,30 @@
         });
 
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
+
+        // Resources dropdown (setup screen)
+        const resourcesBtn = document.getElementById('resources-btn');
+        const resourcesDropdown = document.getElementById('resources-dropdown');
+        const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
+        if (resourcesBtn && resourcesDropdown) {
+            resourcesBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const open = resourcesDropdown.classList.toggle('open');
+                resourcesBtn.setAttribute('aria-expanded', open);
+            });
+            document.addEventListener('click', () => {
+                resourcesDropdown.classList.remove('open');
+                resourcesBtn.setAttribute('aria-expanded', 'false');
+            });
+            resourcesDropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+        if (resourcesProjectorBtn) {
+            resourcesProjectorBtn.addEventListener('click', () => {
+                resourcesDropdown.classList.remove('open');
+                resourcesBtn.setAttribute('aria-expanded', 'false');
+                window.open('projector.html', 'DaggerDieProjector', 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no');
+            });
+        }
 
         settingsGearBtn.addEventListener('click', () => {
             const readOnly = state.hasScoreBeenEntered;
