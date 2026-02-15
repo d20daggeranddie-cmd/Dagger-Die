@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dagger & Die - Web Game Tracker</title>
+    <!-- Open Graph / Social preview (dagger-and-die-preview.html → og-image.png) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://daggeranddie.us/">
+    <meta property="og:title" content="Dagger & Die - Web Game Tracker">
+    <meta property="og:description" content="Track your tabletop sessions. Dagger & Die helps you run and remember your games.">
+    <meta property="og:image" content="https://daggeranddie.us/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://daggeranddie.us/og-image.png">
+    <!-- Google Analytics (GA4) - Replace G-XXXXXXXXXX with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Game Tile */
+        .game-tile {
+            display: block;
+            text-decoration: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 50px;
+            text-align: center;
+            border: 3px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .game-tile:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: #feca57;
+            box-shadow: 0 0 30px rgba(254, 202, 87, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .game-tile-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        .game-tile h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .game-tile p {
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+        }
+
+        .game-tile .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            font-weight: bold;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .game-tile:hover .btn {
+            box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4);
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .info-section h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #feca57;
+        }
+
+        .info-section p {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 12px;
+        }
+
+        .info-section ul {
+            margin: 15px 0;
+            padding-left: 24px;
+        }
+
+        .info-section li {
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .rule-card {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #48dbfb;
+        }
+
+        .rule-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #48dbfb;
+        }
+
+        /* Options Menu */
+        .options-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px 25px;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .options-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #48dbfb;
+        }
+
+        .options-toggle svg {
+            transition: transform 0.3s ease;
+        }
+
+        .options-toggle.open svg {
+            transform: rotate(180deg);
+        }
+
+        .options-menu {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .options-menu.open {
+            display: block;
+        }
+
+        .options-menu h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #feca57;
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .options-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .options-group h4 {
+            font-size: 1rem;
+            color: #48dbfb;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .options-group p,
+        .options-group ul {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+
+        .options-group ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .option-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #48dbfb;
+        }
+
+        .option-row label {
+            cursor: pointer;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .game-tile {
+                padding: 25px 20px;
+            }
+
+            .game-tile-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dagger & Die</h1>
+            <p class="tagline">Web-based game tracker for the physical knife-throwing dice game</p>
+        </header>
+
+        <a href="game.html" class="game-tile">
+            <div class="game-tile-icon">🎯</div>
+            <h2>Play Game Tracker</h2>
+            <p>Roll virtual D20s, track HP, and manage your knife-throwing game. Works on desktop and mobile.</p>
+            <span class="btn">Start Game →</span>
+        </a>
+
+        <button class="options-toggle" id="options-toggle" aria-expanded="false" aria-controls="options-menu">
+            Options
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+
+        <section class="options-menu" id="options-menu" role="region" aria-label="Game options">
+            <h3>Game Defaults</h3>
+            <div class="options-group">
+                <h4>Starting HP by Player Count</h4>
+                <ul>
+                    <li>2 players: 50 HP</li>
+                    <li>3–4 players: 40 HP</li>
+                    <li>5–6 players: 60 HP</li>
+                </ul>
+            </div>
+            <div class="options-group">
+                <h4>Turn Order</h4>
+                <p>Players roll a D20 to determine turn order. Highest goes first. Ties are broken by rerolling only the tied players.</p>
+                <div class="option-row">
+                    <input type="checkbox" id="auto-roll-turn-order" aria-describedby="auto-roll-desc">
+                    <label for="auto-roll-turn-order">Automatically roll dice for turn order</label>
+                </div>
+                <p id="auto-roll-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when the turn order screen appears.</p>
+                <div class="option-row" style="margin-top: 16px;">
+                    <input type="checkbox" id="auto-begin-game" aria-describedby="auto-begin-desc">
+                    <label for="auto-begin-game">Automatically begin game after turn order</label>
+                </div>
+                <p id="auto-begin-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the game starts automatically after turn order is determined.</p>
+            </div>
+            <div class="options-group">
+                <h4>Gameplay</h4>
+                <div class="option-row">
+                    <input type="checkbox" id="auto-roll-dice" aria-describedby="auto-roll-dice-desc">
+                    <label for="auto-roll-dice">Automatically roll dice on player turn</label>
+                </div>
+                <p id="auto-roll-dice-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when each player's turn begins.</p>
+                <div class="option-row" style="margin-top: 16px;">
+                    <input type="checkbox" id="auto-deal-damage" aria-describedby="auto-deal-damage-desc">
+                    <label for="auto-deal-damage">Auto deal damage (randomly assign hits to opponents)</label>
+                </div>
+                <p id="auto-deal-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <h3>How to Play</h3>
+            <p>The physical game uses two log rounds painted with D20 patterns—one for odd numbers (1–19), one for even (2–20). Players throw real knives at the targets based on what they roll!</p>
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <strong>Setup</strong>
+                    Select 2–6 players, choose names and colors, then roll for turn order.
+                </div>
+                <div class="rule-card">
+                    <strong>Gameplay</strong>
+                    Each player starts with 50 HP. Roll 3 D20s, throw knives at the matching targets, and deal damage for hits.
+                </div>
+                <div class="rule-card">
+                    <strong>Special Rules</strong>
+                    Dropped knife = -1 HP. Last player standing wins!
+                </div>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <h3>Features</h3>
+            <ul>
+                <li>Virtual D20 dice rolling with animations</li>
+                <li>Visual target boards with highlighted zones matching your rolls</li>
+                <li>HP tracking for all players</li>
+                <li>Turn order management</li>
+                <li>Game log to track all actions</li>
+                <li>Responsive design—works on desktop and mobile</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Dagger & Die — Throw knives. Roll dice. Take names.</p>
+        </footer>
+    </div>
+
+    <script>
+        const AUTO_ROLL_TURN_ORDER_KEY = 'daggerdie_autoRollTurnOrder';
+        const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
+        const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
+        const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
+
+        document.getElementById('options-toggle').addEventListener('click', () => {
+            const toggle = document.getElementById('options-toggle');
+            const menu = document.getElementById('options-menu');
+            toggle.classList.toggle('open');
+            menu.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', menu.classList.contains('open'));
+        });
+
+        const autoRollTurnOrderCheckbox = document.getElementById('auto-roll-turn-order');
+        autoRollTurnOrderCheckbox.checked = localStorage.getItem(AUTO_ROLL_TURN_ORDER_KEY) === 'true';
+        autoRollTurnOrderCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_ROLL_TURN_ORDER_KEY, autoRollTurnOrderCheckbox.checked);
+        });
+
+        const autoBeginGameCheckbox = document.getElementById('auto-begin-game');
+        autoBeginGameCheckbox.checked = localStorage.getItem(AUTO_BEGIN_GAME_KEY) === 'true';
+        autoBeginGameCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_BEGIN_GAME_KEY, autoBeginGameCheckbox.checked);
+        });
+
+        const autoRollDiceCheckbox = document.getElementById('auto-roll-dice');
+        autoRollDiceCheckbox.checked = localStorage.getItem(AUTO_ROLL_DICE_KEY) === 'true';
+        autoRollDiceCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_ROLL_DICE_KEY, autoRollDiceCheckbox.checked);
+        });
+
+        const autoDealDamageCheckbox = document.getElementById('auto-deal-damage');
+        autoDealDamageCheckbox.checked = localStorage.getItem(AUTO_DEAL_DAMAGE_KEY) === 'true';
+        autoDealDamageCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_DEAL_DAMAGE_KEY, autoDealDamageCheckbox.checked);
+        });
+    </script>
+</body>
+</html>
