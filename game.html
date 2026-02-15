@@ -2658,6 +2658,31 @@
                 </tr>`;
             }).join('');
 
+            // Per-player stats for breakdown
+            const playerStatsBreakdown = state.players.map(p => {
+                const status = p.eliminated ? 'Eliminated' : (winner && p.id === winner.id ? 'Winner' : 'Survived');
+                const hitCount = state.gameLog.filter(e => e.message.includes(p.name) && e.message.includes('dealt') && e.message.includes('damage to')).length;
+                const dropCount = state.gameLog.filter(e => e.type === 'damage' && e.message.includes('dropped a knife') && e.message.includes(p.name)).length;
+                const totalScoring = hitCount + dropCount;
+                const efficiency = totalScoring > 0 ? (hitCount / totalScoring * 100).toFixed(1) : '—';
+                const rolled = p.totalRolled || 0;
+                const claimed = p.totalClaimed || 0;
+                const pointsPct = rolled > 0 ? (claimed / rolled * 100).toFixed(1) : '—';
+                const pointsStr = rolled > 0 ? `${claimed} / ${rolled} (${pointsPct}%)` : '—';
+                return `
+                <div class="report-player-card" style="border-left-color: ${p.color.hex}">
+                    <h3 class="report-player-name"><span class="report-color-dot" style="background:${p.color.hex}"></span> ${escapeHtml(p.name)}</h3>
+                    <table class="report-stats-table">
+                        <tr><td>Status</td><td><span class="report-status report-status-${status.toLowerCase().replace(/\s/g,'')}">${status}</span></td></tr>
+                        <tr><td>Final HP</td><td>${p.hp} / ${p.maxHp}</td></tr>
+                        <tr><td>Hits dealt</td><td>${hitCount}</td></tr>
+                        <tr><td>Drops (self-damage)</td><td>${dropCount}</td></tr>
+                        <tr><td>Efficiency</td><td>${efficiency}${efficiency !== '—' ? '%' : ''}</td></tr>
+                        <tr><td>Points (claimed / rolled)</td><td>${pointsStr}</td></tr>
+                    </table>
+                </div>`;
+            }).join('');
+
             const logEntries = state.gameLog.map((e, i) => {
                 const cls = e.type === 'damage' ? 'report-log-damage' : e.type === 'heal' ? 'report-log-heal' : 'report-log-info';
                 return `<li class="report-log-entry ${cls}"><span class="report-log-num">${i + 1}.</span> ${escapeHtml(e.message)}</li>`;
@@ -2735,6 +2760,19 @@
         .report-log-damage { color: #ff6b6b; }
         .report-log-heal { color: #2ecc71; }
         .report-log-info { color: #48dbfb; }
+        .report-player-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid #48dbfb;
+        }
+        .report-player-card:last-child { margin-bottom: 0; }
+        .report-player-name { font-size: 1rem; color: #e8e8e8; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .report-stats-table { width: 100%; font-size: 0.9rem; }
+        .report-stats-table td { padding: 4px 0; border: none; }
+        .report-stats-table td:first-child { color: rgba(255,255,255,0.6); width: 55%; }
+        .report-stats-table td:last-child { color: #e8e8e8; }
     </style>
 </head>
 <body>
@@ -2759,7 +2797,11 @@
             <p class="report-turn-order">${escapeHtml(turnOrderList)}</p>
         </section>
         <section class="report-section">
-            <h2>Game actions (${totalActions})</h2>
+            <h2>Player stats breakdown</h2>
+            <div class="report-player-cards">${playerStatsBreakdown}</div>
+        </section>
+        <section class="report-section">
+            <h2>Game ledger (${totalActions} entries)</h2>
             <ul class="report-log">${logEntries || '<li class="report-log-info">No actions recorded.</li>'}</ul>
         </section>
     </div>
