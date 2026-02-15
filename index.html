@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dagger & Die - Web Game Tracker</title>
+    <!-- Google Analytics (GA4) - Replace G-XXXXXXXXXX with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
     <style>
         * {
             margin: 0;
@@ -320,6 +328,11 @@
                     <label for="auto-roll-dice">Automatically roll dice on player turn</label>
                 </div>
                 <p id="auto-roll-dice-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, dice roll automatically when each player's turn begins.</p>
+                <div class="option-row" style="margin-top: 16px;">
+                    <input type="checkbox" id="auto-deal-damage" aria-describedby="auto-deal-damage-desc">
+                    <label for="auto-deal-damage">Auto deal damage (randomly assign hits to opponents)</label>
+                </div>
+                <p id="auto-deal-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
             </div>
         </section>
 
@@ -363,6 +376,7 @@
         const AUTO_ROLL_TURN_ORDER_KEY = 'daggerdie_autoRollTurnOrder';
         const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
         const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
+        const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
 
         document.getElementById('options-toggle').addEventListener('click', () => {
             const toggle = document.getElementById('options-toggle');
@@ -388,6 +402,12 @@
         autoRollDiceCheckbox.checked = localStorage.getItem(AUTO_ROLL_DICE_KEY) === 'true';
         autoRollDiceCheckbox.addEventListener('change', () => {
             localStorage.setItem(AUTO_ROLL_DICE_KEY, autoRollDiceCheckbox.checked);
+        });
+
+        const autoDealDamageCheckbox = document.getElementById('auto-deal-damage');
+        autoDealDamageCheckbox.checked = localStorage.getItem(AUTO_DEAL_DAMAGE_KEY) === 'true';
+        autoDealDamageCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AUTO_DEAL_DAMAGE_KEY, autoDealDamageCheckbox.checked);
         });
     </script>
 </body>
