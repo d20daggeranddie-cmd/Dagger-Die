@@ -830,17 +830,7 @@
             border-radius: 50%;
             overflow: hidden;
             /* Wood base color */
-            background:
-                repeating-linear-gradient(
-                    85deg,
-                    transparent 0px,
-                    transparent 2px,
-                    rgba(101, 67, 33, 0.08) 3px,
-                    rgba(101, 67, 33, 0.08) 4px,
-                    transparent 5px,
-                    transparent 12px
-                ),
-                radial-gradient(
+            background: radial-gradient(
                     circle at 45% 45%,
                     #d4a574 0%,
                     #c4956a 20%,
@@ -857,36 +847,6 @@
                 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        .target-image-container::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            right: -8px;
-            bottom: -8px;
-            border-radius: 50%;
-            border: 8px solid transparent;
-            background:
-                repeating-conic-gradient(
-                    from 0deg,
-                    #2d1f0f 0deg,
-                    #4a3520 2deg,
-                    #3d2914 4deg,
-                    #2d1f0f 6deg
-                );
-            background-clip: padding-box;
-            -webkit-mask:
-                linear-gradient(#fff 0 0) content-box,
-                linear-gradient(#fff 0 0);
-            mask:
-                linear-gradient(#fff 0 0) content-box,
-                linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: 5;
-        }
-
         .target-image {
             width: 90%;
             height: 90%;
@@ -894,6 +854,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            object-fit: contain;
+            object-position: center;
             filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
             z-index: 2;
         }
@@ -908,6 +870,14 @@
             z-index: 3;
         }
 
+        .target-overlay.clickable {
+            pointer-events: auto;
+        }
+
+        .target-overlay.clickable .highlight-zone {
+            cursor: pointer;
+        }
+
         .highlight-zone {
             fill: transparent;
             stroke: transparent;
@@ -920,6 +890,12 @@
             stroke: #ffd700;
             stroke-width: 4;
             animation: pulse 1s infinite;
+        }
+
+        .highlight-zone.claimed {
+            fill: rgba(46, 204, 113, 0.5);
+            stroke: #2ecc71;
+            stroke-width: 4;
         }
 
         @keyframes pulse {
@@ -1151,14 +1127,6 @@
                 border-width: 6px;
             }
 
-            .target-image-container::before {
-                top: -6px;
-                left: -6px;
-                right: -6px;
-                bottom: -6px;
-                border-width: 6px;
-            }
-
             .btn {
                 padding: 10px 20px;
                 font-size: 0.9rem;
@@ -1184,14 +1152,6 @@
             }
 
             .target-image-container {
-                border-width: 5px;
-            }
-
-            .target-image-container::before {
-                top: -5px;
-                left: -5px;
-                right: -5px;
-                bottom: -5px;
                 border-width: 5px;
             }
 
@@ -1302,17 +1262,17 @@
                             <div class="target-label">Odd Numbers (1-19)</div>
                             <div class="target-image-container">
                                 <img src="assets/ODD.svg" alt="Odd Target" class="target-image">
-                                <svg class="target-overlay" id="odd-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <polygon class="highlight-zone" data-number="1" points="50,30 35,55 65,55"/>
-                                    <polygon class="highlight-zone" data-number="17" points="19,16 50,10 35,30"/>
-                                    <polygon class="highlight-zone" data-number="3" points="50,10 81,16 65,30"/>
-                                    <polygon class="highlight-zone" data-number="7" points="19,16 35,30 20,50"/>
-                                    <polygon class="highlight-zone" data-number="19" points="65,30 81,16 80,50"/>
-                                    <polygon class="highlight-zone" data-number="15" points="8,35 19,16 20,50"/>
-                                    <polygon class="highlight-zone" data-number="9" points="92,35 80,50 81,16"/>
-                                    <polygon class="highlight-zone" data-number="5" points="20,50 35,55 25,75"/>
-                                    <polygon class="highlight-zone" data-number="11" points="65,55 80,50 75,75"/>
-                                    <polygon class="highlight-zone" data-number="13" points="35,55 65,55 50,85"/>
+                                <svg class="target-overlay" id="odd-overlay" viewBox="49 -377 300 341" preserveAspectRatio="xMidYMid meet">
+                                    <polygon class="highlight-zone" data-number="1" points="126,-215 166,-215 146,-165"/>
+                                    <polygon class="highlight-zone" data-number="3" points="45,-265 85,-265 65,-225"/>
+                                    <polygon class="highlight-zone" data-number="5" points="129,-105 169,-105 149,-56"/>
+                                    <polygon class="highlight-zone" data-number="7" points="216,-268 256,-268 236,-228"/>
+                                    <polygon class="highlight-zone" data-number="9" points="266,-180 306,-180 286,-140"/>
+                                    <polygon class="highlight-zone" data-number="11" points="169,-383 209,-383 189,-343"/>
+                                    <polygon class="highlight-zone" data-number="13" points="48,-141 88,-141 68,-101"/>
+                                    <polygon class="highlight-zone" data-number="15" points="30,-185 70,-185 50,-145"/>
+                                    <polygon class="highlight-zone" data-number="17" points="126,-382 166,-382 146,-342"/>
+                                    <polygon class="highlight-zone" data-number="19" points="247,-139 287,-139 267,-99"/>
                                 </svg>
                             </div>
                         </div>
@@ -1320,17 +1280,17 @@
                             <div class="target-label">Even Numbers (2-20)</div>
                             <div class="target-image-container">
                                 <img src="assets/EVEN.svg" alt="Even Target" class="target-image">
-                                <svg class="target-overlay" id="even-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <polygon class="highlight-zone" data-number="20" points="50,30 35,55 65,55"/>
-                                    <polygon class="highlight-zone" data-number="18" points="19,16 50,10 35,30"/>
-                                    <polygon class="highlight-zone" data-number="4" points="50,10 81,16 65,30"/>
-                                    <polygon class="highlight-zone" data-number="2" points="19,16 35,30 20,50"/>
-                                    <polygon class="highlight-zone" data-number="14" points="65,30 81,16 80,50"/>
-                                    <polygon class="highlight-zone" data-number="12" points="8,35 19,16 20,50"/>
-                                    <polygon class="highlight-zone" data-number="6" points="92,35 80,50 81,16"/>
-                                    <polygon class="highlight-zone" data-number="10" points="20,50 35,55 25,75"/>
-                                    <polygon class="highlight-zone" data-number="16" points="65,55 80,50 75,75"/>
-                                    <polygon class="highlight-zone" data-number="8" points="35,55 65,55 50,85"/>
+                                <svg class="target-overlay" id="even-overlay" viewBox="49 -377 300 341" preserveAspectRatio="xMidYMid meet">
+                                    <polygon class="highlight-zone" data-number="2" points="126,-215 166,-215 146,-165"/>
+                                    <polygon class="highlight-zone" data-number="4" points="45,-265 85,-265 65,-225"/>
+                                    <polygon class="highlight-zone" data-number="6" points="216,-268 256,-268 236,-228"/>
+                                    <polygon class="highlight-zone" data-number="8" points="129,-105 169,-105 149,-56"/>
+                                    <polygon class="highlight-zone" data-number="10" points="126,-382 166,-382 146,-342"/>
+                                    <polygon class="highlight-zone" data-number="12" points="30,-185 70,-185 50,-145"/>
+                                    <polygon class="highlight-zone" data-number="14" points="266,-180 306,-180 286,-140"/>
+                                    <polygon class="highlight-zone" data-number="16" points="247,-139 287,-139 267,-99"/>
+                                    <polygon class="highlight-zone" data-number="18" points="48,-141 88,-141 68,-101"/>
+                                    <polygon class="highlight-zone" data-number="20" points="169,-383 209,-383 189,-343"/>
                                 </svg>
                             </div>
                         </div>
@@ -2182,6 +2142,28 @@
             });
         }
 
+        document.addEventListener('click', (e) => {
+            const zone = e.target.closest('.highlight-zone');
+            if (!zone) return;
+            const overlay = zone.closest('.target-overlay');
+            if (!overlay || !overlay.classList.contains('clickable')) return;
+            const number = parseInt(zone.getAttribute('data-number'));
+            if (!state.currentRoll.includes(number)) return;
+
+            const rollIndices = state.currentRoll.map((r, i) => r === number ? i : -1).filter(i => i >= 0);
+            const hitIndicesForNumber = new Set(state.hits.filter(h => h.roll === number).map(h => h.idx));
+            const firstUnclaimed = rollIndices.find(idx => !hitIndicesForNumber.has(idx));
+            if (firstUnclaimed !== undefined) {
+                const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
+                if (state.hits.length >= slotsLeft) return;
+                state.hits.push({ roll: number, idx: firstUnclaimed });
+            } else {
+                const toRemove = state.hits.find(h => h.roll === number);
+                if (toRemove) state.hits = state.hits.filter(h => h !== toRemove);
+            }
+            syncHitRecorderUI();
+        });
+
         function displayRollResults() {
             diceResults.innerHTML = `
                 <p>Rolled: <strong>${state.currentRoll.join(', ')}</strong></p>
@@ -2190,24 +2172,48 @@
             `;
         }
 
+        const MAX_SCORES_PER_TURN = 3;
+
+        function syncHitRecorderUI() {
+            const hitIdxSet = new Set(state.hits.map(h => h.idx));
+            hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
+                const idx = parseInt(btn.dataset.idx);
+                if (hitIdxSet.has(idx)) {
+                    btn.classList.add('hit');
+                    btn.style.background = '#2ecc71';
+                } else {
+                    btn.classList.remove('hit');
+                    btn.style.background = '';
+                }
+            });
+            const totalDamageEl = document.getElementById('total-damage-display');
+            if (totalDamageEl) totalDamageEl.textContent = state.hits.reduce((sum, h) => sum + h.roll, 0);
+            const scoreCounter = hitInfo.querySelector('.scores-counter');
+            if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
+            document.querySelectorAll('.highlight-zone').forEach(zone => {
+                const num = parseInt(zone.getAttribute('data-number'));
+                const claimedForNumber = state.hits.some(h => h.roll === num);
+                zone.classList.toggle('claimed', claimedForNumber);
+            });
+        }
+
         function showHitRecorder(initialHits) {
             const currentPlayer = getCurrentPlayer();
             droppedKnifeBtn.classList.remove('hidden');
 
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice() : [];
 
-            const MAX_SCORES_PER_TURN = 3;
             const maxDiceScores = Math.max(0, MAX_SCORES_PER_TURN - state.dropsThisTurn);
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice(0, maxDiceScores) : [];
 
             attackPrompt.classList.remove('hidden');
-            attackPrompt.innerHTML = `<strong>Step 1:</strong> Throw your knives! Click up to <strong>3</strong> numbers you HIT on the target (max 3 scores per turn).`;
+            attackPrompt.innerHTML = `<strong>Step 1:</strong> Throw your knives! Tap the target numbers you HIT, or use the buttons below (max 3 scores per turn).`;
 
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
 
             hitInfo.innerHTML = `
                 <div style="width: 100%; text-align: center; margin-bottom: 15px;">
-                    <p style="font-size: 1.1rem;">Click the numbers you <strong>HIT</strong> on the target (max 3 per turn):</p>
+                    <p style="font-size: 1.1rem;">Tap the <strong>highlighted targets</strong> or buttons below to claim hits (max 3 per turn):</p>
                 </div>
                 <div class="hit-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     ${state.currentRoll.map((roll, idx) => `
@@ -2223,31 +2229,29 @@
                 </div>
             `;
 
+            document.getElementById('odd-overlay').classList.add('clickable');
+            document.getElementById('even-overlay').classList.add('clickable');
+            syncHitRecorderUI();
+
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const roll = parseInt(btn.dataset.roll);
                     const idx = parseInt(btn.dataset.idx);
 
                     if (btn.classList.contains('hit')) {
-                        btn.classList.remove('hit');
-                        btn.style.background = '';
                         state.hits = state.hits.filter(h => h.idx !== idx);
                     } else {
                         const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
                         if (state.hits.length >= slotsLeft) return;
-                        btn.classList.add('hit');
-                        btn.style.background = '#2ecc71';
                         state.hits.push({ roll, idx });
                     }
-
-                    state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
-                    document.getElementById('total-damage-display').textContent = state.totalDamage;
-                    const scoreCounter = hitInfo.querySelector('.scores-counter');
-                    if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
+                    syncHitRecorderUI();
                 });
             });
 
             document.getElementById('confirm-hits-btn').addEventListener('click', () => {
+                document.getElementById('odd-overlay').classList.remove('clickable');
+                document.getElementById('even-overlay').classList.remove('clickable');
                 state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
 
                 if (state.totalDamage > 0) {
