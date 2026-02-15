@@ -749,6 +749,94 @@
             color: #e74c3c;
         }
 
+        /* Miss confirmation modal */
+        .miss-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .miss-modal-overlay.open {
+            display: flex;
+        }
+
+        .miss-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 360px;
+            width: 100%;
+            border: 2px solid rgba(231, 76, 60, 0.4);
+        }
+
+        .miss-modal-player {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            font-size: 1.5rem;
+            color: #d4a84b;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .miss-modal-question {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .miss-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .miss-modal-buttons .btn {
+            flex: 1;
+        }
+
+        /* Miss onscreen reaction */
+        .miss-reaction {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        .miss-reaction.show {
+            opacity: 1;
+            animation: miss-pulse 0.3s ease-out;
+        }
+        .miss-reaction.hide {
+            opacity: 0;
+            transition: opacity 0.25s ease-out;
+        }
+        @keyframes miss-pulse {
+            0% { transform: scale(0.85); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        .miss-reaction-inner {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.95) 0%, rgba(139, 69, 69, 0.9) 100%);
+            color: #fff;
+            font-size: clamp(1.8rem, 6vw, 3rem);
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            padding: 20px 40px;
+            border-radius: 16px;
+            box-shadow: 0 0 60px rgba(231, 76, 60, 0.5);
+            text-transform: uppercase;
+        }
+
         @keyframes dropped-flash {
             0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.8); transform: scale(1.05); }
             30% { box-shadow: 0 0 25px 8px rgba(255, 107, 107, 0.5); border-color: #ff6b6b; }
@@ -1576,9 +1664,26 @@
         </div>
     </div>
 
+    <!-- Miss confirmation modal -->
+    <div class="miss-modal-overlay" id="miss-modal" role="dialog" aria-labelledby="miss-modal-title" aria-modal="true">
+        <div class="miss-modal">
+            <div class="miss-modal-player" id="miss-modal-player-name"></div>
+            <div class="miss-modal-question" id="miss-modal-title">Missed?</div>
+            <div class="miss-modal-buttons">
+                <button type="button" class="btn btn-secondary" id="miss-modal-no">No</button>
+                <button type="button" class="btn btn-primary" id="miss-modal-yes">Yes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Critical hit onscreen reaction -->
     <div class="critical-reaction" id="critical-reaction" aria-live="polite">
         <div class="critical-reaction-inner">Critical!</div>
+    </div>
+
+    <!-- Miss onscreen reaction -->
+    <div class="miss-reaction" id="miss-reaction" aria-live="polite">
+        <div class="miss-reaction-inner">Miss!</div>
     </div>
 
     <!-- Custom circular color picker modal (must be in DOM before script runs) -->
@@ -2499,11 +2604,7 @@
                     }
                     showTargetSelection();
                 } else {
-                    if (confirm('No hits recorded. Did you miss all targets?')) {
-                        if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
-                        addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
-                        finishTurnNoAttack();
-                    }
+                    showMissModal(currentPlayer);
                 }
             });
         }
@@ -3133,6 +3234,51 @@
                 setTimeout(() => el.classList.remove('hide'), 300);
             }, 1000);
         }
+
+        const missModal = document.getElementById('miss-modal');
+        const missModalPlayerName = document.getElementById('miss-modal-player-name');
+        const missModalYes = document.getElementById('miss-modal-yes');
+        const missModalNo = document.getElementById('miss-modal-no');
+
+        function showMissModal(currentPlayer) {
+            missModalPlayerName.textContent = currentPlayer.name;
+            missModal.classList.add('open');
+        }
+
+        function closeMissModal() {
+            missModal.classList.remove('open');
+        }
+
+        function showMissReaction() {
+            const el = document.getElementById('miss-reaction');
+            if (!el) return;
+            const inner = el.querySelector('.miss-reaction-inner');
+            if (inner) inner.textContent = 'Miss!';
+            el.classList.remove('hide');
+            el.classList.add('show');
+            setTimeout(() => {
+                el.classList.remove('show');
+                el.classList.add('hide');
+                setTimeout(() => el.classList.remove('hide'), 300);
+            }, 1000);
+        }
+
+        missModalYes.addEventListener('click', () => {
+            const currentPlayer = getCurrentPlayer();
+            closeMissModal();
+            if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
+            addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
+            showMissReaction();
+            finishTurnNoAttack();
+        });
+
+        missModalNo.addEventListener('click', () => {
+            closeMissModal();
+        });
+
+        missModal.addEventListener('click', (e) => {
+            if (e.target === missModal) closeMissModal();
+        });
 
         document.getElementById('new-game-btn').addEventListener('click', resetGame);
                 function playAgain() {
