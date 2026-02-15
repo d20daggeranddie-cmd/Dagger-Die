@@ -138,13 +138,59 @@
   }
 
   .resources-wrap { position: absolute; top: 20px; right: 20px; }
-  .resources-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.95); font-size: 0.9rem; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
-  .resources-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
-  .resources-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; min-width: 220px; background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 8px 0; z-index: 100; }
-  .resources-dropdown.open { display: block; }
-  .resources-dropdown a, .resources-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; color: rgba(255,255,255,0.95); font-size: 0.95rem; text-align: left; cursor: pointer; text-decoration: none; transition: background 0.2s; }
-  .resources-dropdown a:hover, .resources-dropdown button:hover { background: rgba(255,255,255,0.1); }
-  .resources-dropdown .icon { width: 18px; height: 18px; opacity: 0.9; }
+  .resources-star-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: #f0c040;
+    transition: transform 0.2s ease;
+  }
+  .resources-star-btn:hover { transform: scale(1.15); }
+  .resources-star-btn:focus { outline: 2px solid #f0c040; outline-offset: 4px; border-radius: 4px; }
+  .resources-star-btn svg {
+    width: 36px; height: 36px;
+    filter: drop-shadow(0 0 8px rgba(240, 192, 64, 0.5));
+    animation: star-twinkle 2s ease-in-out infinite;
+  }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 8px rgba(240, 192, 64, 0.5)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(240, 192, 64, 0.9)); }
+  }
+
+  /* Resources modal */
+  .resources-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .resources-modal-overlay.open {
+    opacity: 1; visibility: visible; pointer-events: auto;
+  }
+  .resources-modal {
+    background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
+    padding: 28px; min-width: 280px; max-width: 90vw;
+    transform: scale(0.95); transition: transform 0.3s ease;
+  }
+  .resources-modal-overlay.open .resources-modal { transform: scale(1); }
+  .resources-modal h3 { font-size: 1.25rem; color: #feca57; margin-bottom: 20px; text-align: center; }
+  .resources-modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .resources-modal-actions button {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 14px 18px;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95);
+    font-size: 0.95rem; text-align: left; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .resources-modal-actions button:hover {
+    background: rgba(255,255,255,0.15); border-color: rgba(240, 192, 64, 0.4);
+  }
+  .resources-modal-actions .icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.9; }
 
   header { text-align: center; margin-bottom: 50px; }
   h1 { font-family: 'Cinzel Decorative', 'Times New Roman', serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 10px; color: #d4a84b; text-shadow: 2px 2px 0 #5c3d1e, 4px 4px 0 rgba(0,0,0,0.3), 0 0 20px rgba(212, 168, 75, 0.3); letter-spacing: 4px; }
@@ -273,16 +319,27 @@
   <main class="main-content">
     <div class="container">
       <div class="resources-wrap">
-        <button type="button" class="resources-btn" id="resources-btn" aria-label="Resources" aria-expanded="false" aria-haspopup="true">Resources ▾</button>
-        <div class="resources-dropdown" id="resources-dropdown" role="menu">
-          <button type="button" id="resources-download-stencil-btn" role="menuitem">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download target stencil (SVG)
-          </button>
-          <button type="button" id="resources-projector-btn" role="menuitem">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Open target face (projector)
-          </button>
+        <button type="button" class="resources-star-btn" id="resources-btn" aria-label="Resources">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Resources modal -->
+      <div class="resources-modal-overlay" id="resources-modal" role="dialog" aria-label="Resources" aria-modal="true" aria-hidden="true">
+        <div class="resources-modal">
+          <h3>Resources</h3>
+          <div class="resources-modal-actions">
+            <button type="button" id="resources-download-stencil-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download target stencil (SVG)
+            </button>
+            <button type="button" id="resources-projector-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Open target face (projector)
+            </button>
+          </div>
         </div>
       </div>
       <header>
@@ -388,34 +445,48 @@
       starsContainer.appendChild(star);
     }
 
-    // Resources dropdown
+    // Resources modal (star button)
     const resourcesBtn = document.getElementById('resources-btn');
-    const resourcesDropdown = document.getElementById('resources-dropdown');
+    const resourcesModal = document.getElementById('resources-modal');
     const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
-    if (resourcesBtn && resourcesDropdown) {
+    const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
+
+    function openResourcesModal() {
+      if (resourcesModal) {
+        resourcesModal.classList.add('open');
+        resourcesModal.setAttribute('aria-hidden', 'false');
+      }
+    }
+    function closeResourcesModal() {
+      if (resourcesModal) {
+        resourcesModal.classList.remove('open');
+        resourcesModal.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    if (resourcesBtn) {
       resourcesBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const open = resourcesDropdown.classList.toggle('open');
-        resourcesBtn.setAttribute('aria-expanded', open);
+        openResourcesModal();
       });
-      document.addEventListener('click', () => {
-        resourcesDropdown.classList.remove('open');
-        resourcesBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (resourcesModal) {
+      resourcesModal.addEventListener('click', (e) => {
+        if (e.target === resourcesModal) closeResourcesModal();
       });
-      resourcesDropdown.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && resourcesModal.classList.contains('open')) closeResourcesModal();
+      });
     }
     if (resourcesProjectorBtn) {
       resourcesProjectorBtn.addEventListener('click', () => {
-        resourcesDropdown.classList.remove('open');
-        resourcesBtn.setAttribute('aria-expanded', 'false');
+        closeResourcesModal();
         window.open('projector.html', 'DaggerDieProjector', 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no');
       });
     }
-    const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
     if (stencilDownloadBtn) {
       stencilDownloadBtn.addEventListener('click', () => {
-        resourcesDropdown.classList.remove('open');
-        resourcesBtn.setAttribute('aria-expanded', 'false');
+        closeResourcesModal();
         const svgUrl = new URL('assets/targetstencil.svg', window.location.href).href;
         fetch(svgUrl).then(r => {
           if (!r.ok) throw new Error('Fetch failed');
