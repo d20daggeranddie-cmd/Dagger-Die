@@ -21,7 +21,7 @@
   gtag('config', 'G-XXXXXXXXXX');
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -96,11 +96,11 @@
   .dice-right { right: 28%; transform: rotate(12deg); animation: dice-bounce-r 2.8s ease-in-out infinite; }
   @keyframes dice-bounce-l { 0%, 100% { transform: rotate(-15deg) translateY(0); } 50% { transform: rotate(-15deg) translateY(-8px); } }
   @keyframes dice-bounce-r { 0%, 100% { transform: rotate(12deg) translateY(0); } 50% { transform: rotate(12deg) translateY(-8px); } }
-  .title-area { position: absolute; top: 40px; left: 0; right: 0; text-align: center; z-index: 6; }
-  .title-main { font-family: 'Press Start 2P', monospace; font-size: 52px; color: #f0c040; text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 20px rgba(240, 192, 64, 0.5), 0 0 60px rgba(240, 192, 64, 0.2); letter-spacing: 4px; line-height: 1.3; animation: title-glow 2s ease-in-out infinite alternate; }
-  .title-amp { font-size: 36px; color: #e04040; text-shadow: 3px 3px 0 #6b1a1a, 0 0 20px rgba(224, 64, 64, 0.6); display: inline-block; margin: 0 8px; vertical-align: middle; }
-  @keyframes title-glow { 0% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 20px rgba(240, 192, 64, 0.4), 0 0 60px rgba(240, 192, 64, 0.15); } 100% { text-shadow: 4px 4px 0 #8b4513, -2px -2px 0 #f5d060, 0 0 30px rgba(240, 192, 64, 0.7), 0 0 80px rgba(240, 192, 64, 0.3); } }
-  .subtitle { font-family: 'Silkscreen', monospace; font-size: 14px; color: #8af; letter-spacing: 8px; margin-top: 12px; text-transform: uppercase; text-shadow: 0 0 10px rgba(136, 170, 255, 0.5); animation: subtitle-pulse 3s ease-in-out infinite; }
+  .title-area { position: absolute; top: 36px; left: 0; right: 0; text-align: center; z-index: 6; }
+  .title-main { font-family: 'Cinzel Decorative', 'Times New Roman', serif; font-size: 48px; font-weight: 700; color: #d4a84b; text-shadow: 3px 3px 0 #5c3d1e, 5px 5px 0 rgba(0,0,0,0.4), 0 0 30px rgba(212, 168, 75, 0.4), 0 0 60px rgba(212, 168, 75, 0.2); letter-spacing: 6px; line-height: 1.2; animation: title-glow 2s ease-in-out infinite alternate; }
+  .title-amp { font-size: 36px; color: #b85450; text-shadow: 2px 2px 0 #4a2020, 0 0 20px rgba(184, 84, 80, 0.5); display: inline-block; margin: 0 6px; vertical-align: middle; }
+  @keyframes title-glow { 0% { text-shadow: 3px 3px 0 #5c3d1e, 5px 5px 0 rgba(0,0,0,0.4), 0 0 25px rgba(212, 168, 75, 0.3), 0 0 50px rgba(212, 168, 75, 0.15); } 100% { text-shadow: 3px 3px 0 #5c3d1e, 5px 5px 0 rgba(0,0,0,0.4), 0 0 35px rgba(212, 168, 75, 0.6), 0 0 70px rgba(212, 168, 75, 0.25); } }
+  .subtitle { font-family: 'Cinzel', Georgia, serif; font-size: 11px; color: #b8a070; letter-spacing: 4px; margin-top: 14px; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5; text-transform: none; text-shadow: 0 0 8px rgba(184, 160, 112, 0.4); animation: subtitle-pulse 3s ease-in-out infinite; }
   @keyframes subtitle-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
   .hud-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 8; display: flex; gap: 32px; align-items: center; }
   .stat-block { font-family: 'Press Start 2P', monospace; font-size: 9px; color: #aaa; text-align: center; line-height: 1.6; }
@@ -147,12 +147,13 @@
   .resources-dropdown .icon { width: 18px; height: 18px; opacity: 0.9; }
 
   header { text-align: center; margin-bottom: 50px; }
-  h1 { font-size: 3.5rem; margin-bottom: 10px; background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .tagline { font-size: 1.2rem; opacity: 0.9; color: rgba(255,255,255,0.9); }
+  h1 { font-family: 'Cinzel Decorative', 'Times New Roman', serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 10px; color: #d4a84b; text-shadow: 2px 2px 0 #5c3d1e, 4px 4px 0 rgba(0,0,0,0.3), 0 0 20px rgba(212, 168, 75, 0.3); letter-spacing: 4px; }
+  .tagline { font-family: 'Cinzel', Georgia, serif; font-size: 1rem; letter-spacing: 2px; opacity: 0.9; color: #b8a070; }
 
   .game-tile { display: block; text-decoration: none; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; margin-bottom: 50px; text-align: center; border: 3px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
   .game-tile:hover { background: rgba(255,255,255,0.15); border-color: #feca57; box-shadow: 0 0 30px rgba(254, 202, 87, 0.3); transform: translateY(-4px); }
-  .game-tile-icon { font-size: 4rem; margin-bottom: 15px; line-height: 1; }
+  .game-tile-icon { font-size: 4rem; margin-bottom: 15px; line-height: 1; display: flex; justify-content: center; }
+  .game-tile-icon img { width: 6.25rem; height: 6.25rem; object-fit: contain; }
   .game-tile h2 { font-size: 1.8rem; margin-bottom: 10px; color: #fff; }
   .game-tile p { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
   .game-tile .btn { display: inline-block; padding: 15px 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; font-weight: bold; border-radius: 10px; font-size: 1.1rem; transition: all 0.3s; }
@@ -218,8 +219,8 @@
         <div class="corner-deco bl"></div>
         <div class="corner-deco br"></div>
         <div class="title-area">
-          <div class="title-main">DAGGER<span class="title-amp">&amp;</span>DIE</div>
-          <div class="subtitle">A Knife Throwing Quest</div>
+          <div class="title-main">Dagger<span class="title-amp">&amp;</span>Die</div>
+          <div class="subtitle">Precision knife throwing in a retro turn based RPG format</div>
         </div>
         <div class="dagger-container">
           <svg class="dagger-svg" viewBox="0 0 80 320" xmlns="http://www.w3.org/2000/svg">
@@ -286,12 +287,12 @@
       </div>
       <header>
         <h1>Dagger & Die</h1>
-        <p class="tagline">Web-based game tracker for the physical knife-throwing dice game</p>
+        <p class="tagline">Precision knife throwing in a retro turn based RPG format</p>
       </header>
 
       <a href="game.html" class="game-tile">
-        <div class="game-tile-icon">🎯</div>
-        <h2>Play Game Tracker</h2>
+        <div class="game-tile-icon"><img src="assets/DND.png" alt="Game Tracker" loading="lazy"></div>
+        <h2>Prepare For Battle!</h2>
         <p>Roll virtual D20s, track HP, and manage your knife-throwing game. Works on desktop and mobile.</p>
         <span class="btn">Start Game →</span>
       </a>
