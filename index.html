@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dagger & Die - Web Game Tracker</title>
+<title>Dagger & Die - Prepare for Battle!</title>
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daggeranddie.us/">
-<meta property="og:title" content="Dagger & Die - Web Game Tracker">
-<meta property="og:description" content="Track your tabletop sessions. Dagger & Die helps you run and remember your games.">
+<meta property="og:title" content="Dagger & Die - Prepare for Battle!">
+<meta property="og:description" content="Dagger & Die - Prepare for Battle!">
 <meta property="og:image" content="https://daggeranddie.us/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -200,7 +200,19 @@
   .game-tile:hover { background: rgba(255,255,255,0.15); border-color: #feca57; box-shadow: 0 0 30px rgba(254, 202, 87, 0.3); transform: translateY(-4px); }
   .game-tile-icon { font-size: 4rem; margin-bottom: 15px; line-height: 1; display: flex; justify-content: center; }
   .game-tile-icon img { width: 6.25rem; height: 6.25rem; object-fit: contain; }
-  .game-tile h2 { font-size: 1.8rem; margin-bottom: 10px; color: #fff; }
+  .game-tile h2 {
+    font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 15%, #a8a8a8 35%, #707070 50%, #909090 70%, #c8c8c8 90%, #e8e8e8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.5)) drop-shadow(-1px -1px 0 rgba(255,255,255,0.3)) drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
+    letter-spacing: 2px;
+  }
   .game-tile p { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
   .game-tile .btn { display: inline-block; padding: 15px 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; font-weight: bold; border-radius: 10px; font-size: 1.1rem; transition: all 0.3s; }
   .game-tile:hover .btn { box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4); }
