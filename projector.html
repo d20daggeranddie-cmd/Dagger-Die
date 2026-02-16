@@ -24,5 +24,21 @@
 </head>
 <body>
     <img class="target-face" src="assets/TEMPLATE.png" alt="Target face for projector">
+    <script>
+      (function() {
+        function enforceSquare() {
+          var w = window.outerWidth, h = window.outerHeight;
+          var side = Math.min(w, h);
+          if (side < 200) side = 200;
+          if (side !== w || side !== h) {
+            try { window.resizeTo(side, side); } catch (e) {}
+          }
+        }
+        window.addEventListener('resize', function() {
+          clearTimeout(window._projectorResizeT);
+          window._projectorResizeT = setTimeout(enforceSquare, 50);
+        });
+      })();
+    </script>
 </body>
 </html>
