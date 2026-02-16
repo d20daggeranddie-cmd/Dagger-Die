@@ -869,6 +869,27 @@
             color: #e74c3c;
         }
 
+        /* Death ghost animation */
+        .death-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 60px;
+            height: 70px;
+            animation: ghost-float 1.8s ease-out forwards;
+        }
+        .death-ghost svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+        }
+        @keyframes ghost-float {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            30% { opacity: 1; transform: translateY(-20px) scale(1.05) translateX(0); }
+            60% { opacity: 0.9; transform: translateY(-60px) scale(1) translateX(8px); }
+            100% { opacity: 0; transform: translateY(-120px) scale(0.8) translateX(-5px); }
+        }
+
         /* Miss confirmation modal */
         .miss-modal-overlay {
             display: none;
@@ -2605,6 +2626,19 @@
             }
         }
 
+        function spawnDeathGhost(cardRect) {
+            if (!cardRect || cardRect.width === 0) return;
+            const ghost = document.createElement('div');
+            ghost.className = 'death-ghost';
+            const cx = cardRect.left + cardRect.width / 2;
+            const cy = cardRect.top + cardRect.height / 2;
+            ghost.style.left = (cx - 30) + 'px';
+            ghost.style.top = (cy - 35) + 'px';
+            ghost.innerHTML = '<svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(255,255,255,0.9)" d="M30 5c-12 0-22 10-22 22 0 8 4 15 10 19v12l4-4 4 4v-8l4-4 4 4v8l4-4 4 4v-12c6-4 10-11 10-19 0-12-10-22-22-22z"/><circle cx="22" cy="25" r="4" fill="#1a1a2e"/><circle cx="38" cy="25" r="4" fill="#1a1a2e"/><path fill="#1a1a2e" d="M26 38c0 2 1.5 4 4 4s4-2 4-4c0-1-1-2-4-2s-4 1-4 2z"/></svg>';
+            document.body.appendChild(ghost);
+            setTimeout(() => ghost.remove(), 1900);
+        }
+
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             playersPanel.innerHTML = state.players.map(p => `
@@ -2869,10 +2903,15 @@
                 addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
                 state.attackLog.push(damage !== currentHit.roll ? `${currentHit.roll} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHit.roll} → ${targetPlayer.name}`);
                 if (targetPlayer.hp <= 0) {
+                    const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
+                    const rect = card ? card.getBoundingClientRect() : null;
                     targetPlayer.eliminated = true;
                     addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
+                    updatePlayersPanel();
+                    spawnDeathGhost(rect);
+                } else {
+                    updatePlayersPanel();
                 }
-                updatePlayersPanel();
                 checkWinCondition();
             }
             finishAttackPhase();
@@ -2982,11 +3021,15 @@
             state.attackLog.push(damage !== currentHit.roll ? `${currentHit.roll} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHit.roll} → ${targetPlayer.name}`);
 
             if (targetPlayer.hp <= 0) {
+                const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
+                const rect = card ? card.getBoundingClientRect() : null;
                 targetPlayer.eliminated = true;
                 addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
+                updatePlayersPanel();
+                spawnDeathGhost(rect);
+            } else {
+                updatePlayersPanel();
             }
-
-            updatePlayersPanel();
             checkWinCondition();
 
             state.currentHitIndex++;
@@ -3047,8 +3090,12 @@
             });
 
             if (current.hp <= 0) {
+                const card = document.querySelector(`.player-card[data-player="${current.id}"]`);
+                const rect = card ? card.getBoundingClientRect() : null;
                 current.eliminated = true;
                 addLogEntry(`${current.name} has been eliminated!`, 'info');
+                updatePlayersPanel();
+                spawnDeathGhost(rect);
                 checkWinCondition();
                 if (state.phase === 'playing') {
                     nextTurn();
