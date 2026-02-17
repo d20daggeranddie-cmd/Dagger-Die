@@ -166,295 +166,6 @@
             letter-spacing: 6px;
         }
 
-        /* Setup Screen */
-        #setup-screen {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .setup-title {
-            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-            color: #d4a84b;
-            text-shadow: 2px 2px 0 #5c3d1e, 0 0 15px rgba(212, 168, 75, 0.3);
-        }
-
-        .player-count-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .player-count-btn {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .player-count-btn:hover, .player-count-btn.selected {
-            background: #48dbfb;
-            transform: scale(1.1);
-        }
-
-        .player-setup {
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .player-setup.visible {
-            display: flex;
-        }
-
-        .player-input {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .player-input input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .player-input input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-
-        .player-input.error input,
-        .player-input.error-duplicate input {
-            border: 2px solid #e74c3c;
-            box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
-        }
-
-        .setup-error {
-            background: rgba(231, 76, 60, 0.2);
-            border: 2px solid #e74c3c;
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            color: #ff6b6b;
-            font-size: 0.95rem;
-        }
-
-        .color-picker {
-            display: flex;
-            align-items: center;
-        }
-
-        .color-picker-wrap {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .color-picker-wrap:hover {
-            transform: scale(1.12);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.8);
-        }
-
-        .color-swatch {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .player-color-input {
-            position: absolute;
-            width: 0;
-            height: 0;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* Custom circular color picker modal */
-        .color-picker-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .color-picker-modal-overlay.open {
-            display: flex;
-        }
-
-        .color-picker-modal {
-            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 100%;
-        }
-
-        .color-picker-modal h3 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.9);
-        }
-
-        .color-wheel-container {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            margin: 0 auto 20px;
-            touch-action: none;
-        }
-
-        .color-wheel-hue {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, #ff0000, #ff8800, #ffff00, #88ff00, #00ff00, #00ff88, #00ffff, #0088ff, #0000ff, #8800ff, #ff00ff, #ff0088, #ff0000);
-            padding: 12px;
-        }
-
-        .color-wheel-inner {
-            position: absolute;
-            inset: 12px;
-            border-radius: 50%;
-            background: #1e2a3a;
-        }
-
-        .color-wheel-sat {
-            position: absolute;
-            inset: 12px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--picker-gray, #808080) 0%, var(--picker-hue-color, #f00) 100%);
-            cursor: crosshair;
-        }
-
-        .color-wheel-hue-handle {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 6px rgba(0,0,0,0.5);
-            pointer-events: none;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .color-wheel-sat-handle {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 6px rgba(0,0,0,0.5);
-            pointer-events: none;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .color-picker-lightness {
-            margin-bottom: 20px;
-        }
-
-        .color-picker-lightness label {
-            display: block;
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 8px;
-        }
-
-        .color-picker-lightness input[type="range"] {
-            width: 100%;
-            height: 28px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-        }
-
-        .color-picker-lightness input[type="range"]::-webkit-slider-runnable-track {
-            height: 10px;
-            border-radius: 5px;
-            background: linear-gradient(90deg, #000, #fff);
-        }
-
-        .color-picker-lightness input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid rgba(0,0,0,0.2);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            margin-top: -7px;
-            cursor: pointer;
-        }
-
-        .color-picker-lightness input[type="range"]::-moz-range-track {
-            height: 10px;
-            border-radius: 5px;
-            background: linear-gradient(90deg, #000, #fff);
-        }
-
-        .color-picker-lightness input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-
-        .color-picker-done {
-            display: block;
-            width: 100%;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(45deg, #48dbfb, #0abde3);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .color-picker-done:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,171,227,0.4);
-        }
-
         .btn {
             padding: 15px 40px;
             border: none;
@@ -685,6 +396,7 @@
             height: 64px;
             border-radius: 50%;
             flex-shrink: 0;
+            overflow: hidden;
         }
 
         .player-stats-meta {
@@ -989,6 +701,14 @@
             height: 60px;
             border-radius: 50%;
             margin: 0 auto 10px;
+        }
+        .player-avatar.player-avatar-char {
+            overflow: hidden;
+        }
+        .player-avatar.player-avatar-char svg {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         .player-name {
@@ -1602,21 +1322,6 @@
         <a href="index.html" class="back-link">← Back to Home</a>
         <h1>Dagger & Die</h1>
 
-        <!-- Setup Screen -->
-        <div id="setup-screen">
-            <h2 class="setup-title">Select Number of Players</h2>
-            <div class="player-count-selector">
-                <button class="player-count-btn" data-count="2">2</button>
-                <button class="player-count-btn" data-count="3">3</button>
-                <button class="player-count-btn" data-count="4">4</button>
-                <button class="player-count-btn" data-count="5">5</button>
-                <button class="player-count-btn" data-count="6">6</button>
-            </div>
-            <div class="player-setup" id="player-setup"></div>
-            <div class="setup-error hidden" id="setup-error" role="alert"></div>
-            <button class="btn btn-primary btn-center" id="start-game-btn" style="display:none;">Start Game</button>
-        </div>
-
         <!-- Turn Order Screen -->
         <div id="turn-order-screen">
             <h2 class="setup-title">Rolling for Turn Order</h2>
@@ -1929,25 +1634,6 @@
         <div class="miss-reaction-inner">Miss!</div>
     </div>
 
-    <!-- Custom circular color picker modal (must be in DOM before script runs) -->
-    <div class="color-picker-modal-overlay" id="color-picker-modal" role="dialog" aria-label="Pick color">
-        <div class="color-picker-modal">
-            <h3>Pick your color</h3>
-            <div class="color-wheel-container" id="color-wheel-container">
-                <div class="color-wheel-hue" id="color-wheel-hue"></div>
-                <div class="color-wheel-inner"></div>
-                <div class="color-wheel-sat" id="color-wheel-sat"></div>
-                <div class="color-wheel-hue-handle" id="color-hue-handle"></div>
-                <div class="color-wheel-sat-handle" id="color-sat-handle"></div>
-            </div>
-            <div class="color-picker-lightness">
-                <label for="color-lightness-input">Brightness</label>
-                <input type="range" id="color-lightness-input" min="0" max="100" value="50">
-            </div>
-            <button type="button" class="color-picker-done" id="color-picker-done">Done</button>
-        </div>
-    </div>
-
     <script>
     // ── RPG background: CSS ember particles & runes ──
     (function() {
@@ -1978,6 +1664,7 @@
     })();
     </script>
     <script src="rpg-bg-canvas.js"></script>
+    <script src="characters.js"></script>
     <script>
         // Game State
         const state = {
@@ -2005,50 +1692,12 @@
 
         const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
 
-        const COLORS = [
-            { name: 'Red', hex: '#e74c3c' },
-            { name: 'Blue', hex: '#3498db' },
-            { name: 'Green', hex: '#2ecc71' },
-            { name: 'Purple', hex: '#9b59b6' },
-            { name: 'Orange', hex: '#e67e22' },
-            { name: 'Pink', hex: '#fd79a8' },
-            { name: 'Cyan', hex: '#00cec9' },
-            { name: 'Yellow', hex: '#f1c40f' }
-        ];
-
-        function hexToHSL(hex) {
-            const n = parseInt(hex.slice(1), 16);
-            const r = (n >> 16) / 255, g = ((n >> 8) & 0xff) / 255, b = (n & 0xff) / 255;
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            let h = 0, s = 0, l = (max + min) / 2;
-            if (max !== min) {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-                else if (max === g) h = ((b - r) / d + 2) / 6;
-                else h = ((r - g) / d + 4) / 6;
-            }
-            return { h: h * 360, s: s * 100, l: l * 100 };
-        }
-
-        function hslToHex(h, s, l) {
-            s /= 100; l /= 100;
-            const a = s * Math.min(l, 1 - l);
-            const f = n => {
-                const k = (n + h / 30) % 12;
-                return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
-            };
-            const r = Math.round(f(0) * 255), g = Math.round(f(8) * 255), b = Math.round(f(4) * 255);
-            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
-        }
+        const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
 
         // DOM Elements
-        const setupScreen = document.getElementById('setup-screen');
         const turnOrderScreen = document.getElementById('turn-order-screen');
         const gameScreen = document.getElementById('game-screen');
         const winnerScreen = document.getElementById('winner-screen');
-        const playerSetup = document.getElementById('player-setup');
-        const startGameBtn = document.getElementById('start-game-btn');
         const playersPanel = document.getElementById('players-panel');
         const currentPlayerNameEl = document.getElementById('current-player-name');
         const rollDiceBtn = document.getElementById('roll-dice-btn');
@@ -2058,15 +1707,6 @@
         const endTurnBtn = document.getElementById('end-turn-btn');
         const droppedKnifeBtn = document.getElementById('dropped-knife-btn');
         const gameLogEntries = document.getElementById('game-log-entries');
-
-        // Custom circular color picker
-        const colorPickerModal = document.getElementById('color-picker-modal');
-        const colorWheelContainer = document.getElementById('color-wheel-container');
-        const colorWheelSat = document.getElementById('color-wheel-sat');
-        const colorHueHandle = document.getElementById('color-hue-handle');
-        const colorSatHandle = document.getElementById('color-sat-handle');
-        const colorLightnessInput = document.getElementById('color-lightness-input');
-        const colorPickerDone = document.getElementById('color-picker-done');
 
         const settingsModal = document.getElementById('settings-modal');
         const settingsGearBtn = document.getElementById('settings-gear-btn');
@@ -2200,199 +1840,6 @@
             if (e.target === settingsModal) settingsModal.classList.remove('open');
         });
 
-        let colorPickerState = { wrap: null, input: null, swatch: null, h: 0, s: 100, l: 50 };
-        const WHEEL_SIZE = 260;
-        const WHEEL_PADDING = 12;
-        const WHEEL_INNER_R = (WHEEL_SIZE / 2) - WHEEL_PADDING;
-
-        function openColorPicker(wrap) {
-            const input = wrap.querySelector('.player-color-input');
-            const swatch = wrap.querySelector('.color-swatch');
-            const hex = input.value || '#e74c3c';
-            const hsl = hexToHSL(hex);
-            colorPickerState = { wrap, input, swatch, h: hsl.h, s: hsl.s, l: hsl.l };
-            colorLightnessInput.value = Math.round(hsl.l);
-            colorPickerModal.classList.add('open');
-            updatePickerGradient();
-            updatePickerHandles();
-        }
-
-        function updatePickerGradient() {
-            const { h } = colorPickerState;
-            const gray = hslToHex(h, 0, 50);
-            const hueColor = hslToHex(h, 100, 50);
-            colorWheelSat.style.setProperty('--picker-gray', gray);
-            colorWheelSat.style.setProperty('--picker-hue-color', hueColor);
-        }
-
-        function updatePickerHandles() {
-            const { h, s } = colorPickerState;
-            const rad = (h - 90) * Math.PI / 180;
-            const hueR = 48;
-            colorHueHandle.style.left = (50 + hueR * Math.cos(rad)) + '%';
-            colorHueHandle.style.top = (50 + hueR * Math.sin(rad)) + '%';
-            const satR = (s / 100) * 42;
-            colorSatHandle.style.left = (50 + satR) + '%';
-            colorSatHandle.style.top = '50%';
-        }
-
-        function commitPickerColor() {
-            const { input, swatch, h, s, l } = colorPickerState;
-            const hex = hslToHex(h, s, l);
-            if (input) input.value = hex;
-            if (swatch) swatch.style.background = hex;
-        }
-
-        function getWheelXY(e) {
-            const rect = colorWheelContainer.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const x = (e.clientX ?? e.touches?.[0]?.clientX) - cx;
-            const y = (e.clientY ?? e.touches?.[0]?.clientY) - cy;
-            const dist = Math.sqrt(x * x + y * y);
-            const angle = Math.atan2(y, x);
-            return { x, y, dist, angle };
-        }
-
-        function onWheelPointerDown(e) {
-            e.preventDefault();
-            const { dist, angle } = getWheelXY(e);
-            const isHue = dist > WHEEL_INNER_R;
-            let move = (e2) => {
-                const xy = getWheelXY(e2);
-                if (isHue) {
-                    colorPickerState.h = ((xy.angle * 180 / Math.PI + 90) + 360) % 360;
-                    updatePickerGradient();
-                } else {
-                    colorPickerState.s = Math.min(100, Math.max(0, (xy.dist / WHEEL_INNER_R) * 100));
-                    updatePickerHandles();
-                }
-                updatePickerHandles();
-                commitPickerColor();
-            };
-            const up = () => {
-                document.removeEventListener('pointermove', move);
-                document.removeEventListener('pointerup', up);
-                document.removeEventListener('touchmove', move, { passive: false });
-                document.removeEventListener('touchend', up);
-            };
-            if (isHue) {
-                colorPickerState.h = ((angle * 180 / Math.PI + 90) + 360) % 360;
-                updatePickerGradient();
-            } else {
-                colorPickerState.s = Math.min(100, Math.max(0, (dist / WHEEL_INNER_R) * 100));
-            }
-            updatePickerHandles();
-            commitPickerColor();
-            document.addEventListener('pointermove', move);
-            document.addEventListener('pointerup', up);
-            document.addEventListener('touchmove', move, { passive: false });
-            document.addEventListener('touchend', up);
-        }
-
-        document.addEventListener('click', (e) => {
-            const wrap = e.target.closest('.color-picker-wrap');
-            if (wrap) {
-                e.preventDefault();
-                openColorPicker(wrap);
-            }
-        });
-
-        colorWheelContainer.addEventListener('pointerdown', onWheelPointerDown);
-        colorWheelContainer.addEventListener('touchstart', onWheelPointerDown, { passive: false });
-
-        colorLightnessInput.addEventListener('input', () => {
-            colorPickerState.l = parseInt(colorLightnessInput.value, 10);
-            commitPickerColor();
-        });
-
-        colorPickerDone.addEventListener('click', () => {
-            colorPickerModal.classList.remove('open');
-        });
-
-        colorPickerModal.addEventListener('click', (e) => {
-            if (e.target === colorPickerModal) colorPickerModal.classList.remove('open');
-        });
-
-        // Setup: Player count selection
-        document.querySelectorAll('.player-count-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                const count = parseInt(btn.dataset.count);
-                setupPlayerInputs(count);
-            });
-        });
-
-        function setupPlayerInputs(count) {
-            playerSetup.innerHTML = '';
-            playerSetup.classList.add('visible');
-            const setupError = document.getElementById('setup-error');
-            if (setupError) {
-                setupError.classList.add('hidden');
-                setupError.textContent = '';
-            }
-
-            const usedColors = new Set();
-
-            for (let i = 0; i < count; i++) {
-                const div = document.createElement('div');
-                div.className = 'player-input';
-                const defaultHex = COLORS[i % COLORS.length].hex;
-                div.innerHTML = `
-                    <span>P${i + 1}</span>
-                    <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
-                    <div class="color-picker" data-player="${i}">
-                        <div class="color-picker-wrap" data-player="${i}" title="Pick your color">
-                            <span class="color-swatch" style="background: ${defaultHex};"></span>
-                            <input type="color" class="player-color-input" data-player="${i}" value="${defaultHex}" aria-hidden="true">
-                        </div>
-                    </div>
-                `;
-                playerSetup.appendChild(div);
-            }
-
-            playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
-                input.addEventListener('input', checkDuplicateNames);
-            });
-
-            startGameBtn.style.display = 'block';
-        }
-
-        function checkDuplicateNames() {
-            const inputs = playerSetup.querySelectorAll('input[type="text"]');
-            const errorEl = document.getElementById('setup-error');
-
-            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error-duplicate'));
-
-            const names = [];
-            for (let idx = 0; idx < inputs.length; idx++) {
-                const raw = inputs[idx].value.trim();
-                names.push(raw || `Player ${idx + 1}`);
-            }
-
-            const nameCount = {};
-            names.forEach(n => {
-                const key = n.toLowerCase();
-                nameCount[key] = (nameCount[key] || 0) + 1;
-            });
-
-            const duplicates = new Set(Object.entries(nameCount).filter(([, c]) => c > 1).map(([k]) => k));
-
-            if (duplicates.size > 0) {
-                inputs.forEach((input, idx) => {
-                    if (duplicates.has(names[idx].toLowerCase())) {
-                        input.closest('.player-input').classList.add('error-duplicate');
-                    }
-                });
-                errorEl.textContent = `Names must be unique: ${[...duplicates].join(', ')} appears more than once.`;
-                errorEl.classList.remove('hidden');
-            } else {
-                errorEl.classList.add('hidden');
-                errorEl.textContent = '';
-            }
-        }
-
         const CUSTOM_HP_KEY = 'daggerdie_customHp';
         const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
         const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
@@ -2426,118 +1873,7 @@
             return 60; // 5-6 players
         }
 
-        const NAME_MIN_LEN = 2;
-        const NAME_MAX_LEN = 30;
-
-        function validatePlayerNames() {
-            const inputs = playerSetup.querySelectorAll('input[type="text"]');
-            const errorEl = document.getElementById('setup-error');
-            const names = [];
-            let firstInvalidInput = null;
-
-            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error', 'error-duplicate'));
-
-            for (let idx = 0; idx < inputs.length; idx++) {
-                const raw = inputs[idx].value.trim();
-                names.push(raw || `Player ${idx + 1}`);
-            }
-
-            const duplicateNames = new Set(
-                names.filter((n, i) => names.findIndex(x => x.toLowerCase() === n.toLowerCase()) !== i)
-                    .map(n => n.toLowerCase())
-            );
-
-            for (let idx = 0; idx < inputs.length; idx++) {
-                const input = inputs[idx];
-                const raw = input.value.trim();
-                const name = raw || `Player ${idx + 1}`;
-                const playerInputEl = input.closest('.player-input');
-
-                if (raw) {
-                    if (raw.length < NAME_MIN_LEN) {
-                        if (!firstInvalidInput) firstInvalidInput = input;
-                        playerInputEl.classList.add('error');
-                    } else if (raw.length > NAME_MAX_LEN) {
-                        if (!firstInvalidInput) firstInvalidInput = input;
-                        playerInputEl.classList.add('error');
-                    }
-                }
-
-                if (duplicateNames.has(name.toLowerCase())) {
-                    if (!firstInvalidInput) firstInvalidInput = input;
-                    playerInputEl.classList.add('error', 'error-duplicate');
-                }
-            }
-
-            const errors = [];
-            inputs.forEach((input, idx) => {
-                const el = input.closest('.player-input');
-                if (!el.classList.contains('error')) return;
-                const raw = input.value.trim();
-                if (raw && raw.length < NAME_MIN_LEN) {
-                    errors.push(`"${raw || input.value}" is too short (min ${NAME_MIN_LEN} characters).`);
-                } else if (raw && raw.length > NAME_MAX_LEN) {
-                    errors.push(`"${input.value}" is too long (max ${NAME_MAX_LEN} characters).`);
-                }
-            });
-            if (duplicateNames.size > 0) {
-                errors.push(`Names must be unique: ${[...duplicateNames].join(', ')} appears more than once.`);
-            }
-
-            if (errors.length > 0) {
-                errorEl.textContent = errors.join(' ');
-                errorEl.classList.remove('hidden');
-                if (firstInvalidInput) firstInvalidInput.focus();
-                return false;
-            }
-            errorEl.classList.add('hidden');
-            errorEl.textContent = '';
-            return true;
-        }
-
-        startGameBtn.addEventListener('click', () => {
-            if (!validatePlayerNames()) return;
-
-            applySettingsForNewGame();
-            const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
-            state.players = [];
-            const defaultHp = getDefaultHp(nameInputs.length);
-
-            nameInputs.forEach((input, idx) => {
-                const colorPicker = playerSetup.querySelector(`.color-picker[data-player="${idx}"]`);
-                const colorInput = colorPicker.querySelector('input[type="color"]');
-                const hex = colorInput ? colorInput.value : COLORS[idx % COLORS.length].hex;
-                const name = input.value.trim() || `Player ${idx + 1}`;
-
-                state.players.push({
-                    id: idx,
-                    name,
-                    color: { name: 'Custom', hex },
-                    hp: defaultHp,
-                    maxHp: defaultHp,
-                    turnOrderRoll: 0,
-                    eliminated: false,
-                    totalRolled: 0,
-                    totalClaimed: 0,
-                    criticals: 0,
-                    buffActive: false,
-                    nerfActive: false
-                });
-            });
-
-            state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
-
-            showTurnOrderScreen();
-
-            if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
-                setTimeout(() => {
-                    document.getElementById('roll-turn-order-btn')?.click();
-                }, 400);
-            }
-        });
-
         function showTurnOrderScreen() {
-            setupScreen.style.display = 'none';
             turnOrderScreen.style.display = 'block';
 
             const rollBtn = document.getElementById('roll-turn-order-btn');
@@ -2549,7 +1885,7 @@
             rollsDiv.innerHTML = state.players.map(p => `
                 <div class="turn-order-player" data-player="${p.id}">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 30px; height: 30px; border-radius: 50%; background: ${p.color.hex};"></div>
+                        ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
                         <span>${p.name}</span>
                     </div>
                     <span class="roll-value">-</span>
@@ -2591,7 +1927,7 @@
                     <div class="turn-order-player" data-player="${p.id}">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-weight: bold; width: 25px;">#${idx + 1}</span>
-                            <div style="width: 30px; height: 30px; border-radius: 50%; background: ${p.color.hex};"></div>
+                            ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
                             <span>${p.name}</span>
                         </div>
                         <span class="roll-value">${p.turnOrderRoll}</span>
@@ -2690,6 +2026,48 @@
             updateGameUI();
         });
 
+        (function initFromCharSelect() {
+            const saved = sessionStorage.getItem(PLAYERS_SETUP_KEY);
+            if (!saved) {
+                window.location.href = 'charselect.html';
+                return;
+            }
+            let payload;
+            try {
+                payload = JSON.parse(saved);
+                sessionStorage.removeItem(PLAYERS_SETUP_KEY);
+            } catch (e) {
+                window.location.href = 'charselect.html';
+                return;
+            }
+            applySettingsForNewGame();
+            const defaultHp = getDefaultHp(payload.length);
+            const CHAR_BY_ID = window.DAGGERDIE_CHARACTER_BY_ID || {};
+            state.players = payload.map((p, idx) => {
+                const hex = p.color || (p.characterId && CHAR_BY_ID[p.characterId] ? CHAR_BY_ID[p.characterId].color : '#8b7355');
+                return {
+                    id: idx,
+                    name: p.name,
+                    color: { name: p.characterId && CHAR_BY_ID[p.characterId] ? CHAR_BY_ID[p.characterId].name : 'Custom', hex },
+                    characterId: p.characterId || null,
+                    hp: defaultHp,
+                    maxHp: defaultHp,
+                    turnOrderRoll: 0,
+                    eliminated: false,
+                    totalRolled: 0,
+                    totalClaimed: 0,
+                    criticals: 0,
+                    buffActive: false,
+                    nerfActive: false
+                };
+            });
+            state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
+            showTurnOrderScreen();
+            if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
+                setTimeout(() => document.getElementById('roll-turn-order-btn')?.click(), 400);
+            }
+        })();
+
         function rollD20() {
             return Math.floor(Math.random() * 20) + 1;
         }
@@ -2704,6 +2082,20 @@
 
         function getAlivePlayers() {
             return state.players.filter(p => !p.eliminated);
+        }
+
+        function getPlayerAvatarHtml(p, opts) {
+            if (!p) return '';
+            const size = (opts && opts.size) || 60;
+            const baseClass = (opts && opts.className) || 'player-avatar';
+            const CHAR_BY_ID = window.DAGGERDIE_CHARACTER_BY_ID || {};
+            const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
+            const char = p.characterId && CHAR_BY_ID[p.characterId];
+            if (char) {
+                const svg = prefixSvgIds(char.svg, 'game-p' + p.id);
+                return `<div class="${baseClass} player-avatar-char" style="width:${size}px;height:${size}px;flex-shrink:0;overflow:hidden;border-radius:50%;">${svg}</div>`;
+            }
+            return `<div class="${baseClass}" style="width:${size}px;height:${size}px;background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
         }
 
         function updateGameUI() {
@@ -2755,7 +2147,7 @@
                     <button type="button" class="player-card-stats-btn" data-player="${p.id}" aria-label="Stats and drops">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     </button>
-                    <div class="player-avatar" style="background: ${p.color.hex};"></div>
+                    ${getPlayerAvatarHtml(p)}
                     <div class="player-name">${p.name}</div>
                     <div class="player-hp">${p.hp} HP</div>
                     <div class="hp-bar">
@@ -3240,7 +2632,7 @@
             if (!player) return;
             playerStatsModalPlayerId = playerId;
             playerStatsTitle.textContent = player.name;
-            playerStatsAvatar.style.background = player.color.hex;
+            playerStatsAvatar.innerHTML = getPlayerAvatarHtml(player, { size: 64, className: '' });
             playerStatsHp.textContent = `${player.hp} / ${player.maxHp} HP`;
             playerStatsTurnOrder.textContent = `Turn order: #${state.players.indexOf(player) + 1}`;
             if (player.eliminated) {
@@ -3385,7 +2777,7 @@
 
             if (winner) {
                 document.getElementById('winner-name').innerHTML = `
-                    <div style="width: 80px; height: 80px; border-radius: 50%; background: ${winner.color.hex}; margin: 0 auto 20px;"></div>
+                    <div style="margin: 0 auto 20px; display: flex; justify-content: center;">${getPlayerAvatarHtml(winner, { size: 80, className: '' })}</div>
                     <span style="color: ${winner.color.hex};">${winner.name}</span> Wins!
                 `;
             } else {
@@ -3423,7 +2815,7 @@
                 const pointsStr = rolled > 0 ? `${claimed} / ${rolled} (${pointsPct}%)` : '—';
                 return `
                 <div class="report-player-card" style="border-left-color: ${p.color.hex}">
-                    <h3 class="report-player-name"><span class="report-color-dot" style="background:${p.color.hex}"></span> ${escapeHtml(p.name)}</h3>
+                    <h3 class="report-player-name">${getPlayerAvatarHtml(p, { size: 24, className: 'report-avatar' })} ${escapeHtml(p.name)}</h3>
                     <table class="report-stats-table">
                         <tr><td>Status</td><td><span class="report-status report-status-${status.toLowerCase().replace(/\s/g,'')}">${status}</span></td></tr>
                         <tr><td>Final HP</td><td>${p.hp} / ${p.maxHp}</td></tr>
@@ -3501,6 +2893,7 @@
         .report-table th, .report-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .report-table th { color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.85rem; }
         .report-color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+        .report-avatar { display: inline-block; vertical-align: middle; margin-right: 8px; }
         .report-status { font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; }
         .report-status-winner { background: rgba(46, 204, 113, 0.3); color: #2ecc71; }
         .report-status-eliminated { background: rgba(231, 76, 60, 0.3); color: #e74c3c; }
@@ -3703,7 +3096,7 @@
             rollsDiv.innerHTML = state.players.map(p => `
                 <div class="turn-order-player" data-player="${p.id}">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 30px; height: 30px; border-radius: 50%; background: ${p.color.hex};"></div>
+                        ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
                         <span>${p.name}</span>
                     </div>
                     <span class="roll-value">-</span>
@@ -3720,43 +3113,7 @@
         document.getElementById('finished-btn').addEventListener('click', () => { window.location.href = 'index.html'; });
 
         function resetGame() {
-            state.players = [];
-            state.currentPlayerIndex = 0;
-            state.phase = 'setup';
-            state.currentRoll = [];
-            state.hits = [];
-            state.totalDamage = 0;
-            state.hasRolled = false;
-            state.hasAttacked = false;
-            state.damageClaimedPhase = false;
-            state.currentHitIndex = 0;
-            state.attackLog = [];
-            state.gameLog = [];
-            state.hasScoreBeenEntered = false;
-            state.lastDroppedKnifeLogIndex = undefined;
-            state.dropsThisTurn = 0;
-            state.dropsThisTurnLogIndices = [];
-            state.damageDealtThisTurn = false;
-
-            gameScreen.style.display = 'none';
-            winnerScreen.style.display = 'none';
-            turnOrderScreen.style.display = 'none';
-            setupScreen.style.display = 'block';
-
-            document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
-            playerSetup.innerHTML = '';
-            playerSetup.classList.remove('visible');
-            startGameBtn.style.display = 'none';
-            const setupError = document.getElementById('setup-error');
-            if (setupError) {
-                setupError.classList.add('hidden');
-                setupError.textContent = '';
-            }
-            gameLogEntries.innerHTML = '';
-
-            document.getElementById('roll-turn-order-btn').classList.remove('hidden');
-            document.getElementById('roll-turn-order-btn').disabled = false;
-            document.getElementById('begin-game-btn').classList.add('hidden');
+            window.location.href = 'charselect.html';
         }
     </script>
 </body>
