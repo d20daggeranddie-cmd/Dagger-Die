@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dagger & Die - Select Players</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0c18;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .game-bg-base {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% 110%, #1a1040 0%, transparent 60%),
+                radial-gradient(ellipse 80% 60% at 20% 80%, #0d1a3a 0%, transparent 50%),
+                radial-gradient(ellipse 80% 60% at 80% 80%, #1a0d2e 0%, transparent 50%),
+                radial-gradient(ellipse 100% 50% at 50% 0%, #0f1628 0%, transparent 60%),
+                linear-gradient(180deg, #080b16 0%, #0e1225 40%, #141833 70%, #1a1040 100%);
+        }
+        .game-bg-texture {
+            position: fixed; inset: 0; z-index: 1;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+        .game-bg-vignette {
+            position: fixed; inset: 0; z-index: 2;
+            background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(5,5,15,0.7) 100%);
+            pointer-events: none;
+        }
+        .game-bg-grid {
+            position: fixed; inset: 0; z-index: 2;
+            pointer-events: none;
+            opacity: 0.02;
+            background-image:
+                linear-gradient(rgba(150,160,200,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(150,160,200,0.3) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .game-bg-fog {
+            position: fixed; inset: 0; z-index: 3; pointer-events: none;
+            overflow: hidden;
+        }
+        .game-bg-fog-layer {
+            position: absolute; width: 200%; height: 100%;
+            top: 0; left: -50%;
+            background:
+                radial-gradient(ellipse 300px 80px at 20% 70%, rgba(100,120,180,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 400px 100px at 60% 80%, rgba(80,60,140,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 250px 60px at 80% 60%, rgba(60,80,160,0.04) 0%, transparent 70%);
+            animation: gameFogDrift 40s ease-in-out infinite alternate;
+        }
+        .game-bg-fog-layer:nth-child(2) {
+            background:
+                radial-gradient(ellipse 350px 90px at 30% 85%, rgba(70,50,120,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 280px 70px at 70% 75%, rgba(90,100,170,0.04) 0%, transparent 70%);
+            animation: gameFogDrift2 55s ease-in-out infinite alternate;
+            opacity: 0.8;
+        }
+        @keyframes gameFogDrift {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(5%) translateY(-2%); }
+        }
+        @keyframes gameFogDrift2 {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-4%) translateY(1%); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #d4a84b;
+            text-shadow: 3px 3px 0 #5c3d1e, 5px 5px 0 rgba(0,0,0,0.4), 0 0 30px rgba(212, 168, 75, 0.4), 0 0 60px rgba(212, 168, 75, 0.2);
+            letter-spacing: 6px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: #48dbfb;
+        }
+
+        #setup-screen {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .setup-title {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            color: #d4a84b;
+            text-shadow: 2px 2px 0 #5c3d1e, 0 0 15px rgba(212, 168, 75, 0.3);
+        }
+
+        .player-count-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .player-count-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .player-count-btn:hover, .player-count-btn.selected {
+            background: #48dbfb;
+            transform: scale(1.1);
+        }
+
+        .player-setup {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .player-setup.visible {
+            display: flex;
+        }
+
+        .player-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .player-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .player-input input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .player-input.error input,
+        .player-input.error-duplicate input {
+            border: 2px solid #e74c3c;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+        }
+
+        .setup-error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            font-size: 0.95rem;
+        }
+
+        .character-selector-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .character-avatar-btn {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+        .character-avatar-btn:hover {
+            transform: scale(1.08);
+            border-color: #d4a84b;
+            box-shadow: 0 0 12px rgba(212, 168, 75, 0.4);
+        }
+        .character-avatar-btn svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .character-picker-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .character-picker-modal-overlay.open {
+            display: flex;
+        }
+        .character-picker-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .character-picker-modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+        }
+        .character-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .character-picker-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+        }
+        .character-picker-option:hover {
+            border-color: #d4a84b;
+            background: rgba(212, 168, 75, 0.15);
+            transform: scale(1.02);
+        }
+        .character-picker-option .char-portrait {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.3);
+        }
+        .character-picker-option .char-portrait svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .character-picker-option .char-name {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(238, 90, 36, 0.4);
+        }
+        .btn-center {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="game-bg-base"></div>
+    <div class="game-bg-texture"></div>
+    <div class="game-bg-grid"></div>
+    <div class="game-bg-vignette"></div>
+    <div class="game-bg-fog">
+        <div class="game-bg-fog-layer"></div>
+        <div class="game-bg-fog-layer"></div>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        <h1>Dagger & Die</h1>
+
+        <div id="setup-screen">
+            <h2 class="setup-title">Select Number of Players</h2>
+            <div class="player-count-selector">
+                <button class="player-count-btn" data-count="2">2</button>
+                <button class="player-count-btn" data-count="3">3</button>
+                <button class="player-count-btn" data-count="4">4</button>
+                <button class="player-count-btn" data-count="5">5</button>
+                <button class="player-count-btn" data-count="6">6</button>
+            </div>
+            <div class="player-setup" id="player-setup"></div>
+            <div class="setup-error hidden" id="setup-error" role="alert"></div>
+            <button class="btn btn-primary btn-center" id="start-game-btn" style="display:none;">Start Game</button>
+        </div>
+    </div>
+
+    <div class="character-picker-modal-overlay" id="character-picker-modal" role="dialog" aria-label="Pick character">
+        <div class="character-picker-modal">
+            <h3>Pick your character</h3>
+            <div class="character-picker-grid" id="character-picker-grid"></div>
+        </div>
+    </div>
+
+    <script src="characters.js"></script>
+    <script>
+        const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
+        const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
+
+        const playerSetup = document.getElementById('player-setup');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const characterPickerModal = document.getElementById('character-picker-modal');
+        const characterPickerGrid = document.getElementById('character-picker-grid');
+
+        let currentPickingPlayerIndex = 0;
+
+        const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
+
+        function buildCharacterPickerGrid() {
+            characterPickerGrid.innerHTML = CHARACTERS.map((c, idx) => `
+                <button type="button" class="character-picker-option" data-character-id="${c.id}" title="${c.name}">
+                    <div class="char-portrait">${prefixSvgIds(c.svg, 'cs-grid-' + idx)}</div>
+                    <span class="char-name">${c.name}</span>
+                </button>
+            `).join('');
+            characterPickerGrid.querySelectorAll('.character-picker-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const row = playerSetup.querySelector(`.player-input[data-player="${currentPickingPlayerIndex}"]`);
+                    if (row) {
+                        const charId = btn.dataset.characterId;
+                        const char = CHARACTERS.find(x => x.id === charId);
+                        if (char) {
+                            row.dataset.characterId = charId;
+                            const avatarBtn = row.querySelector('.character-avatar-btn');
+                            if (avatarBtn) {
+                                avatarBtn.innerHTML = prefixSvgIds(char.svg, 'cs-p' + currentPickingPlayerIndex + '-' + charId);
+                                avatarBtn.title = char.name;
+                            }
+                        }
+                    }
+                    characterPickerModal.classList.remove('open');
+                });
+            });
+        }
+        buildCharacterPickerGrid();
+
+        characterPickerModal.addEventListener('click', (e) => {
+            if (e.target === characterPickerModal) characterPickerModal.classList.remove('open');
+        });
+
+        document.querySelectorAll('.player-count-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                const count = parseInt(btn.dataset.count);
+                setupPlayerInputs(count);
+            });
+        });
+
+        function setupPlayerInputs(count) {
+            playerSetup.innerHTML = '';
+            playerSetup.classList.add('visible');
+            const setupError = document.getElementById('setup-error');
+            if (setupError) {
+                setupError.classList.add('hidden');
+                setupError.textContent = '';
+            }
+            for (let i = 0; i < count; i++) {
+                const defaultChar = CHARACTERS[i % CHARACTERS.length];
+                const div = document.createElement('div');
+                div.className = 'player-input';
+                div.dataset.player = String(i);
+                div.dataset.characterId = defaultChar.id;
+                div.innerHTML = `
+                    <span>P${i + 1}</span>
+                    <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
+                    <div class="character-selector-wrap" data-player="${i}">
+                        <button type="button" class="character-avatar-btn" title="${defaultChar.name} – click to change">${prefixSvgIds(defaultChar.svg, 'cs-p' + i + '-' + defaultChar.id)}</button>
+                    </div>
+                `;
+                playerSetup.appendChild(div);
+                const avatarBtn = div.querySelector('.character-avatar-btn');
+                avatarBtn.addEventListener('click', () => {
+                    currentPickingPlayerIndex = i;
+                    characterPickerModal.classList.add('open');
+                });
+            }
+            playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
+                input.addEventListener('input', checkDuplicateNames);
+            });
+            startGameBtn.style.display = 'block';
+        }
+
+        function checkDuplicateNames() {
+            const inputs = playerSetup.querySelectorAll('input[type="text"]');
+            const errorEl = document.getElementById('setup-error');
+            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error-duplicate'));
+            const names = [];
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const raw = inputs[idx].value.trim();
+                names.push(raw || `Player ${idx + 1}`);
+            }
+            const nameCount = {};
+            names.forEach(n => {
+                const key = n.toLowerCase();
+                nameCount[key] = (nameCount[key] || 0) + 1;
+            });
+            const duplicates = new Set(Object.entries(nameCount).filter(([, c]) => c > 1).map(([k]) => k));
+            if (duplicates.size > 0) {
+                inputs.forEach((input, idx) => {
+                    if (duplicates.has(names[idx].toLowerCase())) {
+                        input.closest('.player-input').classList.add('error-duplicate');
+                    }
+                });
+                errorEl.textContent = `Names must be unique: ${[...duplicates].join(', ')} appears more than once.`;
+                errorEl.classList.remove('hidden');
+            } else {
+                errorEl.classList.add('hidden');
+                errorEl.textContent = '';
+            }
+        }
+
+        const NAME_MIN_LEN = 2;
+        const NAME_MAX_LEN = 30;
+
+        function validatePlayerNames() {
+            const inputs = playerSetup.querySelectorAll('input[type="text"]');
+            const errorEl = document.getElementById('setup-error');
+            const names = [];
+            let firstInvalidInput = null;
+            document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error', 'error-duplicate'));
+
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const raw = inputs[idx].value.trim();
+                names.push(raw || `Player ${idx + 1}`);
+            }
+            const duplicateNames = new Set(
+                names.filter((n, i) => names.findIndex(x => x.toLowerCase() === n.toLowerCase()) !== i)
+                    .map(n => n.toLowerCase())
+            );
+
+            for (let idx = 0; idx < inputs.length; idx++) {
+                const input = inputs[idx];
+                const raw = input.value.trim();
+                const name = raw || `Player ${idx + 1}`;
+                const playerInputEl = input.closest('.player-input');
+                if (raw) {
+                    if (raw.length < NAME_MIN_LEN) {
+                        if (!firstInvalidInput) firstInvalidInput = input;
+                        playerInputEl.classList.add('error');
+                    } else if (raw.length > NAME_MAX_LEN) {
+                        if (!firstInvalidInput) firstInvalidInput = input;
+                        playerInputEl.classList.add('error');
+                    }
+                }
+                if (duplicateNames.has(name.toLowerCase())) {
+                    if (!firstInvalidInput) firstInvalidInput = input;
+                    playerInputEl.classList.add('error', 'error-duplicate');
+                }
+            }
+
+            const errors = [];
+            inputs.forEach((input, idx) => {
+                const el = input.closest('.player-input');
+                if (!el.classList.contains('error')) return;
+                const raw = input.value.trim();
+                if (raw && raw.length < NAME_MIN_LEN) {
+                    errors.push(`"${raw || input.value}" is too short (min ${NAME_MIN_LEN} characters).`);
+                } else if (raw && raw.length > NAME_MAX_LEN) {
+                    errors.push(`"${input.value}" is too long (max ${NAME_MAX_LEN} characters).`);
+                }
+            });
+            if (duplicateNames.size > 0) {
+                errors.push(`Names must be unique: ${[...duplicateNames].join(', ')} appears more than once.`);
+            }
+            if (errors.length > 0) {
+                errorEl.textContent = errors.join(' ');
+                errorEl.classList.remove('hidden');
+                if (firstInvalidInput) firstInvalidInput.focus();
+                return false;
+            }
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+            return true;
+        }
+
+        startGameBtn.addEventListener('click', () => {
+            if (!validatePlayerNames()) return;
+
+            const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
+            const payload = [];
+            playerSetup.querySelectorAll('.player-input').forEach((row, idx) => {
+                const input = row.querySelector('input[type="text"]');
+                const name = input && input.value.trim() ? input.value.trim() : `Player ${idx + 1}`;
+                const characterId = row.dataset.characterId || CHARACTERS[idx % CHARACTERS.length].id;
+                const char = CHARACTERS.find(c => c.id === characterId);
+                payload.push({
+                    name,
+                    characterId,
+                    color: char ? char.color : '#8b7355'
+                });
+            });
+
+            try {
+                sessionStorage.setItem(PLAYERS_SETUP_KEY, JSON.stringify(payload));
+            } catch (err) {
+                alert('Could not save player data. Please try again.');
+                return;
+            }
+            window.location.href = 'game.html';
+        });
+
+        document.querySelector('.player-count-btn[data-count="2"]')?.classList.add('selected');
+        setupPlayerInputs(2);
+    </script>
+</body>
+</html>
