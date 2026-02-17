@@ -2000,6 +2000,8 @@
             modNerfOnMiss: false
         };
 
+        const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
+
         const COLORS = [
             { name: 'Red', hex: '#e74c3c' },
             { name: 'Blue', hex: '#3498db' },
@@ -2810,12 +2812,18 @@
                     zone.classList.add('active');
                 }
             });
+            try {
+                if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll });
+            } catch (e) {}
         }
 
         function clearHighlights() {
             document.querySelectorAll('.highlight-zone').forEach(zone => {
                 zone.classList.remove('active');
             });
+            try {
+                if (projectorChannel) projectorChannel.postMessage({ type: 'clear' });
+            } catch (e) {}
         }
 
         document.addEventListener('click', (e) => {
@@ -2851,6 +2859,9 @@
         const MAX_SCORES_PER_TURN = 3;
 
         function syncHitRecorderUI() {
+            try {
+                if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll) });
+            } catch (e) {}
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 const idx = parseInt(btn.dataset.idx);
