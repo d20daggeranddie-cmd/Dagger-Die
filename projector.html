@@ -271,6 +271,22 @@
             }
         };
 
+        // ── Apply initial state from URL (so projector shows highlights when opened after a roll) ──
+        (function applyInitialStateFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const rollsStr = params.get('rolls');
+            const claimedStr = params.get('claimed');
+            const rolls = rollsStr ? rollsStr.split(',').map(s => parseInt(String(s).trim(), 10)).filter(n => !isNaN(n)) : [];
+            const claimed = claimedStr ? claimedStr.split(',').map(s => parseInt(String(s).trim(), 10)).filter(n => !isNaN(n)) : [];
+            if (rolls.length > 0 || claimed.length > 0) {
+                clearAll();
+                highlightRolls(rolls);
+                highlightClaimed(claimed);
+                statusDot.classList.add('connected');
+                statusDot.classList.add('active');
+            }
+        })();
+
         // ── Window sizing for projector ──
         function enforceSquare() {
             var w = window.outerWidth, h = window.outerHeight;
