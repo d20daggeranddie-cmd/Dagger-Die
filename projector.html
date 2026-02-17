@@ -3,42 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Target Face - Projector</title>
+    <title>Dagger & Die - Projector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
             width: 100%;
             height: 100%;
-            background: #111;
+            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
         }
+        .target-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+        }
         .target-face {
+            width: 100%;
+            height: 100%;
             max-width: 100%;
             max-height: 100%;
-            object-fit: contain;
+        }
+
+        /* ── Face polygon styling ── */
+        .face-shape {
+            fill: #e8e8e8;
+            stroke: #333;
+            stroke-width: 1.5;
+            stroke-linejoin: round;
+            transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+        }
+        .face-label {
+            font-family: 'Cinzel Decorative', 'Cinzel', 'Palatino', serif;
+            font-weight: bold;
+            fill: #333;
+            pointer-events: none;
+            transition: fill 0.3s ease;
+        }
+
+        /* ── Rolled (active) state — gold glow ── */
+        .highlight-zone.active .face-shape {
+            fill: #ffd700;
+            stroke: #b8960f;
+            stroke-width: 2;
+            filter: url(#glow-gold);
+        }
+        .highlight-zone.active .face-label {
+            fill: #4a3800;
+        }
+
+        /* ── Claimed (hit) state — green glow ── */
+        .highlight-zone.claimed .face-shape {
+            fill: #2ecc71;
+            stroke: #1a9c54;
+            stroke-width: 2;
+            filter: url(#glow-green);
+        }
+        .highlight-zone.claimed .face-label {
+            fill: #0a3d1f;
+        }
+
+        /* ── Pulse animation for active zones ── */
+        .highlight-zone.active .face-shape {
+            animation: projectorPulse 1.5s ease-in-out infinite;
+        }
+        .highlight-zone.claimed .face-shape {
+            animation: none;
+        }
+        @keyframes projectorPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ── Connection status indicator ── */
+        .status-dot {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ccc;
+            border: 2px solid #999;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .status-dot.connected {
+            background: #2ecc71;
+            border-color: #1a9c54;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
+        }
+        .status-dot.active {
+            background: #ffd700;
+            border-color: #b8960f;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <img class="target-face" src="assets/TEMPLATE.png" alt="Target face for projector">
+    <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
+
+    <div class="target-wrapper">
+        <svg class="target-face" id="target-board" viewBox="-5 -5 210 210" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="glow-gold" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#ffd700" flood-opacity="0.5" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#2ecc71" flood-opacity="0.5" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+
+            <!-- Center face: 1 / 2 -->
+            <g class="highlight-zone" data-pair="1-2">
+                <polygon class="face-shape" points="100,50 157,148 43,148"/>
+                <text class="face-label" x="100" y="118" text-anchor="middle" font-size="28">1–2</text>
+            </g>
+            <!-- Medium left: 3 / 4 -->
+            <g class="highlight-zone" data-pair="3-4">
+                <polygon class="face-shape" points="14,51 100,50 43,148"/>
+                <text class="face-label" x="52" y="90" text-anchor="middle" font-size="22">3–4</text>
+            </g>
+            <!-- Medium right: 7 / 6 -->
+            <g class="highlight-zone" data-pair="6-7">
+                <polygon class="face-shape" points="186,51 157,148 100,50"/>
+                <text class="face-label" x="148" y="90" text-anchor="middle" font-size="22">7–6</text>
+            </g>
+            <!-- Medium bottom: 5 / 8 -->
+            <g class="highlight-zone" data-pair="5-8">
+                <polygon class="face-shape" points="100,198 43,148 157,148"/>
+                <text class="face-label" x="100" y="178" text-anchor="middle" font-size="22">5–8</text>
+            </g>
+            <!-- Small top-left: 17 / 10 -->
+            <g class="highlight-zone" data-pair="10-17">
+                <polygon class="face-shape" points="100,2 100,50 14,51"/>
+                <text class="face-label" x="71" y="38" text-anchor="middle" font-size="10">17–10</text>
+            </g>
+            <!-- Small top-right: 11 / 20 -->
+            <g class="highlight-zone" data-pair="11-20">
+                <polygon class="face-shape" points="100,2 186,51 100,50"/>
+                <text class="face-label" x="129" y="38" text-anchor="middle" font-size="10">11–20</text>
+            </g>
+            <!-- Small left: 15 / 12 -->
+            <g class="highlight-zone" data-pair="12-15">
+                <polygon class="face-shape" points="14,51 14,149 43,148"/>
+                <text class="face-label" x="26" y="132" text-anchor="middle" font-size="9">15–12</text>
+            </g>
+            <!-- Small bottom-left: 13 / 18 -->
+            <g class="highlight-zone" data-pair="13-18">
+                <polygon class="face-shape" points="14,149 100,198 43,148"/>
+                <text class="face-label" x="52.33" y="168" text-anchor="middle" font-size="9" transform="rotate(38, 52.33, 168)">13–18</text>
+            </g>
+            <!-- Small bottom-right: 19 / 16 -->
+            <g class="highlight-zone" data-pair="16-19">
+                <polygon class="face-shape" points="186,149 157,148 100,198"/>
+                <text class="face-label" x="147.67" y="168" text-anchor="middle" font-size="9" transform="rotate(-38, 147.67, 168)">19–16</text>
+            </g>
+            <!-- Small right: 9 / 14 -->
+            <g class="highlight-zone" data-pair="9-14">
+                <polygon class="face-shape" points="186,51 186,149 157,148"/>
+                <text class="face-label" x="174" y="132" text-anchor="middle" font-size="9">9–14</text>
+            </g>
+        </svg>
+    </div>
+
     <script>
-      (function() {
+    (function() {
+        // ── Number-to-pair lookup ──
+        // Each d20 number maps to its face's data-pair attribute
+        const numberToPair = {
+            1: '1-2',    2: '1-2',
+            3: '3-4',    4: '3-4',
+            5: '5-8',    8: '5-8',
+            6: '6-7',    7: '6-7',
+            9: '9-14',  14: '9-14',
+           10: '10-17', 17: '10-17',
+           11: '11-20', 20: '11-20',
+           12: '12-15', 15: '12-15',
+           13: '13-18', 18: '13-18',
+           16: '16-19', 19: '16-19'
+        };
+
+        const allZones = document.querySelectorAll('.highlight-zone');
+        const statusDot = document.getElementById('status-dot');
+
+        function clearAll() {
+            allZones.forEach(z => {
+                z.classList.remove('active', 'claimed');
+            });
+        }
+
+        function highlightRolls(rolls) {
+            // Collect unique pairs that were rolled
+            const activePairs = new Set();
+            rolls.forEach(r => {
+                const pair = numberToPair[r];
+                if (pair) activePairs.add(pair);
+            });
+            allZones.forEach(z => {
+                const pair = z.getAttribute('data-pair');
+                if (activePairs.has(pair)) {
+                    z.classList.add('active');
+                } else {
+                    z.classList.remove('active');
+                }
+            });
+        }
+
+        function highlightClaimed(claimed) {
+            const claimedPairs = new Set();
+            claimed.forEach(r => {
+                const pair = numberToPair[r];
+                if (pair) claimedPairs.add(pair);
+            });
+            allZones.forEach(z => {
+                const pair = z.getAttribute('data-pair');
+                if (claimedPairs.has(pair)) {
+                    z.classList.add('claimed');
+                    z.classList.remove('active');
+                } else {
+                    z.classList.remove('claimed');
+                }
+            });
+        }
+
+        // ── BroadcastChannel listener ──
+        const channel = new BroadcastChannel('daggerdie-projector');
+
+        channel.onmessage = function(event) {
+            const msg = event.data;
+
+            // Flash status dot on any message
+            statusDot.classList.add('connected');
+
+            if (msg.type === 'clear') {
+                clearAll();
+                statusDot.classList.remove('active');
+                return;
+            }
+
+            if (msg.type === 'roll') {
+                clearAll();
+                highlightRolls(msg.rolls || []);
+                statusDot.classList.add('active');
+                return;
+            }
+
+            if (msg.type === 'update') {
+                // Full state update: rolls + claimed
+                clearAll();
+                highlightRolls(msg.rolls || []);
+                highlightClaimed(msg.claimed || []);
+                statusDot.classList.add('active');
+                return;
+            }
+        };
+
+        // ── Window sizing for projector ──
         function enforceSquare() {
-          var w = window.outerWidth, h = window.outerHeight;
-          var side = Math.min(w, h);
-          if (side < 200) side = 200;
-          if (side !== w || side !== h) {
-            try { window.resizeTo(side, side); } catch (e) {}
-          }
+            var w = window.outerWidth, h = window.outerHeight;
+            var side = Math.min(w, h);
+            if (side < 200) side = 200;
+            if (side !== w || side !== h) {
+                try { window.resizeTo(side, side); } catch (e) {}
+            }
         }
         window.addEventListener('resize', function() {
-          clearTimeout(window._projectorResizeT);
-          window._projectorResizeT = setTimeout(enforceSquare, 50);
+            clearTimeout(window._projectorResizeT);
+            window._projectorResizeT = setTimeout(enforceSquare, 50);
         });
-      })();
+    })();
     </script>
 </body>
 </html>
