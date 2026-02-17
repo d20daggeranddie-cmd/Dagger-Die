@@ -1876,6 +1876,9 @@
                 <label for="mod-nerf-on-miss-cb">Nerf on Miss</label>
             </div>
             <p id="mod-nerf-hint" class="setting-hint">Take 125% damage for 1 turn after missing all throws.</p>
+            <div class="settings-modal-projector-row" style="margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" id="open-projector-btn">Dynamic Target</button>
+            </div>
             <button type="button" class="btn btn-primary" id="settings-modal-done">Done</button>
         </div>
     </div>
@@ -2181,6 +2184,17 @@
             }
             settingsModal.classList.remove('open');
         });
+
+        const openProjectorBtn = document.getElementById('open-projector-btn');
+        if (openProjectorBtn) {
+            openProjectorBtn.addEventListener('click', () => {
+                const rolls = (state.currentRoll || []).join(',');
+                const claimed = (state.hits || []).map(h => h.roll).join(',');
+                const url = 'projector.html?rolls=' + encodeURIComponent(rolls) + '&claimed=' + encodeURIComponent(claimed);
+                const features = 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no';
+                window.open(url, 'DaggerDieProjector', features);
+            });
+        }
 
         settingsModal.addEventListener('click', (e) => {
             if (e.target === settingsModal) settingsModal.classList.remove('open');
