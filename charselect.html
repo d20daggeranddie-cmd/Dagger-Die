@@ -189,6 +189,37 @@
             color: rgba(255,255,255,0.5);
         }
 
+        .player-input-bot-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .player-input-bot-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+        }
+        .player-input-bot-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .bot-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(72, 219, 251, 0.25);
+            color: #48dbfb;
+        }
+
         .player-input.error input,
         .player-input.error-duplicate input {
             border: 2px solid #e74c3c;
@@ -300,6 +331,55 @@
             text-align: center;
         }
 
+        .bot-difficulty-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .bot-difficulty-modal-overlay.open {
+            display: flex;
+        }
+        .bot-difficulty-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 360px;
+            width: 100%;
+        }
+        .bot-difficulty-modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+        }
+        .bot-difficulty-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bot-difficulty-option {
+            padding: 14px 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+            text-align: center;
+        }
+        .bot-difficulty-option:hover {
+            border-color: #48dbfb;
+            background: rgba(72, 219, 251, 0.15);
+            transform: scale(1.02);
+        }
+
         .btn {
             padding: 15px 40px;
             border: none;
@@ -362,17 +442,35 @@
         </div>
     </div>
 
+    <div class="bot-difficulty-modal-overlay" id="bot-difficulty-modal" role="dialog" aria-label="Bot difficulty">
+        <div class="bot-difficulty-modal">
+            <h3>Bot difficulty</h3>
+            <div class="bot-difficulty-options" id="bot-difficulty-options"></div>
+        </div>
+    </div>
+
     <script src="characters.js"></script>
     <script>
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
         const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
 
+        const BOT_SKILLS = [
+            { id: 'newb',   label: 'Newb' },
+            { id: 'novice', label: 'Novice' },
+            { id: 'skilled', label: 'Skilled' },
+            { id: 'expert', label: 'Expert' },
+            { id: 'master', label: 'Master' }
+        ];
+
         const playerSetup = document.getElementById('player-setup');
         const startGameBtn = document.getElementById('start-game-btn');
         const characterPickerModal = document.getElementById('character-picker-modal');
         const characterPickerGrid = document.getElementById('character-picker-grid');
+        const botDifficultyModal = document.getElementById('bot-difficulty-modal');
+        const botDifficultyOptions = document.getElementById('bot-difficulty-options');
 
         let currentPickingPlayerIndex = 0;
+        let currentBotPlayerIndex = 0;
 
         const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
 
@@ -408,6 +506,34 @@
             if (e.target === characterPickerModal) characterPickerModal.classList.remove('open');
         });
 
+        function buildBotDifficultyOptions() {
+            botDifficultyOptions.innerHTML = BOT_SKILLS.map(s => `
+                <button type="button" class="bot-difficulty-option" data-skill-id="${s.id}">${s.label}</button>
+            `).join('');
+            botDifficultyOptions.querySelectorAll('.bot-difficulty-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const row = playerSetup.querySelector(`.player-input[data-player="${currentBotPlayerIndex}"]`);
+                    if (row) {
+                        row.dataset.botSkill = btn.dataset.skillId;
+                        row.dataset.isBot = 'true';
+                        const badge = row.querySelector('.bot-badge');
+                        if (badge) {
+                            badge.textContent = btn.textContent;
+                            badge.classList.remove('hidden');
+                        }
+                        const botCb = row.querySelector('.bot-checkbox');
+                        if (botCb) botCb.checked = true;
+                    }
+                    botDifficultyModal.classList.remove('open');
+                });
+            });
+        }
+        buildBotDifficultyOptions();
+
+        botDifficultyModal.addEventListener('click', (e) => {
+            if (e.target === botDifficultyModal) botDifficultyModal.classList.remove('open');
+        });
+
         document.querySelectorAll('.player-count-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
@@ -427,15 +553,25 @@
             }
             for (let i = 0; i < count; i++) {
                 const defaultChar = CHARACTERS[i % CHARACTERS.length];
+                const defaultBotSkill = BOT_SKILLS[1].id; // Novice
                 const div = document.createElement('div');
                 div.className = 'player-input';
                 div.dataset.player = String(i);
                 div.dataset.characterId = defaultChar.id;
+                div.dataset.isBot = 'false';
+                div.dataset.botSkill = defaultBotSkill;
                 div.innerHTML = `
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
                         <button type="button" class="character-avatar-btn" title="${defaultChar.name} – click to change">${prefixSvgIds(defaultChar.svg, 'cs-p' + i + '-' + defaultChar.id)}</button>
+                    </div>
+                    <div class="player-input-bot-row">
+                        <label>
+                            <input type="checkbox" class="bot-checkbox" data-player="${i}" aria-label="Player ${i + 1} is a bot">
+                            Bot
+                        </label>
+                        <span class="bot-badge hidden" data-player="${i}"></span>
                     </div>
                 `;
                 playerSetup.appendChild(div);
@@ -444,6 +580,26 @@
                     currentPickingPlayerIndex = i;
                     characterPickerModal.classList.add('open');
                 });
+                const botCb = div.querySelector('.bot-checkbox');
+                const botBadge = div.querySelector('.bot-badge');
+                botCb.addEventListener('change', () => {
+                    if (botCb.checked) {
+                        div.dataset.isBot = 'true';
+                        currentBotPlayerIndex = i;
+                        const skill = BOT_SKILLS.find(s => s.id === div.dataset.botSkill);
+                        botBadge.textContent = skill ? skill.label : div.dataset.botSkill;
+                        botBadge.classList.remove('hidden');
+                        botDifficultyModal.classList.add('open');
+                    } else {
+                        div.dataset.isBot = 'false';
+                        botBadge.classList.add('hidden');
+                    }
+                });
+                if (div.dataset.isBot === 'true') {
+                    const skill = BOT_SKILLS.find(s => s.id === div.dataset.botSkill);
+                    botBadge.textContent = skill ? skill.label : div.dataset.botSkill;
+                    botBadge.classList.remove('hidden');
+                }
             }
             playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
                 input.addEventListener('input', checkDuplicateNames);
@@ -554,10 +710,14 @@
                 const name = input && input.value.trim() ? input.value.trim() : `Player ${idx + 1}`;
                 const characterId = row.dataset.characterId || CHARACTERS[idx % CHARACTERS.length].id;
                 const char = CHARACTERS.find(c => c.id === characterId);
+                const isBot = row.dataset.isBot === 'true';
+                const botSkill = (row.dataset.botSkill || 'novice');
                 payload.push({
                     name,
                     characterId,
-                    color: char ? char.color : '#8b7355'
+                    color: char ? char.color : '#8b7355',
+                    isBot: isBot,
+                    botSkill: isBot ? botSkill : undefined
                 });
             });
 
