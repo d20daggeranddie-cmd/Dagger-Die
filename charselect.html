@@ -468,6 +468,7 @@
     <script src="characters.js"></script>
     <script>
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
+        const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
         const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
 
         const BOT_SKILLS = [
@@ -572,6 +573,10 @@
             });
         });
 
+        function botsEnabled() {
+            return localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
+        }
+
         function setupPlayerInputs(count) {
             playerSetup.innerHTML = '';
             playerSetup.classList.add('visible');
@@ -580,6 +585,7 @@
                 setupError.classList.add('hidden');
                 setupError.textContent = '';
             }
+            const showBots = botsEnabled();
             for (let i = 0; i < count; i++) {
                 const defaultChar = CHARACTERS[i % CHARACTERS.length];
                 const defaultBotSkill = BOT_SKILLS[1].id; // Novice
@@ -589,14 +595,17 @@
                 div.dataset.characterId = defaultChar.id;
                 div.dataset.isBot = 'false';
                 div.dataset.botSkill = defaultBotSkill;
+                const botButtonHtml = showBots ? `
+                        <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M12 10V6"/><path d="M8 6h8"/></svg>
+                        </button>
+                ` : '';
                 div.innerHTML = `
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
                         <button type="button" class="character-avatar-btn" title="${defaultChar.name} – click to change">${prefixSvgIds(defaultChar.svg, 'cs-p' + i + '-' + defaultChar.id)}</button>
-                        <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M12 10V6"/><path d="M8 6h8"/></svg>
-                        </button>
+                        ${botButtonHtml}
                     </div>
                 `;
                 playerSetup.appendChild(div);
@@ -605,12 +614,14 @@
                     currentPickingPlayerIndex = i;
                     characterPickerModal.classList.add('open');
                 });
-                const botBtn = div.querySelector('.bot-toggle-btn');
-                botBtn.addEventListener('click', () => {
-                    currentBotPlayerIndex = i;
-                    botDifficultyModal.classList.add('open');
-                });
-                updateBotButtonState(div);
+                if (showBots) {
+                    const botBtn = div.querySelector('.bot-toggle-btn');
+                    botBtn.addEventListener('click', () => {
+                        currentBotPlayerIndex = i;
+                        botDifficultyModal.classList.add('open');
+                    });
+                    updateBotButtonState(div);
+                }
             }
             playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
                 input.addEventListener('input', checkDuplicateNames);
@@ -716,12 +727,13 @@
 
             const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
             const payload = [];
+            const allowBots = botsEnabled();
             playerSetup.querySelectorAll('.player-input').forEach((row, idx) => {
                 const input = row.querySelector('input[type="text"]');
                 const name = input && input.value.trim() ? input.value.trim() : `Player ${idx + 1}`;
                 const characterId = row.dataset.characterId || CHARACTERS[idx % CHARACTERS.length].id;
                 const char = CHARACTERS.find(c => c.id === characterId);
-                const isBot = row.dataset.isBot === 'true';
+                const isBot = allowBots && (row.dataset.isBot === 'true');
                 const botSkill = (row.dataset.botSkill || 'novice');
                 payload.push({
                     name,
