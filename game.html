@@ -741,6 +741,17 @@
             margin-top: 5px;
         }
 
+        .player-card-bot-skill {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            color: #48dbfb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
         /* Game Area */
         .game-area {
             display: grid;
@@ -1694,6 +1705,14 @@
 
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
 
+        const BOT_SKILLS = {
+            newb:    { min: 1,  max: 15, pct: 0.08 },
+            novice:  { min: 15, max: 30, pct: 0.225 },
+            skilled: { min: 30, max: 45, pct: 0.375 },
+            expert:  { min: 45, max: 75, pct: 0.6 },
+            master:  { min: 75, max: 99, pct: 0.87 }
+        };
+
         // DOM Elements
         const turnOrderScreen = document.getElementById('turn-order-screen');
         const gameScreen = document.getElementById('game-screen');
@@ -2058,7 +2077,9 @@
                     totalClaimed: 0,
                     criticals: 0,
                     buffActive: false,
-                    nerfActive: false
+                    nerfActive: false,
+                    isBot: !!p.isBot,
+                    botSkill: p.botSkill && BOT_SKILLS[p.botSkill] ? p.botSkill : 'novice'
                 };
             });
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
@@ -2118,12 +2139,51 @@
             disableTargetSelection();
             droppedKnifeBtn.classList.add('hidden');
 
-            if (localStorage.getItem('daggerdie_autoRollDice') === 'true') {
+            if (getCurrentPlayer().isBot) {
+                rollDiceBtn.classList.add('hidden');
+                setTimeout(() => runBotTurn(), 500);
+            } else if (localStorage.getItem('daggerdie_autoRollDice') === 'true') {
                 rollDiceBtn.classList.add('hidden');
                 setTimeout(() => rollDiceBtn.click(), 300);
             } else {
                 rollDiceBtn.classList.remove('hidden');
             }
+        }
+
+        function runBotTurn() {
+            const MAX_SCORES = 3;
+            rollDiceBtn.click();
+            setTimeout(() => {
+                const current = getCurrentPlayer();
+                if (!current.isBot || !state.hasRolled) return;
+                const skill = BOT_SKILLS[current.botSkill];
+                const hitChance = skill ? skill.pct : 0.225;
+                state.hits = [];
+                for (let idx = 0; idx < state.currentRoll.length; idx++) {
+                    if (state.hits.length >= MAX_SCORES) break;
+                    if (Math.random() < hitChance) state.hits.push({ roll: state.currentRoll[idx], idx });
+                }
+                state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
+                if (state.totalDamage > 0) {
+                    if (state.hits.length === MAX_SCORES) {
+                        current.criticals = (current.criticals || 0) + 1;
+                        if (state.modBuffOnCritical) current.buffActive = true;
+                        addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')}) — Critical!`, 'info');
+                        showCriticalReaction(current.name);
+                    } else {
+                        addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
+                    }
+                    showTargetSelection();
+                } else {
+                    addLogEntry(`${current.name} missed all throws.`, 'info');
+                    if (state.modNerfOnMiss) current.nerfActive = true;
+                    showMissReaction();
+                    finishTurnNoAttack();
+                    setTimeout(() => {
+                        if (getCurrentPlayer().isBot) endTurnBtn.click();
+                    }, 1800);
+                }
+            }, 1100);
         }
 
         function spawnDeathGhost(cardRect) {
@@ -2154,10 +2214,15 @@
                         <div class="hp-fill" style="width: ${(p.hp / p.maxHp) * 100}%; background: ${p.color.hex};"></div>
                     </div>
                     <div class="player-turn-order">Turn Order: #${state.players.indexOf(p) + 1}</div>
+                    ${p.isBot ? '<div class="player-card-bot-skill" data-player="'+p.id+'">Bot: ' + capitalizeBotSkill(p.botSkill) + '</div>' : ''}
                     ${p.buffActive ? '<div class="player-card-status buff">Buff</div>' : ''}
                     ${p.nerfActive ? '<div class="player-card-status nerf">Nerf</div>' : ''}
                 </div>
             `).join('');
+        }
+
+        function capitalizeBotSkill(s) {
+            return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
         }
 
         function updateCurrentPlayerDisplay() {
@@ -2374,7 +2439,7 @@
             state.attackLog = [];
             state.attackAssignments = [];
 
-            if (state.autoDealDamage) {
+            if (getCurrentPlayer().isBot || state.autoDealDamage) {
                 autoDealDamageAndFinish();
                 return;
             }
@@ -2563,6 +2628,11 @@
             attackPrompt.classList.add('hidden');
             endTurnBtn.classList.remove('hidden');
             state.hasAttacked = true;
+            if (getCurrentPlayer().isBot) {
+                setTimeout(() => {
+                    endTurnBtn.click();
+                }, 2200);
+            }
         }
 
         function finishTurnNoAttack() {
