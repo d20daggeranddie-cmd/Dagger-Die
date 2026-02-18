@@ -89,6 +89,7 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         h1 {
@@ -168,6 +169,7 @@
 
         .player-input {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             gap: 15px;
             background: rgba(255,255,255,0.1);
@@ -177,6 +179,7 @@
 
         .player-input input {
             flex: 1;
+            min-width: 0;
             padding: 10px 15px;
             border: none;
             border-radius: 8px;
@@ -189,35 +192,33 @@
             color: rgba(255,255,255,0.5);
         }
 
-        .player-input-bot-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .player-input-bot-row label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .bot-toggle-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: rgba(255,255,255,0.5);
             cursor: pointer;
-            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+        .bot-toggle-btn:hover {
+            border-color: rgba(255,255,255,0.5);
             color: rgba(255,255,255,0.9);
         }
-        .player-input-bot-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        .bot-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+        .bot-toggle-btn.is-bot {
+            border-color: #48dbfb;
             background: rgba(72, 219, 251, 0.25);
             color: #48dbfb;
+        }
+        .bot-toggle-btn svg {
+            width: 22px;
+            height: 22px;
         }
 
         .player-input.error input,
@@ -281,8 +282,9 @@
             border-radius: 24px;
             padding: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 100%;
+            max-width: calc(100vw - 40px);
             max-height: 90vh;
+            overflow-x: hidden;
             overflow-y: auto;
         }
         .character-picker-modal h3 {
@@ -295,6 +297,16 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
+        }
+        @media (max-width: 600px) {
+            .character-picker-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 420px) {
+            .character-picker-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         .character-picker-option {
             display: flex;
@@ -378,6 +390,10 @@
             border-color: #48dbfb;
             background: rgba(72, 219, 251, 0.15);
             transform: scale(1.02);
+        }
+        .bot-difficulty-option.bot-difficulty-human {
+            opacity: 0.9;
+            border-style: dashed;
         }
 
         .btn {
@@ -506,23 +522,36 @@
             if (e.target === characterPickerModal) characterPickerModal.classList.remove('open');
         });
 
+        function updateBotButtonState(row) {
+            const btn = row.querySelector('.bot-toggle-btn');
+            if (!btn) return;
+            const isBot = row.dataset.isBot === 'true';
+            const skillId = row.dataset.botSkill || 'novice';
+            const skill = BOT_SKILLS.find(s => s.id === skillId);
+            btn.classList.toggle('is-bot', isBot);
+            btn.title = isBot ? (skill ? 'Bot: ' + skill.label : 'Bot') : 'Set as bot';
+            btn.setAttribute('aria-label', isBot ? 'Bot: ' + (skill ? skill.label : '') : 'Set as bot');
+        }
+
         function buildBotDifficultyOptions() {
-            botDifficultyOptions.innerHTML = BOT_SKILLS.map(s => `
-                <button type="button" class="bot-difficulty-option" data-skill-id="${s.id}">${s.label}</button>
-            `).join('');
+            botDifficultyOptions.innerHTML = `
+                <button type="button" class="bot-difficulty-option bot-difficulty-human" data-skill-id="">Human</button>
+                ${BOT_SKILLS.map(s => `
+                    <button type="button" class="bot-difficulty-option" data-skill-id="${s.id}">${s.label}</button>
+                `).join('')}
+            `;
             botDifficultyOptions.querySelectorAll('.bot-difficulty-option').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const row = playerSetup.querySelector(`.player-input[data-player="${currentBotPlayerIndex}"]`);
                     if (row) {
-                        row.dataset.botSkill = btn.dataset.skillId;
-                        row.dataset.isBot = 'true';
-                        const badge = row.querySelector('.bot-badge');
-                        if (badge) {
-                            badge.textContent = btn.textContent;
-                            badge.classList.remove('hidden');
+                        const skillId = btn.dataset.skillId || '';
+                        if (skillId === '') {
+                            row.dataset.isBot = 'false';
+                        } else {
+                            row.dataset.isBot = 'true';
+                            row.dataset.botSkill = skillId;
                         }
-                        const botCb = row.querySelector('.bot-checkbox');
-                        if (botCb) botCb.checked = true;
+                        updateBotButtonState(row);
                     }
                     botDifficultyModal.classList.remove('open');
                 });
@@ -565,13 +594,9 @@
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
                         <button type="button" class="character-avatar-btn" title="${defaultChar.name} – click to change">${prefixSvgIds(defaultChar.svg, 'cs-p' + i + '-' + defaultChar.id)}</button>
-                    </div>
-                    <div class="player-input-bot-row">
-                        <label>
-                            <input type="checkbox" class="bot-checkbox" data-player="${i}" aria-label="Player ${i + 1} is a bot">
-                            Bot
-                        </label>
-                        <span class="bot-badge hidden" data-player="${i}"></span>
+                        <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M12 10V6"/><path d="M8 6h8"/></svg>
+                        </button>
                     </div>
                 `;
                 playerSetup.appendChild(div);
@@ -580,26 +605,12 @@
                     currentPickingPlayerIndex = i;
                     characterPickerModal.classList.add('open');
                 });
-                const botCb = div.querySelector('.bot-checkbox');
-                const botBadge = div.querySelector('.bot-badge');
-                botCb.addEventListener('change', () => {
-                    if (botCb.checked) {
-                        div.dataset.isBot = 'true';
-                        currentBotPlayerIndex = i;
-                        const skill = BOT_SKILLS.find(s => s.id === div.dataset.botSkill);
-                        botBadge.textContent = skill ? skill.label : div.dataset.botSkill;
-                        botBadge.classList.remove('hidden');
-                        botDifficultyModal.classList.add('open');
-                    } else {
-                        div.dataset.isBot = 'false';
-                        botBadge.classList.add('hidden');
-                    }
+                const botBtn = div.querySelector('.bot-toggle-btn');
+                botBtn.addEventListener('click', () => {
+                    currentBotPlayerIndex = i;
+                    botDifficultyModal.classList.add('open');
                 });
-                if (div.dataset.isBot === 'true') {
-                    const skill = BOT_SKILLS.find(s => s.id === div.dataset.botSkill);
-                    botBadge.textContent = skill ? skill.label : div.dataset.botSkill;
-                    botBadge.classList.remove('hidden');
-                }
+                updateBotButtonState(div);
             }
             playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
                 input.addEventListener('input', checkDuplicateNames);
