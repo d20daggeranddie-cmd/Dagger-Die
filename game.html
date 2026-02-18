@@ -1562,11 +1562,12 @@
         </div>
     </div>
 
-    <!-- Game settings modal -->
+    <!-- Game settings modal (same options as main menu Options; editable here until first damage) -->
     <div class="settings-modal-overlay" id="settings-modal" role="dialog" aria-label="Game settings">
         <div class="settings-modal">
             <h3>Game Settings</h3>
             <p id="settings-readonly-hint" class="setting-hint setting-readonly-hint" style="display: none;">Settings are locked after the first damage is dealt. Start a new game to change them.</p>
+            <p class="setting-hint" style="margin-bottom: 12px;">You can also set these on the main menu under <strong>Options</strong>.</p>
             <div class="option-row">
                 <input type="checkbox" id="use-custom-hp-cb" aria-describedby="custom-hp-hint">
                 <label for="use-custom-hp-cb">Use custom HP</label>
@@ -1735,12 +1736,11 @@
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
         const settingsModalDone = document.getElementById('settings-modal-done');
+        const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
 
         useCustomHpCb.addEventListener('change', () => {
             customHpInput.disabled = !useCustomHpCb.checked;
         });
-
-        const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
 
         settingsGearBtn.addEventListener('click', () => {
             const readOnly = state.hasScoreBeenEntered;
@@ -1763,10 +1763,6 @@
             if (settingsReadOnlyHint) settingsReadOnlyHint.style.display = readOnly ? 'block' : 'none';
             settingsModalDone.textContent = readOnly ? 'Close' : 'Done';
             settingsModal.classList.add('open');
-        });
-
-        persistentSettingsCb.addEventListener('change', () => {
-            // Persistent checkbox does not affect other settings; each is independent
         });
 
         settingsModalDone.addEventListener('click', () => {
