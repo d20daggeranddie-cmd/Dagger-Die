@@ -291,6 +291,9 @@
   .option-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
   .option-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #48dbfb; }
   .option-row label { cursor: pointer; color: rgba(255,255,255,0.9); font-size: 0.95rem; }
+  .options-group .custom-hp-row { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .options-group .custom-hp-row input[type="number"] { max-width: 120px; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem; }
+  .options-group .custom-hp-row input[type="number"]:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .info-section { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; }
   .info-section h3 { font-size: 1.4rem; margin-bottom: 15px; color: #feca57; }
@@ -495,18 +498,15 @@
       </button>
 
       <section class="options-menu" id="options-menu" role="region" aria-label="Game options">
-        <h3>Game Defaults</h3>
         <div class="options-group">
-          <h4>Starting HP by Player Count</h4>
-          <ul>
-            <li>2 players: 50 HP</li>
-            <li>3–4 players: 40 HP</li>
-            <li>5–6 players: 60 HP</li>
-          </ul>
+          <div class="option-row">
+            <input type="checkbox" id="persistent-settings-cb" aria-describedby="persistent-settings-hint">
+            <label for="persistent-settings-cb">Persistent settings</label>
+          </div>
+          <p id="persistent-settings-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked (default), settings reset to defaults each new game. When checked, your selections are kept until you uncheck this.</p>
         </div>
         <div class="options-group">
-          <h4>Turn Order</h4>
-          <p>Players roll a D20 to determine turn order. Highest goes first. Ties are broken by rerolling only the tied players.</p>
+          <h4>Auto-Advance</h4>
           <div class="option-row">
             <input type="checkbox" id="auto-roll-turn-order" aria-describedby="auto-roll-desc">
             <label for="auto-roll-turn-order">Automatically roll dice for turn order</label>
@@ -517,10 +517,7 @@
             <label for="auto-begin-game">Automatically begin game after turn order</label>
           </div>
           <p id="auto-begin-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the game starts automatically after turn order is determined.</p>
-        </div>
-        <div class="options-group">
-          <h4>Gameplay</h4>
-          <div class="option-row">
+          <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="auto-roll-dice" aria-describedby="auto-roll-dice-desc">
             <label for="auto-roll-dice">Automatically roll dice on player turn</label>
           </div>
@@ -530,6 +527,33 @@
             <label for="auto-deal-damage">Auto deal damage (randomly assign hits to opponents)</label>
           </div>
           <p id="auto-deal-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
+        </div>
+        <div class="options-group">
+          <h4>Mods</h4>
+          <div class="option-row">
+            <input type="checkbox" id="use-custom-hp-cb" aria-describedby="custom-hp-hint">
+            <label for="use-custom-hp-cb">Use custom HP</label>
+          </div>
+          <div class="custom-hp-row">
+            <label for="custom-hp-input">Default HP per player (20–999)</label>
+            <input type="number" id="custom-hp-input" min="20" max="999" placeholder="e.g. 50" disabled>
+          </div>
+          <p id="custom-hp-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked, automatic values are used (2 players: 50, 3–4: 40, 5–6: 60).</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-buff-on-critical-cb" aria-describedby="mod-buff-hint">
+            <label for="mod-buff-on-critical-cb">Buff on Critical</label>
+          </div>
+          <p id="mod-buff-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Take 1/2 damage for 1 turn after scoring a critical.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-nerf-on-miss-cb" aria-describedby="mod-nerf-hint">
+            <label for="mod-nerf-on-miss-cb">Nerf on Miss</label>
+          </div>
+          <p id="mod-nerf-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Take 125% damage for 1 turn after missing all throws.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="bots-enabled-cb" aria-describedby="bots-enabled-desc">
+            <label for="bots-enabled-cb">Enable bots</label>
+          </div>
+          <p id="bots-enabled-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, you can mark players as bots (with difficulty) on the character select screen. When disabled, all players are human.</p>
         </div>
       </section>
 
@@ -678,6 +702,12 @@
     const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
     const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
     const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
+    const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
+    const CUSTOM_HP_KEY = 'daggerdie_customHp';
+    const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
+    const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
+    const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
+    const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
 
     document.getElementById('options-toggle').addEventListener('click', () => {
       const toggle = document.getElementById('options-toggle');
@@ -702,6 +732,55 @@
     const autoDealDamageCheckbox = document.getElementById('auto-deal-damage');
     autoDealDamageCheckbox.checked = localStorage.getItem(AUTO_DEAL_DAMAGE_KEY) === 'true';
     autoDealDamageCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_DEAL_DAMAGE_KEY, autoDealDamageCheckbox.checked));
+
+    const useCustomHpCb = document.getElementById('use-custom-hp-cb');
+    const customHpInput = document.getElementById('custom-hp-input');
+    const persistentSettingsCb = document.getElementById('persistent-settings-cb');
+    const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
+    const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
+
+    const isPersistent = () => localStorage.getItem(PERSISTENT_SETTINGS_KEY) === 'true';
+    useCustomHpCb.checked = localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
+    const savedHp = localStorage.getItem(CUSTOM_HP_KEY);
+    customHpInput.value = (savedHp !== null && savedHp !== '') ? savedHp : '';
+    customHpInput.disabled = !useCustomHpCb.checked;
+    persistentSettingsCb.checked = isPersistent();
+    modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
+    modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+
+    useCustomHpCb.addEventListener('change', () => {
+      customHpInput.disabled = !useCustomHpCb.checked;
+      localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
+      if (useCustomHpCb.checked) {
+        const n = parseInt(customHpInput.value.trim(), 10);
+        if (!isNaN(n) && n >= 20 && n <= 999) localStorage.setItem(CUSTOM_HP_KEY, String(n));
+      } else localStorage.removeItem(CUSTOM_HP_KEY);
+    });
+
+    customHpInput.addEventListener('change', () => {
+      const val = customHpInput.value.trim();
+      const n = val === '' ? NaN : parseInt(val, 10);
+      if (!isNaN(n) && n >= 20 && n <= 999 && useCustomHpCb.checked) {
+        localStorage.setItem(CUSTOM_HP_KEY, String(n));
+        localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
+      }
+    });
+    customHpInput.addEventListener('blur', () => {
+      const val = customHpInput.value.trim();
+      const n = val === '' ? NaN : parseInt(val, 10);
+      if (!isNaN(n) && n >= 20 && n <= 999 && useCustomHpCb.checked) localStorage.setItem(CUSTOM_HP_KEY, String(n));
+    });
+
+    persistentSettingsCb.addEventListener('change', () => {
+      localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
+    });
+
+    modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
+    modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
+
+    const botsEnabledCb = document.getElementById('bots-enabled-cb');
+    botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
+    botsEnabledCb.addEventListener('change', () => localStorage.setItem(BOTS_ENABLED_KEY, String(botsEnabledCb.checked)));
   </script>
 </body>
 </html>
