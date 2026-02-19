@@ -97,9 +97,16 @@
             border-color: #b8960f;
             box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
         }
+
+        .m3-logo {
+            position: fixed; bottom: 10px; right: 10px; z-index: 50;
+            width: 36px; height: auto; pointer-events: none;
+        }
+        @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
     </style>
 </head>
 <body>
+    <img src="assets/m3.png" alt="M3" class="m3-logo">
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
 
     <div class="target-wrapper">
