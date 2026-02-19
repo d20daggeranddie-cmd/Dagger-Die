@@ -22,9 +22,15 @@
     object-fit: contain;
     display: block;
   }
+  .m3-logo {
+    position: fixed; bottom: 10px; right: 10px; z-index: 50;
+    width: 36px; height: auto; pointer-events: none;
+  }
+  @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
 </style>
 </head>
 <body role="button" tabindex="0" aria-label="Tap to enter Dagger & Die">
+  <img src="assets/m3.png" alt="M3" class="m3-logo">
   <div class="cover-inner">
     <div class="preview-frame">
       <img src="assets/dnd-roll-image.png" alt="Dagger &amp; Die — Precision knife throwing in a retro turn based RPG format. Roll for throw.">
