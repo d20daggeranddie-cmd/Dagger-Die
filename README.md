@@ -35,7 +35,7 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 - Turn order management with automatic tie-breaking
 - Player name validation (2-30 chars, unique, real-time duplicate detection)
 - Game log to track all actions
-- Projector mode to display target face on a second screen (window stays square when resizing)
+- Projector mode to display target face on a second screen (scales smoothly to any window size)
 - Download target stencil (SVG) for painting your own boards
 - Responsive design — works on desktop and mobile (tap highlighted areas to claim hits)
 
@@ -59,7 +59,7 @@ During a game, open the gear icon to access in-game settings (locked after first
 From the Resources dropdown on the landing page:
 
 - **Download target stencil (SVG)** — SVG file for painting D20 targets onto log rounds
-- **Open target face (projector)** — Opens a separate window to display the target on a projector or second screen. The window enforces a square aspect ratio when resized to keep the target properly scaled.
+- **Open target face (projector)** — Opens a separate window to display the D20 target on a projector or second screen. Also available in-game via the gear menu (Dynamic Target). Syncs with the game via BroadcastChannel — highlights rolled zones (gold) and claimed hits (green). Scales smoothly to any window size.
 
 ## Hosting on GitHub Pages
 
@@ -69,9 +69,12 @@ From the Resources dropdown on the landing page:
 4. Your game will be available at `https://[username].github.io/[repo-name]/`
 
 ## Files
-- `index.html` — Landing page with cover graphic, Options menu, Resources dropdown, and game tile
-- `game.html` — The complete game application (setup, turn order, gameplay)
-- `projector.html` — Target display for projector mode; maintains square aspect ratio on resize (expects `assets/TEMPLATE.png`)
+- `index.html` — Entry point; loads intro animation in iframe
+- `intro-animation.html` — Cover graphic and tap-to-enter; navigates to startgame
+- `startgame.html` — Landing page with Options menu, Resources dropdown, and player setup
+- `charselect.html` — Character/player selection (2–6 players, names, colors)
+- `game.html` — Full game application (turn order, dice rolling, HP tracking, hit claiming)
+- `projector.html` — Target display for projector mode; D20 face syncs with game, scales to window
 - `assets/ODD.svg` — Odd numbers target board (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)
 - `assets/EVEN.svg` — Even numbers target board (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
 - `assets/targetstencil.svg` — Target stencil for download
