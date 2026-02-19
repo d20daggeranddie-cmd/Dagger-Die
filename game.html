@@ -1269,9 +1269,16 @@
         .back-link:hover {
             color: #48dbfb;
         }
+
+        .m3-logo {
+            position: fixed; bottom: 10px; right: 10px; z-index: 50;
+            width: 36px; height: auto; pointer-events: none;
+        }
+        @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
     </style>
 </head>
 <body>
+    <img src="assets/m3.png" alt="M3" class="m3-logo">
     <!-- RPG background layers -->
     <div class="game-bg-base"></div>
     <div class="game-bg-texture"></div>
@@ -1992,6 +1999,7 @@
                     eliminated: false,
                     totalRolled: 0,
                     totalClaimed: 0,
+                    totalThrows: 0,
                     criticals: 0,
                     buffActive: false,
                     nerfActive: false,
@@ -2188,6 +2196,7 @@
             state.hasRolled = true;
             const current = getCurrentPlayer();
             current.totalRolled = (current.totalRolled || 0) + state.currentRoll.reduce((s, v) => s + v, 0);
+            current.totalThrows = (current.totalThrows || 0) + 3;
             showHitRecorder();
             droppedKnifeBtn.classList.remove('hidden');
         });
@@ -2637,11 +2646,10 @@
             }
 
             const hitCount = state.gameLog.filter(e => e.message.includes(player.name) && e.message.includes('dealt') && e.message.includes('damage to')).length;
-            const dropCountForStat = state.gameLog.filter(e => e.type === 'damage' && e.message.includes('dropped a knife') && e.message.includes(player.name)).length;
-            const totalScoring = hitCount + dropCountForStat;
-            if (totalScoring > 0) {
-                const hitPct = (hitCount / totalScoring * 100).toFixed(1);
-                playerStatsHitDrop.textContent = `Efficiency: ${hitPct}%`;
+            const throws = player.totalThrows || 0;
+            if (throws > 0) {
+                const hitPct = (hitCount / throws * 100).toFixed(1);
+                playerStatsHitDrop.textContent = `Efficiency: ${hitCount}/${throws} (${hitPct}%)`;
             } else {
                 playerStatsHitDrop.textContent = 'Efficiency: —';
             }
@@ -2794,8 +2802,8 @@
                 const status = p.eliminated ? 'Eliminated' : (winner && p.id === winner.id ? 'Winner' : 'Survived');
                 const hitCount = state.gameLog.filter(e => e.message.includes(p.name) && e.message.includes('dealt') && e.message.includes('damage to')).length;
                 const dropCount = state.gameLog.filter(e => e.type === 'damage' && e.message.includes('dropped a knife') && e.message.includes(p.name)).length;
-                const totalScoring = hitCount + dropCount;
-                const efficiency = totalScoring > 0 ? (hitCount / totalScoring * 100).toFixed(1) : '—';
+                const throws = p.totalThrows || 0;
+                const efficiency = throws > 0 ? (hitCount / throws * 100).toFixed(1) : '—';
                 const rolled = p.totalRolled || 0;
                 const claimed = p.totalClaimed || 0;
                 const pointsPct = rolled > 0 ? (claimed / rolled * 100).toFixed(1) : '—';
@@ -2809,7 +2817,7 @@
                         <tr><td>Hits dealt</td><td>${hitCount}</td></tr>
                         <tr><td>Drops (self-damage)</td><td>${dropCount}</td></tr>
                         <tr><td>Criticals</td><td>${p.criticals || 0}</td></tr>
-                        <tr><td>Efficiency</td><td>${efficiency}${efficiency !== '—' ? '%' : ''}</td></tr>
+                        <tr><td>Efficiency (hits/throws)</td><td>${throws > 0 ? `${hitCount}/${throws} (${efficiency}%)` : '—'}</td></tr>
                         <tr><td>Points (claimed / rolled)</td><td>${pointsStr}</td></tr>
                     </table>
                 </div>`;
@@ -3049,6 +3057,7 @@
                 p.turnOrderRoll = 0;
                 p.totalRolled = 0;
                 p.totalClaimed = 0;
+                p.totalThrows = 0;
                 p.criticals = 0;
                 p.buffActive = false;
                 p.nerfActive = false;
