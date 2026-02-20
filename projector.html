@@ -102,11 +102,20 @@
             position: fixed; bottom: 10px; right: 10px; z-index: 50;
             width: 36px; height: auto; pointer-events: none;
         }
-        @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
+        .dimensions-label {
+            position: fixed; top: 12px; left: 12px; z-index: 50;
+            font-size: 10px; color: #888; font-family: sans-serif;
+            pointer-events: none;
+        }
+        @media (max-width: 480px) {
+            .m3-logo { width: 28px; bottom: 8px; right: 8px; }
+            .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
+        }
     </style>
 </head>
 <body>
     <img src="assets/m3.png" alt="M3" class="m3-logo">
+    <div class="dimensions-label">360×315mm · 14.25×12.5"</div>
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
 
     <div class="target-wrapper">
