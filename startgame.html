@@ -311,11 +311,29 @@
           <div class="resources-modal-actions">
             <button type="button" id="resources-download-stencil-btn">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download target stencil (SVG)
+              Download target stencil
             </button>
             <button type="button" id="resources-projector-btn">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               Dynamic Target (Projector)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stencil choice modal (Print vs Cut) -->
+      <div class="resources-modal-overlay" id="stencil-choice-modal" role="dialog" aria-label="Target stencil format" aria-modal="true" aria-hidden="true">
+        <div class="resources-modal">
+          <h3>Target stencil format</h3>
+          <p style="color: rgba(255,255,255,0.85); font-size: 0.9rem; margin-bottom: 16px;">Choose how you want to use the target stencil:</p>
+          <div class="resources-modal-actions">
+            <button type="button" id="stencil-print-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>
+              Print — PDF for printing on paper
+            </button>
+            <button type="button" id="stencil-cut-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 6l7-3 3 7-3 2"/><path d="M9.5 17.5l5-5"/></svg>
+              Cut — SVG for cutting machines
             </button>
           </div>
         </div>
@@ -484,9 +502,45 @@
         window.open('projector.html', 'DaggerDieProjector', 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no');
       });
     }
+    const stencilChoiceModal = document.getElementById('stencil-choice-modal');
+    const stencilPrintBtn = document.getElementById('stencil-print-btn');
+    const stencilCutBtn = document.getElementById('stencil-cut-btn');
+
+    function openStencilChoiceModal() {
+      closeResourcesModal();
+      if (stencilChoiceModal) {
+        stencilChoiceModal.classList.add('open');
+        stencilChoiceModal.setAttribute('aria-hidden', 'false');
+      }
+    }
+    function closeStencilChoiceModal() {
+      if (stencilChoiceModal) {
+        stencilChoiceModal.classList.remove('open');
+        stencilChoiceModal.setAttribute('aria-hidden', 'true');
+      }
+    }
+
     if (stencilDownloadBtn) {
-      stencilDownloadBtn.addEventListener('click', () => {
-        closeResourcesModal();
+      stencilDownloadBtn.addEventListener('click', () => openStencilChoiceModal());
+    }
+    if (stencilChoiceModal) {
+      stencilChoiceModal.addEventListener('click', (e) => {
+        if (e.target === stencilChoiceModal) closeStencilChoiceModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && stencilChoiceModal.classList.contains('open')) closeStencilChoiceModal();
+      });
+    }
+    if (stencilPrintBtn) {
+      stencilPrintBtn.addEventListener('click', () => {
+        closeStencilChoiceModal();
+        const pdfUrl = new URL('assets/PrintTarget.pdf', window.location.href).href;
+        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+      });
+    }
+    if (stencilCutBtn) {
+      stencilCutBtn.addEventListener('click', () => {
+        closeStencilChoiceModal();
         const svgUrl = new URL('assets/targetstencil.svg', window.location.href).href;
         fetch(svgUrl).then(r => {
           if (!r.ok) throw new Error('Fetch failed');
