@@ -1656,6 +1656,8 @@
         const droppedKnifeBtn = document.getElementById('dropped-knife-btn');
         const gameLogEntries = document.getElementById('game-log-entries');
 
+        let botEndTurnTimerId = null;
+
         const settingsModal = document.getElementById('settings-modal');
         const settingsGearBtn = document.getElementById('settings-gear-btn');
         const useCustomHpCb = document.getElementById('use-custom-hp-cb');
@@ -1774,7 +1776,7 @@
                 const rolls = (state.currentRoll || []).join(',');
                 const claimed = (state.hits || []).map(h => h.roll).join(',');
                 const url = 'projector.html?rolls=' + encodeURIComponent(rolls) + '&claimed=' + encodeURIComponent(claimed);
-                const features = 'width=800,height=800,menubar=no,toolbar=no,location=no,status=no';
+                const features = 'width=534,height=534,menubar=no,toolbar=no,location=no,status=no';
                 window.open(url, 'DaggerDieProjector', features);
             });
         }
@@ -2104,7 +2106,9 @@
                     if (state.modNerfOnMiss) current.nerfActive = true;
                     showMissReaction();
                     finishTurnNoAttack();
-                    setTimeout(() => {
+                    if (botEndTurnTimerId) clearTimeout(botEndTurnTimerId);
+                    botEndTurnTimerId = setTimeout(() => {
+                        botEndTurnTimerId = null;
                         if (getCurrentPlayer().isBot) endTurnBtn.click();
                     }, 1800);
                 }
@@ -2555,8 +2559,10 @@
             endTurnBtn.classList.remove('hidden');
             state.hasAttacked = true;
             if (getCurrentPlayer().isBot) {
-                setTimeout(() => {
-                    endTurnBtn.click();
+                if (botEndTurnTimerId) clearTimeout(botEndTurnTimerId);
+                botEndTurnTimerId = setTimeout(() => {
+                    botEndTurnTimerId = null;
+                    if (getCurrentPlayer().isBot) endTurnBtn.click();
                 }, 2200);
             }
         }
@@ -2725,6 +2731,7 @@
         });
 
         function nextTurn() {
+            if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
             disableTargetSelection();
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
@@ -3048,6 +3055,7 @@
 
         document.getElementById('new-game-btn').addEventListener('click', resetGame);
                 function playAgain() {
+            if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
             applySettingsForNewGame();
             const defaultHp = getDefaultHp(state.players.length);
             state.players.forEach(p => {
