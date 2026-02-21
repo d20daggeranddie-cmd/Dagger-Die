@@ -420,6 +420,88 @@
         .player-stats-modal .btn {
             width: 100%;
         }
+        #damage-confirm-modal-content,
+        #critical-item-modal-content {
+            max-width: 430px;
+            border: 1px solid rgba(254, 202, 87, 0.28);
+            box-shadow: 0 24px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .modal-eyebrow {
+            margin: 0 auto 8px auto;
+            width: fit-content;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(254, 202, 87, 0.4);
+            background: rgba(254, 202, 87, 0.1);
+            color: #feca57;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .confirm-rolls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 6px 0 10px 0;
+        }
+        .confirm-roll-pill {
+            min-width: 44px;
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            text-align: center;
+            background: rgba(72, 219, 251, 0.16);
+            border: 1px solid rgba(72, 219, 251, 0.35);
+            color: #8feaff;
+        }
+        #damage-confirm-detail {
+            text-align: center;
+            margin: 0 0 16px 0;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-actions .btn {
+            margin-top: 0;
+            width: 100%;
+        }
+        #critical-item-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 14px 0 18px 0;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .critical-item-roll {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 0.04em;
+        }
+        .critical-item-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+        .critical-item-effect {
+            color: #8feaff;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        .critical-item-type {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
 
         /* Critical hit onscreen reaction */
         .critical-reaction {
@@ -560,6 +642,47 @@
             border-color: #e74c3c;
             box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 15px rgba(254, 202, 87, 0.3);
         }
+        .player-card.shielded { box-shadow: 0 0 14px rgba(129, 140, 248, 0.35); }
+        .player-card.focused { box-shadow: 0 0 14px rgba(250, 204, 21, 0.35); }
+        .player-card.enraged { box-shadow: 0 0 14px rgba(251, 113, 133, 0.35); }
+        .player-card.regening { box-shadow: 0 0 14px rgba(74, 222, 128, 0.35); }
+        .player-card.poisoned { box-shadow: 0 0 14px rgba(196, 132, 252, 0.35); }
+        .player-card.free-drops { box-shadow: 0 0 14px rgba(56, 189, 248, 0.35); }
+        .player-card.aiming { box-shadow: 0 0 14px rgba(167, 139, 250, 0.35); }
+        .player-card.hp-change-up {
+            animation: hp-heal-flash 0.55s ease;
+        }
+        .player-card.hp-change-down {
+            animation: hp-damage-flash 0.55s ease;
+        }
+        .hp-delta-float {
+            position: absolute;
+            right: 8px;
+            top: -10px;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: 0.9rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.65);
+            animation: hp-delta-rise 0.85s ease forwards;
+            z-index: 3;
+        }
+        .hp-delta-float.up { color: #86efac; }
+        .hp-delta-float.down { color: #ff8f8f; }
+        @keyframes hp-heal-flash {
+            0% { box-shadow: 0 0 0 rgba(46,204,113,0); transform: scale(1); }
+            35% { box-shadow: 0 0 24px rgba(46,204,113,0.6); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 rgba(46,204,113,0); transform: scale(1); }
+        }
+        @keyframes hp-damage-flash {
+            0% { box-shadow: 0 0 0 rgba(231,76,60,0); transform: scale(1); }
+            35% { box-shadow: 0 0 24px rgba(231,76,60,0.55); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 rgba(231,76,60,0); transform: scale(1); }
+        }
+        @keyframes hp-delta-rise {
+            0% { opacity: 0; transform: translateY(6px); }
+            20% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-16px); }
+        }
 
         .player-card-status {
             font-size: 0.75rem;
@@ -571,6 +694,164 @@
             border-radius: 6px;
         }
 
+        .player-card-inventory {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .player-card-inventory-slot {
+            width: 28px;
+            height: 28px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .player-card-inventory-slot.has-item {
+            border-color: rgba(254,202,87,0.6);
+            cursor: pointer;
+        }
+        .player-card-inventory-slot.has-item:hover {
+            border-color: #feca57;
+            box-shadow: 0 0 8px rgba(254,202,87,0.5);
+        }
+        .player-card-inventory-slot.locked-item,
+        .player-stats-inventory-slots .inv-slot.locked-item {
+            opacity: 0.6;
+            filter: grayscale(0.35);
+        }
+        .player-card-inventory-slot.locked-item:hover,
+        .player-stats-inventory-slots .inv-slot.locked-item:hover {
+            border-color: rgba(255,255,255,0.35);
+            box-shadow: none;
+        }
+        .player-card-inventory-slot svg {
+            width: 20px;
+            height: 20px;
+            image-rendering: pixelated;
+        }
+
+        .player-stats-inventory-slots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .player-stats-inventory-slots .inv-slot {
+            width: 48px;
+            height: 48px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .player-stats-inventory-slots .inv-slot.has-item {
+            border-color: rgba(254,202,87,0.6);
+        }
+        .player-stats-inventory-slots .inv-slot.has-item:hover {
+            border-color: #feca57;
+            box-shadow: 0 0 12px rgba(254,202,87,0.5);
+        }
+        .player-stats-inventory-slots .inv-slot svg {
+            width: 36px;
+            height: 36px;
+            image-rendering: pixelated;
+        }
+        .item-use-icon-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        .item-use-icon-wrap svg {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+        .item-target-card-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border: 2px solid rgba(255,255,255,0.18);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .item-target-card-btn:hover {
+            border-color: rgba(72, 219, 251, 0.6);
+            background: rgba(72, 219, 251, 0.12);
+            transform: translateY(-1px);
+        }
+        .item-target-card-btn.self-target {
+            border-color: rgba(254, 202, 87, 0.7);
+            box-shadow: 0 0 10px rgba(254, 202, 87, 0.25);
+        }
+        .item-target-card-inner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .item-target-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
+        }
+        .item-target-card-name {
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .item-target-card-hp {
+            font-size: 0.85rem;
+            opacity: 0.95;
+        }
+        .item-target-hp-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .item-target-hp-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .item-target-status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .item-target-status-chip {
+            font-size: 0.68rem;
+            line-height: 1;
+            padding: 3px 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.25);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .item-target-status-chip.buff { background: rgba(46, 204, 113, 0.3); border-color: rgba(46, 204, 113, 0.55); color: #2ecc71; }
+        .item-target-status-chip.nerf,
+        .item-target-status-chip.poison { background: rgba(231, 76, 60, 0.3); border-color: rgba(231, 76, 60, 0.55); color: #ff8f8f; }
+        .item-target-status-chip.shield { background: rgba(128, 144, 176, 0.35); border-color: rgba(128, 144, 176, 0.6); color: #d1d9f4; }
+        .item-target-status-chip.focus,
+        .item-target-status-chip.rage { background: rgba(240, 192, 64, 0.3); border-color: rgba(240, 192, 64, 0.6); color: #ffd98a; }
+        .item-target-status-chip.regen { background: rgba(80, 208, 112, 0.28); border-color: rgba(80, 208, 112, 0.55); color: #86efac; }
+        .item-target-status-chip.free { background: rgba(72, 219, 251, 0.28); border-color: rgba(72, 219, 251, 0.55); color: #8feaff; }
+        .item-target-status-chip.eliminated { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.28); color: rgba(255,255,255,0.8); }
+
         .player-card-status.buff {
             background: rgba(46, 204, 113, 0.3);
             color: #2ecc71;
@@ -580,6 +861,13 @@
             background: rgba(231, 76, 60, 0.3);
             color: #e74c3c;
         }
+        .player-card-status.shield { background: rgba(129, 140, 248, 0.25); color: #c7d2fe; }
+        .player-card-status.focus { background: rgba(250, 204, 21, 0.24); color: #fde68a; }
+        .player-card-status.rage { background: rgba(251, 113, 133, 0.24); color: #fecdd3; }
+        .player-card-status.regen { background: rgba(74, 222, 128, 0.24); color: #bbf7d0; }
+        .player-card-status.poison { background: rgba(196, 132, 252, 0.24); color: #e9d5ff; }
+        .player-card-status.free { background: rgba(56, 189, 248, 0.24); color: #bae6fd; }
+        .player-card-status.eliminated { background: rgba(255,255,255,0.15); color: #d1d5db; }
 
         /* Death ghost animation */
         .death-ghost {
@@ -958,6 +1246,19 @@
             filter: url(#glow-hit-odd);
             animation: none;
         }
+        .highlight-zone.aimed .face-shape {
+            fill: rgba(34, 211, 238, 0.26);
+            stroke: #22d3ee;
+            stroke-width: 2.8;
+            filter: url(#glow-even);
+            stroke-dasharray: 7 4;
+        }
+        .highlight-zone.aimed.claimed .face-shape {
+            fill: rgba(232, 121, 249, 0.3);
+            stroke: #e879f9;
+            filter: url(#glow-even);
+            stroke-dasharray: 7 4;
+        }
 
         #even-overlay .highlight-zone.claimed .face-shape {
             filter: url(#glow-hit-even);
@@ -980,6 +1281,13 @@
 
         .highlight-zone.claimed text {
             fill: #22c55e;
+        }
+        .highlight-zone.aimed text {
+            fill: #67e8f9;
+            font-weight: 700;
+        }
+        .highlight-zone.aimed.claimed text {
+            fill: #f5d0fe;
         }
 
         @keyframes pulse {
@@ -1521,6 +1829,11 @@
                 <label for="mod-nerf-on-miss-cb">Nerf on Miss</label>
             </div>
             <p id="mod-nerf-hint" class="setting-hint">Take 125% damage for 1 turn after missing all throws.</p>
+            <div class="option-row">
+                <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
+                <label for="items-enabled-cb">Items</label>
+            </div>
+            <p id="items-enabled-hint" class="setting-hint">3 inventory slots, earn items on critical (all 3 hits). Use items before dealing damage.</p>
             <div class="settings-modal-projector-row" style="margin-top: 20px;">
                 <button type="button" class="btn btn-secondary" id="open-projector-btn">Dynamic Target</button>
             </div>
@@ -1543,12 +1856,27 @@
                     <div id="player-stats-critical" class="player-stats-row"></div>
                 </div>
             </div>
+            <div class="player-stats-section" id="player-stats-inventory-section" style="display: none;">
+                <h4>Inventory</h4>
+                <div id="player-stats-inventory" class="player-stats-inventory-slots"></div>
+                <p id="player-stats-inventory-hint" class="setting-hint" style="margin-top: 8px; font-size: 0.85rem;"></p>
+            </div>
             <div class="player-stats-section">
                 <h4>Drops</h4>
                 <p id="player-stats-drops-hint" class="setting-hint"></p>
                 <button type="button" class="btn btn-secondary" id="player-stats-undo-drop-btn" style="display: none;">Undo last drop</button>
             </div>
             <button type="button" class="btn btn-primary" id="player-stats-close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Item use modal -->
+    <div class="player-stats-modal-overlay" id="item-use-modal" role="dialog" aria-label="Use item">
+        <div class="player-stats-modal" id="item-use-modal-content">
+            <h3 id="item-use-title">Use Item</h3>
+            <div id="item-use-detail" style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px;"></div>
+            <div id="item-use-targets" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <button type="button" class="btn btn-secondary" id="item-use-cancel-btn" style="margin-top: 12px;">Cancel</button>
         </div>
     </div>
 
@@ -1561,6 +1889,30 @@
                 <button type="button" class="btn btn-secondary" id="miss-modal-no">No</button>
                 <button type="button" class="btn btn-primary" id="miss-modal-yes">Yes</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Damage confirmation modal -->
+    <div class="player-stats-modal-overlay" id="damage-confirm-modal" role="dialog" aria-label="Confirm hits">
+        <div class="player-stats-modal" id="damage-confirm-modal-content">
+            <div class="modal-eyebrow">Score Confirm</div>
+            <h3 style="color: #feca57;">Lock these hits?</h3>
+            <div id="damage-confirm-rolls" class="confirm-rolls"></div>
+            <p id="damage-confirm-detail" class="setting-hint"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="damage-confirm-edit-btn">Edit</button>
+                <button type="button" class="btn btn-primary" id="damage-confirm-yes-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical item acquired modal -->
+    <div class="player-stats-modal-overlay" id="critical-item-modal" role="dialog" aria-label="Item acquired">
+        <div class="player-stats-modal" id="critical-item-modal-content">
+            <div class="modal-eyebrow">Critical Reward</div>
+            <h3 style="color: #feca57;">Item Acquired</h3>
+            <div id="critical-item-display"></div>
+            <button type="button" class="btn btn-primary" id="critical-item-dismiss-btn">Got it!</button>
         </div>
     </div>
 
@@ -1605,6 +1957,7 @@
     </script>
     <script src="rpg-bg-canvas.js"></script>
     <script src="characters.js"></script>
+    <script src="items.js"></script>
     <script>
         // Game State
         const state = {
@@ -1618,17 +1971,23 @@
             hasAttacked: false,
             damageClaimedPhase: false,
             currentHitIndex: 0,
+            remainingHitIndices: [],
+            selectedHitIdx: null,
             attackLog: [],
             gameLog: [],
             autoDealDamage: false,
             hasScoreBeenEntered: false,
+            itemUsesThisTurn: 0,
             lastDroppedKnifeLogIndex: undefined,
             dropsThisTurn: 0,
             dropsThisTurnLogIndices: [],
             damageDealtThisTurn: false,
             modBuffOnCritical: false,
-            modNerfOnMiss: false
+            modNerfOnMiss: false,
+            itemsEnabled: false,
+            itemUsePhase: false
         };
+        let previousHpByPlayerId = {};
 
         const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
 
@@ -1640,6 +1999,13 @@
             skilled: { min: 30, max: 45, pct: 0.375 },
             expert:  { min: 45, max: 75, pct: 0.6 },
             master:  { min: 75, max: 99, pct: 0.87 }
+        };
+        const BOT_ITEM_AI = {
+            newb:    { useChance: 0.22, smartChoiceChance: 0.45 },
+            novice:  { useChance: 0.45, smartChoiceChance: 0.65 },
+            skilled: { useChance: 0.72, smartChoiceChance: 0.82 },
+            expert:  { useChance: 0.88, smartChoiceChance: 0.92 },
+            master:  { useChance: 0.96, smartChoiceChance: 0.98 }
         };
 
         // DOM Elements
@@ -1664,6 +2030,7 @@
         const customHpInput = document.getElementById('custom-hp-input');
         const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
+        const itemsEnabledCb = document.getElementById('items-enabled-cb');
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
         const settingsModalDone = document.getElementById('settings-modal-done');
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
@@ -1688,8 +2055,10 @@
             customHpInput.disabled = readOnly || !useCustomHpCb.checked;
             modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
             modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
+            if (itemsEnabledCb) itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
+            if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
             if (settingsReadOnlyHint) settingsReadOnlyHint.style.display = readOnly ? 'block' : 'none';
             settingsModalDone.textContent = readOnly ? 'Close' : 'Done';
             settingsModal.classList.add('open');
@@ -1700,6 +2069,7 @@
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
+                if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
                 localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
                 if (useCustomHpCb.checked) {
                     const val = customHpInput.value.trim();
@@ -1713,9 +2083,11 @@
             } else {
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
+                localStorage.removeItem(ITEMS_ENABLED_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
+            state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
             if (state.hasScoreBeenEntered) {
                 settingsModal.classList.remove('open');
                 return;
@@ -1751,6 +2123,8 @@
             }
             state.modBuffOnCritical = modBuffOnCriticalCb.checked;
             state.modNerfOnMiss = modNerfOnMissCb.checked;
+            state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
+            if (itemsEnabledCb && persistentSettingsCb.checked) localStorage.setItem(ITEMS_ENABLED_KEY, String(state.itemsEnabled));
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
@@ -1789,6 +2163,7 @@
         const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
         const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
         const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
+        const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
 
         function isPersistentSettings() {
@@ -1799,9 +2174,11 @@
             if (isPersistentSettings()) {
                 state.modBuffOnCritical = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
                 state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+                state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             } else {
                 state.modBuffOnCritical = false;
                 state.modNerfOnMiss = false;
+                state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             }
         }
 
@@ -1964,10 +2341,12 @@
             state.currentPlayerIndex = 0;
             state.gameLog = [];
             state.hasScoreBeenEntered = false;
+            state.itemUsesThisTurn = 0;
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
             state.damageDealtThisTurn = false;
+            state.itemUsesThisTurn = 0;
             updateGameUI();
         });
 
@@ -2005,10 +2384,17 @@
                     criticals: 0,
                     buffActive: false,
                     nerfActive: false,
+                    aimActive: false,
+                    aimCalledZone: null,
+                    aimBonus: 0,
                     isBot: !!p.isBot,
-                    botSkill: p.botSkill && BOT_SKILLS[p.botSkill] ? p.botSkill : 'novice'
+                    botSkill: p.botSkill && BOT_SKILLS[p.botSkill] ? p.botSkill : 'novice',
+                    inventory: [null, null, null],
+                    inventoryLocked: [false, false, false],
+                    itemStats: { acquired: 0, used: 0, acquiredById: {}, usedById: {} }
                 };
             });
+            clearHpFeedbackSnapshot();
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             showTurnOrderScreen();
             if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
@@ -2046,6 +2432,53 @@
             return `<div class="${baseClass}" style="width:${size}px;height:${size}px;background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
         }
 
+        function ensurePlayerItemStats(player) {
+            if (!player) return;
+            if (!player.itemStats) player.itemStats = { acquired: 0, used: 0, acquiredById: {}, usedById: {} };
+            if (!player.itemStats.acquiredById) player.itemStats.acquiredById = {};
+            if (!player.itemStats.usedById) player.itemStats.usedById = {};
+        }
+
+        function trackItemAcquired(player, itemId) {
+            ensurePlayerItemStats(player);
+            player.itemStats.acquired = (player.itemStats.acquired || 0) + 1;
+            player.itemStats.acquiredById[itemId] = (player.itemStats.acquiredById[itemId] || 0) + 1;
+        }
+
+        function trackItemUsed(player, itemId) {
+            ensurePlayerItemStats(player);
+            player.itemStats.used = (player.itemStats.used || 0) + 1;
+            player.itemStats.usedById[itemId] = (player.itemStats.usedById[itemId] || 0) + 1;
+        }
+
+        function isItemLocked(player, slotIdx) {
+            if (!player || slotIdx < 0) return false;
+            const lock = player.inventoryLocked || [false, false, false];
+            return !!lock[slotIdx];
+        }
+
+        function getHitEffectiveRoll(hit) {
+            if (!hit) return 0;
+            return (hit.roll || 0) + (hit.itemBonus || 0);
+        }
+
+        function getHitsTotalDamage(hits) {
+            return (hits || []).reduce((sum, h) => sum + getHitEffectiveRoll(h), 0);
+        }
+
+        function consumeAimForCurrentPlayer(player) {
+            if (!player || !player.aimActive || player.aimCalledZone === null) return { hadAim: false, applied: false, bonus: 0, zone: null };
+            const zone = player.aimCalledZone;
+            const bonus = player.aimBonus || 3;
+            const matchingHit = (state.hits || []).find(h => h.roll === zone);
+            const applied = !!matchingHit;
+            if (matchingHit) matchingHit.itemBonus = (matchingHit.itemBonus || 0) + bonus;
+            player.aimActive = false;
+            player.aimCalledZone = null;
+            player.aimBonus = 0;
+            return { hadAim: true, applied, bonus, zone };
+        }
+
         function updateGameUI() {
             updatePlayersPanel();
             updateCurrentPlayerDisplay();
@@ -2061,7 +2494,10 @@
             state.hits = [];
             state.totalDamage = 0;
             state.currentHitIndex = 0;
+            state.remainingHitIndices = [];
+            state.selectedHitIdx = null;
             state.attackLog = [];
+            state.itemUsesThisTurn = 0;
             rollDiceBtn.disabled = false;
             disableTargetSelection();
             droppedKnifeBtn.classList.add('hidden');
@@ -2090,20 +2526,48 @@
                     if (state.hits.length >= MAX_SCORES) break;
                     if (Math.random() < hitChance) state.hits.push({ roll: state.currentRoll[idx], idx });
                 }
-                state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
+                state.totalDamage = getHitsTotalDamage(state.hits);
                 if (state.totalDamage > 0) {
                     if (state.hits.length === MAX_SCORES) {
                         current.criticals = (current.criticals || 0) + 1;
                         if (state.modBuffOnCritical) current.buffActive = true;
-                        addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')}) — Critical!`, 'info');
+                        if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
+                            const slotIdx = (current.inventory || [null, null, null]).findIndex(s => s === null);
+                            if (slotIdx >= 0) {
+                                const d12Roll = Math.floor(Math.random() * 12) + 1;
+                                const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                                if (item) {
+                                    if (!current.inventory) current.inventory = [null, null, null];
+                                    if (!current.inventoryLocked) current.inventoryLocked = [false, false, false];
+                                    current.inventory[slotIdx] = item.id;
+                                    current.inventoryLocked[slotIdx] = true;
+                                    trackItemAcquired(current, item.id);
+                                    addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
+                                } else {
+                                    addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                                }
+                            } else {
+                                addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! (inventory full)`, 'info');
+                            }
+                        } else {
+                            addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                        }
                         showCriticalReaction(current.name);
                     } else {
-                        addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
+                        addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')})`, 'info');
                     }
+                    if (state.itemsEnabled) {
+                        botTryUseOneItem(current);
+                    }
+                    if (state.phase !== 'playing') return;
                     showTargetSelection();
                 } else {
                     addLogEntry(`${current.name} missed all throws.`, 'info');
                     if (state.modNerfOnMiss) current.nerfActive = true;
+                    if (state.itemsEnabled) {
+                        botTryUseOneItem(current);
+                    }
+                    if (state.phase !== 'playing') return;
                     showMissReaction();
                     finishTurnNoAttack();
                     if (botEndTurnTimerId) clearTimeout(botEndTurnTimerId);
@@ -2128,10 +2592,31 @@
             setTimeout(() => ghost.remove(), 1900);
         }
 
+        function clearHpFeedbackSnapshot() {
+            previousHpByPlayerId = {};
+        }
+
+        function showHpDeltaFeedback(playerId, delta) {
+            if (!delta) return;
+            const card = playersPanel.querySelector(`.player-card[data-player="${playerId}"]`);
+            if (!card) return;
+            const isUp = delta > 0;
+            card.classList.remove('hp-change-up', 'hp-change-down');
+            void card.offsetWidth;
+            card.classList.add(isUp ? 'hp-change-up' : 'hp-change-down');
+            setTimeout(() => card.classList.remove('hp-change-up', 'hp-change-down'), 600);
+
+            const bubble = document.createElement('div');
+            bubble.className = `hp-delta-float ${isUp ? 'up' : 'down'}`;
+            bubble.textContent = `${isUp ? '+' : ''}${delta} HP`;
+            card.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 900);
+        }
+
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             playersPanel.innerHTML = state.players.map(p => `
-                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''}"
+                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.rageActive ? 'enraged' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
                      data-player="${p.id}">
                     <button type="button" class="player-card-stats-btn" data-player="${p.id}" aria-label="Stats and drops">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -2144,10 +2629,17 @@
                     </div>
                     <div class="player-turn-order">Turn Order: #${state.players.indexOf(p) + 1}</div>
                     ${p.isBot ? '<div class="player-card-bot-skill" data-player="'+p.id+'">Bot: ' + capitalizeBotSkill(p.botSkill) + '</div>' : ''}
-                    ${p.buffActive ? '<div class="player-card-status buff">Buff</div>' : ''}
-                    ${p.nerfActive ? '<div class="player-card-status nerf">Nerf</div>' : ''}
+                    ${getPlayerStatusEffectsForItemModal(p).map(s => '<div class="player-card-status ' + s.kind + '">' + s.label + '</div>').join('')}
+                    ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '">' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
                 </div>
             `).join('');
+            state.players.forEach(p => {
+                const prevHp = previousHpByPlayerId[p.id];
+                if (typeof prevHp === 'number' && prevHp !== p.hp) {
+                    showHpDeltaFeedback(p.id, p.hp - prevHp);
+                }
+                previousHpByPlayerId[p.id] = p.hp;
+            });
         }
 
         function capitalizeBotSkill(s) {
@@ -2199,6 +2691,7 @@
 
             state.hasRolled = true;
             const current = getCurrentPlayer();
+            addLogEntry(`${current.name} throws: ${state.currentRoll.join(', ')}.`, 'info');
             current.totalRolled = (current.totalRolled || 0) + state.currentRoll.reduce((s, v) => s + v, 0);
             current.totalThrows = (current.totalThrows || 0) + 3;
             showHitRecorder();
@@ -2213,18 +2706,35 @@
                     zone.classList.add('active');
                 }
             });
+            const aimZone = syncAimHighlights();
             try {
-                if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll });
+                if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll, aim: aimZone });
             } catch (e) {}
         }
 
         function clearHighlights() {
             document.querySelectorAll('.highlight-zone').forEach(zone => {
                 zone.classList.remove('active');
+                zone.classList.remove('aimed');
             });
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'clear' });
             } catch (e) {}
+        }
+
+        function getCurrentAimZone() {
+            const current = getCurrentPlayer();
+            if (!current || !current.aimActive || current.aimCalledZone === null) return null;
+            return current.aimCalledZone;
+        }
+
+        function syncAimHighlights() {
+            const aimZone = getCurrentAimZone();
+            document.querySelectorAll('.highlight-zone').forEach(zone => {
+                const num = parseInt(zone.getAttribute('data-number'), 10);
+                zone.classList.toggle('aimed', aimZone !== null && num === aimZone);
+            });
+            return aimZone;
         }
 
         document.addEventListener('click', (e) => {
@@ -2260,9 +2770,6 @@
         const MAX_SCORES_PER_TURN = 3;
 
         function syncHitRecorderUI() {
-            try {
-                if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll) });
-            } catch (e) {}
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 const idx = parseInt(btn.dataset.idx);
@@ -2275,7 +2782,7 @@
                 }
             });
             const totalDamageEl = document.getElementById('total-damage-display');
-            if (totalDamageEl) totalDamageEl.textContent = state.hits.reduce((sum, h) => sum + h.roll, 0);
+            if (totalDamageEl) totalDamageEl.textContent = getHitsTotalDamage(state.hits);
             const scoreCounter = hitInfo.querySelector('.scores-counter');
             if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
             document.querySelectorAll('.highlight-zone').forEach(zone => {
@@ -2283,6 +2790,10 @@
                 const claimedForNumber = state.hits.some(h => h.roll === num);
                 zone.classList.toggle('claimed', claimedForNumber);
             });
+            const aimZone = syncAimHighlights();
+            try {
+                if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll), aim: aimZone });
+            } catch (e) {}
         }
 
         function showHitRecorder(initialHits) {
@@ -2305,7 +2816,7 @@
                 </div>
                 <div style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px;">
                     <div class="scores-counter" style="font-size: 0.9rem; opacity: 0.9;">Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}</div>
-                    <p style="font-size: 1.3rem; margin: 0;">Damage Claimed: <strong id="total-damage-display" style="color: #feca57; font-size: 1.5rem;">${state.hits.reduce((sum, h) => sum + h.roll, 0)}</strong></p>
+                    <p style="font-size: 1.3rem; margin: 0;">Damage Claimed: <strong id="total-damage-display" style="color: #feca57; font-size: 1.5rem;">${getHitsTotalDamage(state.hits)}</strong></p>
                 </div>
                 <div class="hit-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     ${state.currentRoll.map((roll, idx) => `
@@ -2340,32 +2851,150 @@
             });
 
             document.getElementById('confirm-hits-btn').addEventListener('click', () => {
-                document.getElementById('odd-overlay').classList.remove('clickable');
-                document.getElementById('even-overlay').classList.remove('clickable');
-                state.totalDamage = state.hits.reduce((sum, h) => sum + h.roll, 0);
+                state.totalDamage = getHitsTotalDamage(state.hits);
+                showDamageConfirmModal(`Total damage: ${state.totalDamage}`, () => {
+                    document.getElementById('odd-overlay').classList.remove('clickable');
+                    document.getElementById('even-overlay').classList.remove('clickable');
 
-                if (state.totalDamage > 0) {
-                    const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
-                    if (isCritical) {
-                        currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
-                        if (state.modBuffOnCritical) currentPlayer.buffActive = true;
-                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')}) — Critical!`, 'info');
-                        showCriticalReaction(currentPlayer.name);
+                    if (state.totalDamage > 0) {
+                        const aimResult = consumeAimForCurrentPlayer(currentPlayer);
+                        if (aimResult.applied) {
+                            addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim success! (+${aimResult.bonus} DP)`, 'info');
+                        } else if (aimResult.hadAim) {
+                            addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
+                        }
+                        syncHitRecorderUI();
+                        state.totalDamage = getHitsTotalDamage(state.hits);
+                        const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
+                        let acquiredItem = null;
+                        let d12Roll = null;
+                        if (isCritical) {
+                            currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
+                            if (state.modBuffOnCritical) currentPlayer.buffActive = true;
+                            if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
+                                const slotIdx = (currentPlayer.inventory || [null,null,null]).findIndex(s => s === null);
+                                if (slotIdx >= 0) {
+                                    d12Roll = Math.floor(Math.random() * 12) + 1;
+                                    const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                                    if (item) {
+                                        if (!currentPlayer.inventory) currentPlayer.inventory = [null, null, null];
+                                    if (!currentPlayer.inventoryLocked) currentPlayer.inventoryLocked = [false, false, false];
+                                        currentPlayer.inventory[slotIdx] = item.id;
+                                    currentPlayer.inventoryLocked[slotIdx] = true;
+                                        trackItemAcquired(currentPlayer, item.id);
+                                        acquiredItem = item;
+                                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
+                                    } else {
+                                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                                    }
+                                } else {
+                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! (inventory full)`, 'info');
+                                }
+                            } else {
+                                addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                            }
+                            showCriticalReaction(currentPlayer.name);
+                        } else {
+                            addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')})`, 'info');
+                        }
+                        // Reflect critical rewards/buffs in UI immediately after confirm.
+                        updatePlayersPanel();
+                        const proceedAfterCritical = () => {
+                            showTargetSelection();
+                        };
+                        if (acquiredItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
+                            showCriticalItemModal(d12Roll, acquiredItem, proceedAfterCritical);
+                        } else {
+                            proceedAfterCritical();
+                        }
                     } else {
-                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => h.roll).join(', ')})`, 'info');
+                        const aimResult = consumeAimForCurrentPlayer(currentPlayer);
+                        if (aimResult.hadAim) addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
+                        showMissModal(currentPlayer);
                     }
-                    showTargetSelection();
-                } else {
-                    showMissModal(currentPlayer);
-                }
+                });
             });
+        }
+
+        const criticalItemModal = document.getElementById('critical-item-modal');
+        const criticalItemDisplay = document.getElementById('critical-item-display');
+        const criticalItemDismissBtn = document.getElementById('critical-item-dismiss-btn');
+        let criticalItemProceedCallback = null;
+
+        function showCriticalItemModal(d12Roll, item, onDismiss) {
+            criticalItemProceedCallback = onDismiss;
+            criticalItemDisplay.innerHTML = `
+                <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
+                <div class="item-use-icon-wrap" style="--accent:${item.accent}">${item.svg}</div>
+                <div class="critical-item-name" style="color: var(--accent,${item.accent});">${item.name}</div>
+                <div class="critical-item-effect">${item.effect}</div>
+                <div class="critical-item-type">${item.type}</div>
+            `;
+            criticalItemModal.classList.add('open');
+        }
+
+        function closeCriticalItemModal() {
+            criticalItemModal.classList.remove('open');
+            if (criticalItemProceedCallback) {
+                const cb = criticalItemProceedCallback;
+                criticalItemProceedCallback = null;
+                cb();
+            }
+        }
+
+        criticalItemDismissBtn.addEventListener('click', closeCriticalItemModal);
+        criticalItemModal.addEventListener('click', (e) => { if (e.target === criticalItemModal) closeCriticalItemModal(); });
+
+        const damageConfirmModal = document.getElementById('damage-confirm-modal');
+        const damageConfirmRolls = document.getElementById('damage-confirm-rolls');
+        const damageConfirmDetail = document.getElementById('damage-confirm-detail');
+        const damageConfirmYesBtn = document.getElementById('damage-confirm-yes-btn');
+        const damageConfirmEditBtn = document.getElementById('damage-confirm-edit-btn');
+        let damageConfirmCallback = null;
+
+        function showDamageConfirmModal(detailText, onYes) {
+            damageConfirmDetail.textContent = detailText || 'Continue?';
+            if (damageConfirmRolls) {
+                const rolls = (state.hits || []).map(h => h.roll);
+                damageConfirmRolls.innerHTML = rolls.length > 0
+                    ? rolls.map(v => `<span class="confirm-roll-pill">${v}</span>`).join('')
+                    : '<span class="confirm-roll-pill">No hits</span>';
+            }
+            damageConfirmCallback = onYes;
+            damageConfirmModal.classList.add('open');
+        }
+
+        function closeDamageConfirmModal() {
+            damageConfirmModal.classList.remove('open');
+            damageConfirmCallback = null;
+        }
+
+        damageConfirmYesBtn.addEventListener('click', () => {
+            const cb = damageConfirmCallback;
+            closeDamageConfirmModal();
+            if (cb) cb();
+        });
+        damageConfirmEditBtn.addEventListener('click', closeDamageConfirmModal);
+        damageConfirmModal.addEventListener('click', (e) => { if (e.target === damageConfirmModal) closeDamageConfirmModal(); });
+
+        function showItemUsePhase() {
+            state.itemUsePhase = true;
+            attackPrompt.innerHTML = `<strong>Step 2:</strong> Use items (optional) — Open your player card to use items, then assign hits.`;
+            hitInfo.innerHTML = `
+                <div style="background: rgba(254,202,87,0.15); padding: 12px; border-radius: 10px; border: 2px solid #feca57; margin-bottom: 12px;">
+                    <p style="margin-bottom: 8px;">Hits to assign: <strong>${state.hits.map(h => h.roll).join(', ')}</strong></p>
+                    <p style="margin: 0; opacity: 0.9;">Open your player card to use items, then click an opponent to assign each hit.</p>
+                </div>
+            `;
         }
 
         function showTargetSelection() {
             droppedKnifeBtn.classList.add('hidden');
-            state.damageDealtThisTurn = true;
+            state.itemUsePhase = false;
             state.damageClaimedPhase = true;
             state.currentHitIndex = 0;
+            state.remainingHitIndices = state.hits.map((_, idx) => idx);
+            state.selectedHitIdx = state.remainingHitIndices.length > 0 ? state.remainingHitIndices[0] : null;
             state.attackLog = [];
             state.attackAssignments = [];
 
@@ -2376,11 +3005,15 @@
             showNextHitToAssign();
         }
 
-        function getEffectiveDamage(roll, targetPlayer) {
+        function getEffectiveDamage(roll, targetPlayer, attacker, hitRoll) {
             let damage = roll;
             let modNote = '';
             let modLabel = '';
-            if (state.modBuffOnCritical && targetPlayer.buffActive) {
+            if (targetPlayer.shieldActive || (targetPlayer.shieldTurns || 0) > 0) {
+                damage = 0;
+                modNote = ' (shield: blocked!)';
+                modLabel = ', shield';
+            } else if (state.modBuffOnCritical && targetPlayer.buffActive) {
                 damage = Math.ceil(roll / 2);
                 modNote = ' (buff: half)';
                 modLabel = ', buff';
@@ -2389,23 +3022,38 @@
                 modNote = ' (nerf: 125%)';
                 modLabel = ', nerf';
             }
+            if (damage > 0 && attacker) {
+                if (attacker.focusActive) {
+                    damage += (attacker.focusBonus || 5);
+                    attacker.focusActive = false;
+                    modNote += ' (focus +5)';
+                    modLabel += ', focus';
+                }
+                if (attacker.rageActive && state.hits && hitRoll === Math.max(...state.hits.map(h => getHitEffectiveRoll(h)))) {
+                    damage += (attacker.rageBonus || 5);
+                    modNote += ' (rage +5)';
+                    modLabel += ', rage';
+                }
+            }
             return { damage, modNote, modLabel };
         }
 
         function autoDealDamageAndFinish() {
             const currentPlayer = getCurrentPlayer();
+            state.damageDealtThisTurn = true;
             for (let i = 0; i < state.hits.length; i++) {
                 const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
                 if (aliveOpponents.length === 0) break;
                 const currentHit = state.hits[i];
+                const currentHitValue = getHitEffectiveRoll(currentHit);
                 const targetPlayer = aliveOpponents[Math.floor(Math.random() * aliveOpponents.length)];
-                const { damage, modNote, modLabel } = getEffectiveDamage(currentHit.roll, targetPlayer);
-                state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHit.roll, damage });
+                const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
+                state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
                 targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
                 state.hasScoreBeenEntered = true;
-                currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHit.roll;
+                currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
                 addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
-                state.attackLog.push(damage !== currentHit.roll ? `${currentHit.roll} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHit.roll} → ${targetPlayer.name}`);
+                state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
                 if (targetPlayer.hp <= 0) {
                     const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
                     const rect = card ? card.getBoundingClientRect() : null;
@@ -2424,7 +3072,7 @@
         function showNextHitToAssign() {
             const currentPlayer = getCurrentPlayer();
 
-            if (state.currentHitIndex >= state.hits.length) {
+            if (!state.remainingHitIndices || state.remainingHitIndices.length === 0) {
                 finishAttackPhase();
                 return;
             }
@@ -2435,25 +3083,35 @@
                 return;
             }
 
-            const currentHit = state.hits[state.currentHitIndex];
-            const remainingHits = state.hits.slice(state.currentHitIndex);
+            if (!state.remainingHitIndices.includes(state.selectedHitIdx)) {
+                state.selectedHitIdx = state.remainingHitIndices[0];
+            }
+            const currentHit = state.hits[state.selectedHitIdx];
+            const currentHitValue = getHitEffectiveRoll(currentHit);
+            const remainingHits = state.remainingHitIndices.map(hitIdx => ({
+                ...state.hits[hitIdx],
+                hitIdx
+            }));
+            state.currentHitIndex = state.hits.length - state.remainingHitIndices.length;
 
-            attackPrompt.innerHTML = `<strong>Step 2:</strong> Assign hit <span style="color: #feca57; font-size: 1.3rem;">${currentHit.roll}</span> damage - Click an opponent to attack!`;
+            attackPrompt.innerHTML = `<strong>Step 2:</strong> Assign hit <span style="color: #feca57; font-size: 1.3rem;">${currentHitValue}</span> damage - Click an opponent to attack!`;
 
             hitInfo.innerHTML = `
-                <div class="editable-hits-box" id="editable-hits-box" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px; cursor: pointer; transition: background 0.2s, border-color 0.2s;" title="Tap to edit hits">
-                    <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign <span style="font-size: 0.8rem; opacity: 0.8;">(tap to edit)</span>:</p>
+                <div class="editable-hits-box" id="editable-hits-box" style="background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 10px; border: 2px solid #2ecc71; margin-bottom: 10px; transition: background 0.2s, border-color 0.2s;">
+                    <p style="margin-bottom: 5px; font-size: 0.9rem;">Hits to assign <span style="font-size: 0.8rem; opacity: 0.8;">(tap value to select)</span>:</p>
                     <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                        ${remainingHits.map((h, idx) => `
-                            <span style="
+                        ${remainingHits.map((h) => `
+                            <button type="button" class="assignable-hit" data-hit-idx="${h.hitIdx}" style="
                                 padding: 8px 15px;
                                 border-radius: 8px;
                                 font-weight: bold;
                                 font-size: 1.2rem;
-                                background: ${idx === 0 ? '#feca57' : 'rgba(255,255,255,0.2)'};
-                                color: ${idx === 0 ? '#1a1a2e' : '#fff'};
-                                ${idx === 0 ? 'box-shadow: 0 0 10px rgba(254,202,87,0.5);' : ''}
-                            ">${h.roll}</span>
+                                border: none;
+                                cursor: pointer;
+                                background: ${h.hitIdx === state.selectedHitIdx ? '#feca57' : 'rgba(255,255,255,0.2)'};
+                                color: ${h.hitIdx === state.selectedHitIdx ? '#1a1a2e' : '#fff'};
+                                ${h.hitIdx === state.selectedHitIdx ? 'box-shadow: 0 0 10px rgba(254,202,87,0.5);' : ''}
+                            ">${getHitEffectiveRoll(h)}</button>
                         `).join('')}
                     </div>
                 </div>
@@ -2464,22 +3122,15 @@
                 ` : ''}
             `;
 
-            document.getElementById('editable-hits-box').addEventListener('click', () => {
-                if (!confirm('Edit hits? You\'ll change which rolls counted as hits and confirm again. Any damage already assigned will be undone.')) return;
-                state.attackAssignments.forEach(({ playerId, roll, damage }) => {
-                    const p = state.players.find(pl => pl.id === playerId);
-                    if (p) {
-                        p.hp += (damage !== undefined ? damage : roll);
-                        if (p.hp > 0) p.eliminated = false;
-                    }
+            hitInfo.querySelectorAll('.assignable-hit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const selectedHitIdx = parseInt(btn.dataset.hitIdx, 10);
+                    if (isNaN(selectedHitIdx) || selectedHitIdx === state.selectedHitIdx) return;
+                    if (!state.remainingHitIndices.includes(selectedHitIdx)) return;
+                    state.selectedHitIdx = selectedHitIdx;
+                    showNextHitToAssign();
                 });
-                state.damageClaimedPhase = false;
-                state.currentHitIndex = 0;
-                state.attackLog = [];
-                state.attackAssignments = [];
-                updatePlayersPanel();
-                checkWinCondition();
-                showHitRecorder(state.hits);
             });
 
             enableTargetSelection();
@@ -2512,17 +3163,21 @@
             const playerId = parseInt(card.dataset.player);
             const targetPlayer = state.players.find(p => p.id === playerId);
             const currentPlayer = getCurrentPlayer();
-            const currentHit = state.hits[state.currentHitIndex];
-            const { damage, modNote, modLabel } = getEffectiveDamage(currentHit.roll, targetPlayer);
+            const selectedHitIdx = state.selectedHitIdx;
+            if (selectedHitIdx === null || !state.remainingHitIndices.includes(selectedHitIdx)) return;
+            const currentHit = state.hits[selectedHitIdx];
+            const currentHitValue = getHitEffectiveRoll(currentHit);
+            state.damageDealtThisTurn = true;
+            const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
 
             disableTargetSelection();
 
-            state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHit.roll, damage });
+            state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
             targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
             state.hasScoreBeenEntered = true;
-            currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHit.roll;
+            currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
             addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
-            state.attackLog.push(damage !== currentHit.roll ? `${currentHit.roll} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHit.roll} → ${targetPlayer.name}`);
+            state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
 
             if (targetPlayer.hp <= 0) {
                 const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
@@ -2536,7 +3191,9 @@
             }
             checkWinCondition();
 
-            state.currentHitIndex++;
+            state.remainingHitIndices = state.remainingHitIndices.filter(idx => idx !== selectedHitIdx);
+            state.selectedHitIdx = state.remainingHitIndices.length > 0 ? state.remainingHitIndices[0] : null;
+            state.currentHitIndex = state.hits.length - state.remainingHitIndices.length;
 
             if (state.phase === 'playing') {
                 showNextHitToAssign();
@@ -2544,7 +3201,7 @@
         }
 
         function finishAttackPhase() {
-            const totalDealt = state.hits.reduce((sum, h) => sum + h.roll, 0);
+            const totalDealt = getHitsTotalDamage(state.hits);
 
             hitInfo.innerHTML = `
                 <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
@@ -2582,10 +3239,16 @@
                 return;
             }
             const current = getCurrentPlayer();
-            current.hp = Math.max(0, current.hp - 1);
+            const freeDrop = state.itemsEnabled && ((current.freeDropsCount || 0) > 0);
+            if (!freeDrop) {
+                current.hp = Math.max(0, current.hp - 1);
+            } else {
+                current.freeDropsCount = Math.max(0, (current.freeDropsCount || 0) - 1);
+                if (current.freeDropsCount === 0) current.freeDropsActive = false;
+            }
             state.hasScoreBeenEntered = true;
             state.dropsThisTurn++;
-            addLogEntry(`${current.name} dropped a knife! (-1 HP)`, 'damage');
+            addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
             state.lastDroppedKnifeLogIndex = state.gameLog.length - 1;
             if (!state.damageDealtThisTurn) state.dropsThisTurnLogIndices.push(state.gameLog.length - 1);
             updatePlayersPanel();
@@ -2637,15 +3300,16 @@
             playerStatsAvatar.innerHTML = getPlayerAvatarHtml(player, { size: 64, className: '' });
             playerStatsHp.textContent = `${player.hp} / ${player.maxHp} HP`;
             playerStatsTurnOrder.textContent = `Turn order: #${state.players.indexOf(player) + 1}`;
-            if (player.eliminated) {
-                playerStatsStatus.textContent = 'Status: Eliminated';
-                playerStatsStatus.style.color = '#e74c3c';
-            } else if (player.buffActive) {
-                playerStatsStatus.textContent = 'Status: Buff';
-                playerStatsStatus.style.color = '#2ecc71';
-            } else if (player.nerfActive) {
-                playerStatsStatus.textContent = 'Status: Nerf';
-                playerStatsStatus.style.color = '#e74c3c';
+            const statuses = getPlayerStatusEffectsForItemModal(player).map(s => s.label);
+            if (statuses.length > 0) {
+                playerStatsStatus.textContent = `Status: ${statuses.join(', ')}`;
+                if (statuses.includes('Eliminated') || statuses.some(s => s.startsWith('Poison') || s === 'Nerf')) {
+                    playerStatsStatus.style.color = '#e74c3c';
+                } else if (statuses.some(s => s === 'Buff' || s.startsWith('Regen'))) {
+                    playerStatsStatus.style.color = '#2ecc71';
+                } else {
+                    playerStatsStatus.style.color = '#48dbfb';
+                }
             } else {
                 playerStatsStatus.textContent = 'Status: In Battle';
                 playerStatsStatus.style.color = '#48dbfb';
@@ -2679,6 +3343,24 @@
             playerStatsDropsHint.textContent = dropCount === 0 ? 'No drops this game.' : `${dropCount} drop(s) this game.`;
             playerStatsUndoDropBtn.style.display = canUndoDrop ? 'block' : 'none';
             playerStatsUndoDropBtn.textContent = undoableCount === 1 ? 'Undo last drop' : `Undo last drop (${undoableCount} undoable)`;
+
+            const invSection = document.getElementById('player-stats-inventory-section');
+            const invContainer = document.getElementById('player-stats-inventory');
+            const invHint = document.getElementById('player-stats-inventory-hint');
+            if (invSection && invContainer && state.itemsEnabled) {
+                invSection.style.display = 'block';
+                const inv = player.inventory || [null, null, null];
+                const canUseItems = canPlayerUseItemsNow(player.id);
+                invContainer.innerHTML = [0,1,2].map(i => {
+                    const itemId = inv[i];
+                    const locked = isItemLocked(player, i);
+                    const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+                    return '<div class="inv-slot ' + (ITEM ? 'has-item' : '') + (ITEM && locked ? ' locked-item' : '') + '" data-player="'+playerId+'" data-slot="' + i + '" title="' + (ITEM ? (locked ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '" ' + (ITEM && !locked ? 'style="cursor:pointer"' : '') + '>' + (ITEM ? ITEM.svg : '') + '</div>';
+                }).join('');
+                invHint.textContent = canUseItems ? 'Tap an item to use it (max 1 per turn). Newly found items unlock next turn.' : 'Items can be used once per turn on your turn before score confirmation.';
+            } else if (invSection) {
+                invSection.style.display = 'none';
+            }
             playerStatsModal.classList.add('open');
         }
 
@@ -2689,6 +3371,371 @@
 
         playerStatsCloseBtn.addEventListener('click', closePlayerStatsModal);
         playerStatsModal.addEventListener('click', (e) => { if (e.target === playerStatsModal) closePlayerStatsModal(); });
+
+        function canPlayerUseItemsNow(playerId) {
+            if (!state.itemsEnabled || state.autoDealDamage) return false;
+            const current = getCurrentPlayer();
+            if (!current || current.id !== playerId || current.isBot || current.eliminated) return false;
+            // Items are usable only before score confirmation, max 1 use per turn.
+            return !state.damageClaimedPhase && !state.damageDealtThisTurn && state.itemUsesThisTurn < 1;
+        }
+
+        const invContainer = document.getElementById('player-stats-inventory');
+        if (invContainer) {
+            invContainer.addEventListener('click', (e) => {
+                const slot = e.target.closest('.inv-slot.has-item');
+                if (!slot) return;
+                const pid = playerStatsModalPlayerId;
+                if (pid === null) return;
+                if (!canPlayerUseItemsNow(pid)) return;
+                e.stopPropagation();
+                const slotIdx = parseInt(slot.dataset.slot, 10);
+                const playerId = parseInt(slot.dataset.player, 10);
+                if (!isNaN(slotIdx) && !isNaN(playerId)) openItemUseModal(playerId, slotIdx);
+            });
+        }
+
+        const itemUseModal = document.getElementById('item-use-modal');
+        const itemUseTitle = document.getElementById('item-use-title');
+        const itemUseDetail = document.getElementById('item-use-detail');
+        const itemUseTargets = document.getElementById('item-use-targets');
+        const itemUseCancelBtn = document.getElementById('item-use-cancel-btn');
+        let itemUseContext = null; // { playerId, slotIdx, itemId }
+
+        function getPlayerStatusEffectsForItemModal(player) {
+            const statuses = [];
+            if (player.eliminated) statuses.push({ label: 'Eliminated', kind: 'eliminated' });
+            if (player.buffActive) statuses.push({ label: 'Buff', kind: 'buff' });
+            if (player.nerfActive) statuses.push({ label: 'Nerf', kind: 'nerf' });
+            if (player.shieldActive) statuses.push({ label: 'Shield', kind: 'shield' });
+            if (player.focusActive) statuses.push({ label: 'Focus', kind: 'focus' });
+            if (player.rageActive) statuses.push({ label: 'Rage', kind: 'rage' });
+            if ((player.regenTurns || 0) > 0 && (player.regenRemaining || 0) > 0) statuses.push({ label: `Regen ${player.regenRemaining}`, kind: 'regen' });
+            if ((player.poisonTurns || 0) > 0 && (player.poisonRemaining || 0) > 0) statuses.push({ label: `Poison ${player.poisonRemaining}`, kind: 'poison' });
+            if (player.aimActive && player.aimCalledZone !== null) statuses.push({ label: `Aim ${player.aimCalledZone} +${player.aimBonus || 3}`, kind: 'focus' });
+            if (player.freeDropsActive) statuses.push({ label: `Free Drops x${player.freeDropsCount || 0}`, kind: 'free' });
+            else if ((player.freeDropsCount || 0) > 0) statuses.push({ label: `Free x${player.freeDropsCount}`, kind: 'free' });
+            return statuses;
+        }
+
+        function makeItemTargetCardButton(user, item, target, opts = {}) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'item-target-card-btn' + (target.id === user.id ? ' self-target' : '');
+            btn.style.borderLeftColor = target.color ? target.color.hex : 'rgba(255,255,255,0.4)';
+            const statuses = getPlayerStatusEffectsForItemModal(target);
+            const labelPrefix = opts.labelPrefix ? `${opts.labelPrefix} ` : '';
+            const nameLabel = target.id === user.id ? `${target.name} (self)` : target.name;
+            const statusHtml = statuses.length > 0
+                ? `<div class="item-target-status-row">${statuses.map(s => `<span class="item-target-status-chip ${s.kind}">${s.label}</span>`).join('')}</div>`
+                : `<div class="item-target-status-row"><span class="item-target-status-chip">No status</span></div>`;
+            const hpPct = Math.max(0, Math.min(100, (target.hp / Math.max(1, target.maxHp)) * 100));
+            btn.innerHTML = `
+                <div class="item-target-card-inner">
+                    ${getPlayerAvatarHtml(target, { size: 28, className: '' })}
+                    <div class="item-target-card-meta">
+                        <div class="item-target-card-name">${labelPrefix}${nameLabel}</div>
+                        <div class="item-target-card-hp">${target.hp} / ${target.maxHp} HP</div>
+                        <div class="item-target-hp-bar"><div class="item-target-hp-fill" style="width:${hpPct}%; background:${target.color ? target.color.hex : '#48dbfb'};"></div></div>
+                        ${statusHtml}
+                    </div>
+                </div>
+            `;
+            btn.addEventListener('click', () => { applyItemEffect(user, item, target); });
+            return btn;
+        }
+
+        function countDropDamageForPlayer(playerName) {
+            return state.gameLog.filter(e => e.type === 'damage' && e.message.includes('dropped a knife') && e.message.includes(playerName) && e.message.includes('(-1 HP)')).length;
+        }
+
+        function useItemFromInventory(user, slotIdx, target, opts = {}) {
+            if (!user || !user.inventory) return false;
+            if (isItemLocked(user, slotIdx)) return false;
+            if (state.itemUsesThisTurn >= 1) return false;
+            const itemId = user.inventory[slotIdx];
+            const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+            if (!item || !target) return false;
+
+            if (item.id === 'scroll') {
+                target.hp = Math.min(target.maxHp, target.hp + 15);
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Healed +15 HP!`, 'info');
+            } else if (item.id === 'feather') {
+                const immediateRegen = Math.min(5, Math.max(0, target.maxHp - target.hp));
+                target.hp = Math.min(target.maxHp, target.hp + immediateRegen);
+                target.regenRemaining = 10;
+                target.regenTurns = 2;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — +${immediateRegen} HP now, Regen +10 HP over 2 turns!`, 'info');
+            } else if (item.id === 'orb') {
+                target.eliminated = false;
+                target.hp = 20;
+                addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with 20 HP!`, 'info');
+            } else if (item.id === 'metal-fragment') {
+                target.shieldActive = true;
+                target.shieldTurns = 1;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Shield (immune for 1 full turn cycle)!`, 'info');
+            } else if (item.id === 'tigers-eye') {
+                target.focusActive = true;
+                target.focusBonus = 5;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Focus +5 DP next attack!`, 'info');
+            } else if (item.id === 'toy-rocket') {
+                const aimZone = typeof opts.aimZone === 'number' ? opts.aimZone : null;
+                const current = getCurrentPlayer();
+                if (!current || current.id !== target.id || !state.hasRolled || aimZone === null || !(state.currentRoll || []).includes(aimZone)) {
+                    return false;
+                }
+                target.aimActive = true;
+                target.aimCalledZone = aimZone;
+                target.aimBonus = 3;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Called zone ${aimZone} (+3 DP if hit).`, 'info');
+            } else if (item.id === 'monkey-paw') {
+                target.hp = 0;
+                target.eliminated = true;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Instakill!`, 'info');
+            } else if (item.id === 'flame') {
+                target.rageActive = true;
+                target.rageBonus = 5;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Rage +5 DP to highest hit!`, 'info');
+            } else if (item.id === 'potion') {
+                const immediatePoison = Math.min(5, Math.max(0, target.hp));
+                target.hp = Math.max(0, target.hp - immediatePoison);
+                target.poisonRemaining = 10;
+                target.poisonTurns = 2;
+                if (target.hp <= 0) target.eliminated = true;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — -${immediatePoison} HP now, Poison -10 HP over 2 turns!`, 'info');
+            } else if (item.id === 'ticket') {
+                target.freeDropsActive = true;
+                target.freeDropsCount = 3;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Next 3 drops this turn are free!`, 'info');
+            } else if (item.id === 'red-rose') {
+                const dropCount = countDropDamageForPlayer(target.name);
+                target.hp = Math.min(target.maxHp, target.hp + dropCount);
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Recovered ${dropCount} HP from drops!`, 'info');
+            } else if (item.id === 'medkit') {
+                target.buffActive = false;
+                target.nerfActive = false;
+                target.shieldActive = false;
+                target.shieldTurns = 0;
+                target.focusActive = false;
+                target.focusBonus = 0;
+                target.rageActive = false;
+                target.rageBonus = 0;
+                target.freeDropsActive = false;
+                target.freeDropsCount = 0;
+                target.aimActive = false;
+                target.aimCalledZone = null;
+                target.aimBonus = 0;
+                target.regenRemaining = 0;
+                target.regenTurns = 0;
+                target.poisonRemaining = 0;
+                target.poisonTurns = 0;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Status cleared!`, 'info');
+            } else {
+                return false;
+            }
+
+            user.inventory[slotIdx] = null;
+            if (!user.inventoryLocked) user.inventoryLocked = [false, false, false];
+            user.inventoryLocked[slotIdx] = false;
+            trackItemUsed(user, item.id);
+            state.itemUsesThisTurn++;
+            updatePlayersPanel();
+            checkWinCondition();
+            if (item.id === 'toy-rocket') syncHitRecorderUI();
+            if (opts.closeModals) {
+                closeItemUseModal();
+                closePlayerStatsModal();
+            }
+            return true;
+        }
+
+        function getValidTargetsForItem(user, item) {
+            if (item.targetType === 'eliminated') return state.players.filter(p => p.eliminated);
+            if (item.targetType === 'opponent') return state.players.filter(p => !p.eliminated && p.id !== user.id);
+            return state.players.filter(p => !p.eliminated);
+        }
+
+        function pickBotItemTarget(user, item, profile) {
+            const alive = state.players.filter(p => !p.eliminated);
+            const opponents = alive.filter(p => p.id !== user.id);
+            const eliminated = state.players.filter(p => p.eliminated);
+            const byLowestHp = (arr) => arr.slice().sort((a, b) => a.hp - b.hp)[0] || null;
+            const byHighestHp = (arr) => arr.slice().sort((a, b) => b.hp - a.hp)[0] || null;
+
+            // Free-for-all bots avoid resurrecting opponents.
+            if (item.id === 'orb') return null;
+            if (item.id === 'monkey-paw') return byLowestHp(opponents);
+            if (item.id === 'potion') return byHighestHp(opponents.filter(p => (p.poisonTurns || 0) === 0)) || byHighestHp(opponents);
+
+            if (item.id === 'metal-fragment') return (user.shieldActive || (user.shieldTurns || 0) > 0) ? null : user;
+            if (item.id === 'tigers-eye') return user.focusActive ? null : user;
+            if (item.id === 'flame') return user.rageActive ? null : user;
+            if (item.id === 'ticket') return (user.freeDropsActive || (user.freeDropsCount || 0) > 0) ? null : user;
+            if (item.id === 'toy-rocket') return (state.hasRolled && !user.aimActive && state.hits && state.hits.length > 0) ? user : null;
+
+            if (item.id === 'scroll') return user.hp < user.maxHp ? user : null;
+            if (item.id === 'feather') return (user.hp < user.maxHp && (user.regenTurns || 0) === 0) ? user : null;
+            if (item.id === 'red-rose') {
+                return countDropDamageForPlayer(user.name) > 0 ? user : null;
+            }
+            if (item.id === 'medkit') {
+                return (user.nerfActive || (user.poisonRemaining || 0) > 0) ? user : null;
+            }
+
+            if (item.targetType === 'opponent') return byLowestHp(opponents);
+            if (item.targetType === 'eliminated') return byHighestHp(eliminated);
+            if (profile && profile.smartChoiceChance < 0.7) {
+                const valid = getValidTargetsForItem(user, item);
+                if (valid.length > 0 && Math.random() < 0.35) {
+                    return valid[Math.floor(Math.random() * valid.length)];
+                }
+            }
+            return user;
+        }
+
+        function scoreBotItemMove(user, item, target) {
+            if (!item || !target) return -999;
+            const missingHp = Math.max(0, target.maxHp - target.hp);
+            const userMissingHp = Math.max(0, user.maxHp - user.hp);
+            const userCriticalHp = user.hp <= Math.ceil(user.maxHp * 0.35);
+
+            let score = 0;
+            if (item.id === 'monkey-paw') score = 95 + Math.min(30, target.maxHp - target.hp);
+            else if (item.id === 'potion') score = 72 + Math.min(25, target.hp);
+            else if (item.id === 'metal-fragment') score = (user.shieldActive || (user.shieldTurns || 0) > 0) ? -50 : (userCriticalHp ? 78 : 52);
+            else if (item.id === 'tigers-eye') score = user.focusActive ? -30 : 54;
+            else if (item.id === 'flame') score = user.rageActive ? -30 : 56;
+            else if (item.id === 'scroll') score = missingHp > 0 ? (35 + missingHp + (userCriticalHp ? 20 : 0)) : -20;
+            else if (item.id === 'feather') score = missingHp > 0 ? (30 + missingHp + (userCriticalHp ? 15 : 0)) : -20;
+            else if (item.id === 'medkit') score = (target.nerfActive || (target.poisonRemaining || 0) > 0) ? 66 : -15;
+            else if (item.id === 'red-rose') score = 28 + countDropDamageForPlayer(target.name) * 4;
+            else if (item.id === 'ticket') score = (user.freeDropsActive || (user.freeDropsCount || 0) > 0) ? -20 : 44;
+            else if (item.id === 'toy-rocket') score = (!state.hasRolled || user.aimActive || !state.hits || state.hits.length === 0) ? -30 : 48;
+            else if (item.id === 'orb') score = -40;
+            else score = item.targetType === 'opponent' ? 50 : 35;
+
+            if (target.id !== user.id && item.targetType !== 'opponent') score -= 10;
+            if (userMissingHp >= 12 && (item.id === 'scroll' || item.id === 'feather') && target.id === user.id) score += 18;
+            if (item.id === 'monkey-paw' && target.hp <= 12) score += 15;
+            if (item.id === 'potion' && (target.poisonTurns || 0) > 0) score -= 14;
+
+            return score;
+        }
+
+        function botTryUseOneItem(botPlayer) {
+            if (!botPlayer || !botPlayer.inventory || !state.itemsEnabled) return false;
+            const profile = BOT_ITEM_AI[botPlayer.botSkill] || BOT_ITEM_AI.novice;
+            if (Math.random() > profile.useChance) return false;
+
+            const moves = [];
+            for (let i = 0; i < botPlayer.inventory.length; i++) {
+                if (isItemLocked(botPlayer, i)) continue;
+                const itemId = botPlayer.inventory[i];
+                const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+                if (!item) continue;
+                const target = pickBotItemTarget(botPlayer, item, profile);
+                if (!target) continue;
+                moves.push({ slotIdx: i, item, target, score: scoreBotItemMove(botPlayer, item, target) });
+            }
+            if (moves.length === 0) return false;
+
+            let selectedMove;
+            if (Math.random() <= profile.smartChoiceChance) {
+                selectedMove = moves.slice().sort((a, b) => b.score - a.score)[0];
+            } else {
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
+            if (!selectedMove || selectedMove.score < 0) return false;
+
+            const useOpts = { closeModals: false };
+            if (selectedMove.item && selectedMove.item.id === 'toy-rocket') {
+                const called = (state.hits || []).reduce((max, h) => Math.max(max, h.roll), -Infinity);
+                if (!Number.isFinite(called)) return false;
+                useOpts.aimZone = called;
+            }
+            if (useItemFromInventory(botPlayer, selectedMove.slotIdx, selectedMove.target, useOpts)) {
+                return true;
+            }
+            return false;
+        }
+
+        function openItemUseModal(playerId, slotIdx) {
+            const player = state.players.find(p => p.id === playerId);
+            if (!player || !player.inventory) return;
+            if (isItemLocked(player, slotIdx)) return;
+            const itemId = player.inventory[slotIdx];
+            const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+            if (!item) return;
+            itemUseContext = { playerId, slotIdx, itemId };
+            itemUseTitle.textContent = item.name;
+            itemUseDetail.innerHTML = '<div class="item-use-icon-wrap" style="--accent:' + item.accent + '">' + item.svg + '</div><div style="color: #48dbfb; font-size: 0.9rem;">' + item.effect + '</div><div style="font-size: 0.75rem; opacity: 0.7;">' + item.type + '</div>';
+            const targetsDiv = itemUseTargets;
+            targetsDiv.innerHTML = '';
+            if (item.id === 'toy-rocket') {
+                const current = getCurrentPlayer();
+                if (!current || current.id !== player.id || !state.hasRolled || !state.currentRoll || state.currentRoll.length === 0) {
+                    targetsDiv.innerHTML = '<p style="color: #888;">Use this after rolling, before confirming score.</p>';
+                    itemUseModal.classList.add('open');
+                    return;
+                }
+                const uniqueRolls = [...new Set(state.currentRoll)];
+                const help = document.createElement('p');
+                help.style.color = '#8feaff';
+                help.style.fontSize = '0.9rem';
+                help.style.margin = '0 0 6px 0';
+                help.textContent = 'Call one rolled zone. If you hit it, gain +3 DP.';
+                targetsDiv.appendChild(help);
+                uniqueRolls.forEach(roll => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-primary';
+                    btn.textContent = `Call ${roll}`;
+                    btn.addEventListener('click', () => {
+                        useItemFromInventory(player, slotIdx, player, { closeModals: true, aimZone: roll });
+                    });
+                    targetsDiv.appendChild(btn);
+                });
+                itemUseModal.classList.add('open');
+                return;
+            }
+            if (item.targetType === 'eliminated') {
+                const eliminated = state.players.filter(p => p.eliminated);
+                if (eliminated.length === 0) {
+                    targetsDiv.innerHTML = '<p style="color: #888;">No eliminated players to resurrect.</p>';
+                } else {
+                    eliminated.forEach(t => {
+                        targetsDiv.appendChild(makeItemTargetCardButton(player, item, t, { labelPrefix: 'Resurrect' }));
+                    });
+                }
+            } else {
+                const canTargetAnyAlive = item.targetType === 'self';
+                const alive = state.players.filter(p => !p.eliminated && (canTargetAnyAlive || p.id !== player.id));
+                if (alive.length === 0) {
+                    targetsDiv.innerHTML = '<p style="color: #888;">No valid players to target.</p>';
+                } else {
+                    alive.forEach(t => {
+                        targetsDiv.appendChild(makeItemTargetCardButton(player, item, t));
+                    });
+                }
+            }
+            itemUseModal.classList.add('open');
+        }
+
+        function closeItemUseModal() {
+            itemUseModal.classList.remove('open');
+            itemUseContext = null;
+        }
+
+        function applyItemEffect(user, item, target) {
+            if (!itemUseContext) return;
+            const { playerId, slotIdx } = itemUseContext;
+            const player = state.players.find(p => p.id === playerId);
+            if (!player || player.inventory[slotIdx] !== item.id) return;
+            useItemFromInventory(player, slotIdx, target, { closeModals: true });
+        }
+
+        itemUseCancelBtn.addEventListener('click', closeItemUseModal);
+        itemUseModal.addEventListener('click', (e) => { if (e.target === itemUseModal) closeItemUseModal(); });
 
         playerStatsUndoDropBtn.addEventListener('click', () => {
             if (playerStatsModalPlayerId === null) return;
@@ -2720,10 +3767,21 @@
 
         playersPanel.addEventListener('click', (e) => {
             const btn = e.target.closest('.player-card-stats-btn');
-            if (!btn) return;
-            e.stopPropagation();
-            const playerId = parseInt(btn.dataset.player, 10);
-            openPlayerStatsModal(playerId);
+            if (btn) {
+                e.stopPropagation();
+                const playerId = parseInt(btn.dataset.player, 10);
+                openPlayerStatsModal(playerId);
+                return;
+            }
+            const invSlot = e.target.closest('.player-card-inventory-slot.has-item');
+            if (invSlot && state.itemsEnabled) {
+                const playerId = parseInt(invSlot.dataset.player, 10);
+                const slotIdx = parseInt(invSlot.dataset.slot, 10);
+                if (canPlayerUseItemsNow(playerId)) {
+                    e.stopPropagation();
+                    openItemUseModal(playerId, slotIdx);
+                }
+            }
         });
 
         endTurnBtn.addEventListener('click', () => {
@@ -2750,11 +3808,44 @@
                 nextIdx = (nextIdx + 1) % state.players.length;
             } while (state.players[nextIdx].eliminated);
 
+            // Clear buff/nerf/rage for the player whose turn just ended
+            const prevPlayer = state.players[state.currentPlayerIndex];
+            if (prevPlayer) {
+                prevPlayer.rageActive = false;
+                prevPlayer.freeDropsActive = false;
+                prevPlayer.freeDropsCount = 0;
+                prevPlayer.aimActive = false;
+                prevPlayer.aimCalledZone = null;
+                prevPlayer.aimBonus = 0;
+                if (prevPlayer.inventoryLocked) prevPlayer.inventoryLocked = prevPlayer.inventoryLocked.map(() => false);
+            }
             // Clear buff/nerf for the player whose turn is starting (their "1 turn" of effect has ended)
             const nextPlayer = state.players[nextIdx];
             if (nextPlayer) {
                 nextPlayer.buffActive = false;
                 nextPlayer.nerfActive = false;
+                if ((nextPlayer.shieldTurns || 0) > 0) {
+                    nextPlayer.shieldTurns--;
+                    if (nextPlayer.shieldTurns <= 0) nextPlayer.shieldActive = false;
+                }
+                if (nextPlayer.regenRemaining > 0 && nextPlayer.regenTurns > 0) {
+                    const heal = Math.min(5, nextPlayer.regenRemaining);
+                    nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + heal);
+                    nextPlayer.regenRemaining -= heal;
+                    nextPlayer.regenTurns--;
+                    if (heal > 0) addLogEntry(`${nextPlayer.name} regens +${heal} HP!`, 'info');
+                }
+                if (nextPlayer.poisonRemaining > 0 && nextPlayer.poisonTurns > 0) {
+                    const dmg = Math.min(5, nextPlayer.poisonRemaining);
+                    nextPlayer.hp = Math.max(0, nextPlayer.hp - dmg);
+                    nextPlayer.poisonRemaining -= dmg;
+                    nextPlayer.poisonTurns--;
+                    addLogEntry(`${nextPlayer.name} takes ${dmg} poison damage!`, 'damage');
+                    if (nextPlayer.hp <= 0) {
+                        nextPlayer.eliminated = true;
+                        addLogEntry(`${nextPlayer.name} has been eliminated!`, 'info');
+                    }
+                }
             }
 
             state.currentPlayerIndex = nextIdx;
@@ -2774,6 +3865,9 @@
         }
 
         function showWinner(winner) {
+            state.players.forEach(p => {
+                p.inventory = [null, null, null];
+            });
             gameScreen.style.display = 'none';
             winnerScreen.style.display = 'block';
 
@@ -2785,6 +3879,17 @@
             } else {
                 document.getElementById('winner-name').textContent = "It's a Draw!";
             }
+        }
+
+        function formatItemStatsMapForReport(statsMap) {
+            const entries = Object.entries(statsMap || {}).filter(([, count]) => count > 0);
+            if (!entries.length) return '—';
+            entries.sort((a, b) => b[1] - a[1]);
+            return entries.map(([itemId, count]) => {
+                const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+                const label = item && item.name ? item.name : itemId;
+                return `${label} x${count}`;
+            }).join(', ');
         }
 
         function generateGameReportHTML(winner) {
@@ -2815,6 +3920,12 @@
                 const claimed = p.totalClaimed || 0;
                 const pointsPct = rolled > 0 ? (claimed / rolled * 100).toFixed(1) : '—';
                 const pointsStr = rolled > 0 ? `${claimed} / ${rolled} (${pointsPct}%)` : '—';
+                ensurePlayerItemStats(p);
+                const itemRows = state.itemsEnabled ? `
+                        <tr><td>Items acquired</td><td>${p.itemStats.acquired || 0}</td></tr>
+                        <tr><td>Items used</td><td>${p.itemStats.used || 0}</td></tr>
+                        <tr><td>Acquired breakdown</td><td>${escapeHtml(formatItemStatsMapForReport(p.itemStats.acquiredById))}</td></tr>
+                        <tr><td>Used breakdown</td><td>${escapeHtml(formatItemStatsMapForReport(p.itemStats.usedById))}</td></tr>` : '';
                 return `
                 <div class="report-player-card" style="border-left-color: ${p.color.hex}">
                     <h3 class="report-player-name">${getPlayerAvatarHtml(p, { size: 24, className: 'report-avatar' })} ${escapeHtml(p.name)}</h3>
@@ -2826,6 +3937,7 @@
                         <tr><td>Criticals</td><td>${p.criticals || 0}</td></tr>
                         <tr><td>Efficiency (hits/throws)</td><td>${throws > 0 ? `${hitCount}/${throws} (${efficiency}%)` : '—'}</td></tr>
                         <tr><td>Points (claimed / rolled)</td><td>${pointsStr}</td></tr>
+${itemRows}
                     </table>
                 </div>`;
             }).join('');
@@ -3069,6 +4181,12 @@
                 p.criticals = 0;
                 p.buffActive = false;
                 p.nerfActive = false;
+                p.aimActive = false;
+                p.aimCalledZone = null;
+                p.aimBonus = 0;
+                p.inventory = [null, null, null];
+                p.inventoryLocked = [false, false, false];
+                p.itemStats = { acquired: 0, used: 0, acquiredById: {}, usedById: {} };
             });
             state.currentPlayerIndex = 0;
             state.phase = 'turnOrder';
@@ -3079,9 +4197,12 @@
             state.hasAttacked = false;
             state.damageClaimedPhase = false;
             state.currentHitIndex = 0;
+            state.remainingHitIndices = [];
+            state.selectedHitIdx = null;
             state.attackLog = [];
             state.gameLog = [];
             state.hasScoreBeenEntered = false;
+            state.itemUsesThisTurn = 0;
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
