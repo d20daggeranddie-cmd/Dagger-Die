@@ -61,12 +61,28 @@
             stroke-width: 2;
             filter: url(#glow-green);
         }
+        .highlight-zone.aimed .face-shape {
+            fill: #22d3ee;
+            stroke: #0e7490;
+            stroke-width: 2.2;
+            filter: url(#glow-green);
+            stroke-dasharray: 10 6;
+        }
+        .highlight-zone.aimed.claimed .face-shape {
+            fill: #e879f9;
+            stroke: #a21caf;
+            filter: url(#glow-green);
+            stroke-dasharray: 10 6;
+        }
 
         /* ── Pulse animation for active zones ── */
         .highlight-zone.active .face-shape {
             animation: projectorPulse 1.5s ease-in-out infinite;
         }
         .highlight-zone.claimed .face-shape {
+            animation: none;
+        }
+        .highlight-zone.aimed .face-shape {
             animation: none;
         }
         @keyframes projectorPulse {
@@ -191,7 +207,7 @@
 
         function clearAll() {
             allZones.forEach(z => {
-                z.classList.remove('active', 'claimed');
+                z.classList.remove('active', 'claimed', 'aimed');
             });
         }
 
@@ -229,6 +245,14 @@
             });
         }
 
+        function highlightAim(aimZone) {
+            const aimPair = numberToPair[aimZone];
+            allZones.forEach(z => {
+                const pair = z.getAttribute('data-pair');
+                z.classList.toggle('aimed', !!aimPair && pair === aimPair);
+            });
+        }
+
         // ── BroadcastChannel listener ──
         const channel = new BroadcastChannel('daggerdie-projector');
 
@@ -247,6 +271,7 @@
             if (msg.type === 'roll') {
                 clearAll();
                 highlightRolls(msg.rolls || []);
+                highlightAim(msg.aim);
                 statusDot.classList.add('active');
                 return;
             }
@@ -256,6 +281,7 @@
                 clearAll();
                 highlightRolls(msg.rolls || []);
                 highlightClaimed(msg.claimed || []);
+                highlightAim(msg.aim);
                 statusDot.classList.add('active');
                 return;
             }
