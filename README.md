@@ -35,6 +35,7 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 - Turn order management with automatic tie-breaking
 - Player name validation (2-30 chars, unique, real-time duplicate detection)
 - Game log to track all actions
+- Endgame report with per-player stats (including Efficiency shown as hits/throws)
 - Projector mode to display target face on a second screen (scales smoothly to any window size)
 - Download target stencil (SVG) for painting your own boards
 - Responsive design — works on desktop and mobile (tap highlighted areas to claim hits)
@@ -53,6 +54,12 @@ The landing page includes an Options menu with gameplay preferences (saved in br
 During a game, open the gear icon to access in-game settings (locked after first damage is dealt):
 
 - **Use custom HP** — Override the default HP per player (20–999) instead of using automatic values by player count
+
+## Item Inventory Behavior
+
+- Inventory has 3 slots and fills left to right.
+- When an item is used, remaining items shift left to fill empty space.
+- New items are added to the next open slot at the end (behind current items), not inserted in front.
 
 ## Resources
 
