@@ -2457,6 +2457,28 @@
             return !!lock[slotIdx];
         }
 
+        function compactInventory(player) {
+            if (!player) return;
+            const inv = Array.isArray(player.inventory) ? player.inventory.slice(0, 3) : [null, null, null];
+            const lock = Array.isArray(player.inventoryLocked) ? player.inventoryLocked.slice(0, 3) : [false, false, false];
+            while (inv.length < 3) inv.push(null);
+            while (lock.length < 3) lock.push(false);
+
+            const entries = [];
+            for (let i = 0; i < 3; i++) {
+                if (inv[i] !== null && inv[i] !== undefined) {
+                    entries.push({ itemId: inv[i], locked: !!lock[i] });
+                }
+            }
+
+            player.inventory = [null, null, null];
+            player.inventoryLocked = [false, false, false];
+            for (let i = 0; i < entries.length; i++) {
+                player.inventory[i] = entries[i].itemId;
+                player.inventoryLocked[i] = entries[i].locked;
+            }
+        }
+
         function getHitEffectiveRoll(hit) {
             if (!hit) return 0;
             return (hit.roll || 0) + (hit.itemBonus || 0);
@@ -2532,6 +2554,7 @@
                         current.criticals = (current.criticals || 0) + 1;
                         if (state.modBuffOnCritical) current.buffActive = true;
                         if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
+                            compactInventory(current);
                             const slotIdx = (current.inventory || [null, null, null]).findIndex(s => s === null);
                             if (slotIdx >= 0) {
                                 const d12Roll = Math.floor(Math.random() * 12) + 1;
@@ -2872,6 +2895,7 @@
                             currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
                             if (state.modBuffOnCritical) currentPlayer.buffActive = true;
                             if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
+                                compactInventory(currentPlayer);
                                 const slotIdx = (currentPlayer.inventory || [null,null,null]).findIndex(s => s === null);
                                 if (slotIdx >= 0) {
                                     d12Roll = Math.floor(Math.random() * 12) + 1;
@@ -3541,6 +3565,7 @@
             user.inventory[slotIdx] = null;
             if (!user.inventoryLocked) user.inventoryLocked = [false, false, false];
             user.inventoryLocked[slotIdx] = false;
+            compactInventory(user);
             trackItemUsed(user, item.id);
             state.itemUsesThisTurn++;
             updatePlayersPanel();
