@@ -408,6 +408,11 @@
           </div>
           <p id="mod-nerf-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Take 125% damage for 1 turn after missing all throws.</p>
           <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-desc">
+            <label for="items-enabled-cb">Items</label>
+          </div>
+          <p id="items-enabled-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">3 inventory slots, earn items on critical (all 3 hits). Use items before dealing damage.</p>
+          <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="bots-enabled-cb" aria-describedby="bots-enabled-desc">
             <label for="bots-enabled-cb">Enable bots</label>
           </div>
@@ -572,6 +577,7 @@
     const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
     const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
     const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
+    const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
 
     document.getElementById('options-toggle').addEventListener('click', () => {
@@ -612,6 +618,8 @@
     persistentSettingsCb.checked = isPersistent();
     modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
     modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+    const itemsEnabledCb = document.getElementById('items-enabled-cb');
+    itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
 
     useCustomHpCb.addEventListener('change', () => {
       customHpInput.disabled = !useCustomHpCb.checked;
@@ -642,6 +650,7 @@
 
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
+    itemsEnabledCb.addEventListener('change', () => localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked)));
 
     const botsEnabledCb = document.getElementById('bots-enabled-cb');
     botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
