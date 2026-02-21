@@ -3315,7 +3315,11 @@
                 playerStatsStatus.style.color = '#48dbfb';
             }
 
-            const hitCount = state.gameLog.filter(e => e.message.includes(player.name) && e.message.includes('dealt') && e.message.includes('damage to')).length;
+            const hitCount = state.gameLog.filter(e =>
+                e.type === 'damage' &&
+                e.message.startsWith(`${player.name} dealt `) &&
+                e.message.includes(' damage to ')
+            ).length;
             const throws = player.totalThrows || 0;
             if (throws > 0) {
                 const hitPct = (hitCount / throws * 100).toFixed(1);
@@ -3912,7 +3916,11 @@
             // Per-player stats for breakdown
             const playerStatsBreakdown = state.players.map(p => {
                 const status = p.eliminated ? 'Eliminated' : (winner && p.id === winner.id ? 'Winner' : 'Survived');
-                const hitCount = state.gameLog.filter(e => e.message.includes(p.name) && e.message.includes('dealt') && e.message.includes('damage to')).length;
+                const hitCount = state.gameLog.filter(e =>
+                    e.type === 'damage' &&
+                    e.message.startsWith(`${p.name} dealt `) &&
+                    e.message.includes(' damage to ')
+                ).length;
                 const dropCount = state.gameLog.filter(e => e.type === 'damage' && e.message.includes('dropped a knife') && e.message.includes(p.name)).length;
                 const throws = p.totalThrows || 0;
                 const efficiency = throws > 0 ? (hitCount / throws * 100).toFixed(1) : '—';
