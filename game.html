@@ -421,7 +421,8 @@
             width: 100%;
         }
         #damage-confirm-modal-content,
-        #critical-item-modal-content {
+        #critical-item-modal-content,
+        #turn-summary-modal-content {
             max-width: 430px;
             border: 1px solid rgba(254, 202, 87, 0.28);
             box-shadow: 0 24px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -1818,6 +1819,22 @@
                 <label for="persistent-settings-cb">Persistent settings</label>
             </div>
             <p id="persistent-settings-hint" class="setting-hint">When unchecked (default), settings reset to defaults each new game. When checked, your selections are kept until you uncheck this.</p>
+            <h4 class="settings-section-title" style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem; color: #48dbfb;">Auto Advance</h4>
+            <div class="option-row">
+                <input type="checkbox" id="auto-roll-dice-cb" aria-describedby="auto-roll-dice-hint">
+                <label for="auto-roll-dice-cb">Automatically roll dice on player turn</label>
+            </div>
+            <p id="auto-roll-dice-hint" class="setting-hint">When enabled, dice roll automatically when each player's turn begins.</p>
+            <div class="option-row">
+                <input type="checkbox" id="auto-deal-damage-cb" aria-describedby="auto-deal-damage-hint">
+                <label for="auto-deal-damage-cb">Auto deal damage (randomly assign hits to opponents)</label>
+            </div>
+            <p id="auto-deal-damage-hint" class="setting-hint">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
+            <div class="option-row">
+                <input type="checkbox" id="auto-advance-after-damage-cb" aria-describedby="auto-advance-after-damage-hint">
+                <label for="auto-advance-after-damage-cb">Automatically advance to next player after damage</label>
+            </div>
+            <p id="auto-advance-after-damage-hint" class="setting-hint">When enabled, the turn summary appears briefly then the next player's turn starts automatically. No need to click End Turn.</p>
             <h4 class="settings-section-title" style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem; color: #48dbfb;">Mods</h4>
             <div class="option-row">
                 <input type="checkbox" id="mod-buff-on-critical-cb" aria-describedby="mod-buff-hint">
@@ -1916,6 +1933,14 @@
         </div>
     </div>
 
+    <!-- Turn summary modal (shows 2 sec then auto-dismisses) -->
+    <div class="player-stats-modal-overlay" id="turn-summary-modal" role="dialog" aria-label="Turn summary">
+        <div class="player-stats-modal" id="turn-summary-modal-content">
+            <div class="modal-eyebrow">Turn Complete</div>
+            <div id="turn-summary-body"></div>
+        </div>
+    </div>
+
     <!-- Critical hit onscreen reaction -->
     <div class="critical-reaction" id="critical-reaction" aria-live="polite">
         <div class="critical-reaction-inner">Critical!</div>
@@ -1976,6 +2001,7 @@
             attackLog: [],
             gameLog: [],
             autoDealDamage: false,
+            autoAdvanceAfterDamage: false,
             hasScoreBeenEntered: false,
             itemUsesThisTurn: 0,
             lastDroppedKnifeLogIndex: undefined,
@@ -2023,6 +2049,7 @@
         const gameLogEntries = document.getElementById('game-log-entries');
 
         let botEndTurnTimerId = null;
+        let turnSummaryModalTimerId = null;
 
         const settingsModal = document.getElementById('settings-modal');
         const settingsGearBtn = document.getElementById('settings-gear-btn');
@@ -2031,6 +2058,9 @@
         const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
+        const autoRollDiceCb = document.getElementById('auto-roll-dice-cb');
+        const autoDealDamageCb = document.getElementById('auto-deal-damage-cb');
+        const autoAdvanceAfterDamageCb = document.getElementById('auto-advance-after-damage-cb');
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
         const settingsModalDone = document.getElementById('settings-modal-done');
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
@@ -2056,9 +2086,15 @@
             modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
             modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
             if (itemsEnabledCb) itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+            if (autoRollDiceCb) autoRollDiceCb.checked = localStorage.getItem('daggerdie_autoRollDice') === 'true';
+            if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
+            if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
             if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
+            if (autoRollDiceCb) autoRollDiceCb.disabled = readOnly;
+            if (autoDealDamageCb) autoDealDamageCb.disabled = readOnly;
+            if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = readOnly;
             if (settingsReadOnlyHint) settingsReadOnlyHint.style.display = readOnly ? 'block' : 'none';
             settingsModalDone.textContent = readOnly ? 'Close' : 'Done';
             settingsModal.classList.add('open');
@@ -2088,6 +2124,15 @@
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
             state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
+            if (autoRollDiceCb) localStorage.setItem('daggerdie_autoRollDice', String(autoRollDiceCb.checked));
+            if (autoDealDamageCb) {
+                localStorage.setItem('daggerdie_autoDealDamage', String(autoDealDamageCb.checked));
+                state.autoDealDamage = autoDealDamageCb.checked;
+            }
+            if (autoAdvanceAfterDamageCb) {
+                localStorage.setItem('daggerdie_autoAdvanceAfterDamage', String(autoAdvanceAfterDamageCb.checked));
+                state.autoAdvanceAfterDamage = autoAdvanceAfterDamageCb.checked;
+            }
             if (state.hasScoreBeenEntered) {
                 settingsModal.classList.remove('open');
                 return;
@@ -2396,6 +2441,7 @@
             });
             clearHpFeedbackSnapshot();
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
+            state.autoAdvanceAfterDamage = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             showTurnOrderScreen();
             if (localStorage.getItem('daggerdie_autoRollTurnOrder') === 'true') {
                 setTimeout(() => document.getElementById('roll-turn-order-btn')?.click(), 400);
@@ -2593,11 +2639,6 @@
                     if (state.phase !== 'playing') return;
                     showMissReaction();
                     finishTurnNoAttack();
-                    if (botEndTurnTimerId) clearTimeout(botEndTurnTimerId);
-                    botEndTurnTimerId = setTimeout(() => {
-                        botEndTurnTimerId = null;
-                        if (getCurrentPlayer().isBot) endTurnBtn.click();
-                    }, 1800);
                 }
             }, 1100);
         }
@@ -3224,37 +3265,58 @@
             }
         }
 
+        function showTurnSummaryModal(bodyHtml, onDismiss) {
+            if (turnSummaryModalTimerId) clearTimeout(turnSummaryModalTimerId);
+            const modal = document.getElementById('turn-summary-modal');
+            const body = document.getElementById('turn-summary-body');
+            if (body) body.innerHTML = bodyHtml;
+            if (modal) modal.classList.add('open');
+            turnSummaryModalTimerId = setTimeout(() => {
+                turnSummaryModalTimerId = null;
+                if (modal) modal.classList.remove('open');
+                if (typeof onDismiss === 'function') onDismiss();
+            }, 2000);
+        }
+
         function finishAttackPhase() {
             const totalDealt = getHitsTotalDamage(state.hits);
-
-            hitInfo.innerHTML = `
+            const summaryHtml = `
+                <h3 style="color: #feca57; margin-bottom: 16px;">Attacks Complete!</h3>
                 <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
-                    <p style="font-size: 1.1rem; margin-bottom: 8px;">Attacks Complete!</p>
                     <div style="font-size: 0.9rem;">
                         ${state.attackLog.map(log => `<div>${log}</div>`).join('')}
                     </div>
                     <p style="margin-top: 8px;">Total Damage: <strong style="color: #ff6b6b;">${totalDealt}</strong></p>
                 </div>
             `;
+            hitInfo.innerHTML = '';
             attackPrompt.classList.add('hidden');
-            endTurnBtn.classList.remove('hidden');
+            endTurnBtn.classList.add('hidden');
             state.hasAttacked = true;
-            if (getCurrentPlayer().isBot) {
-                if (botEndTurnTimerId) clearTimeout(botEndTurnTimerId);
-                botEndTurnTimerId = setTimeout(() => {
-                    botEndTurnTimerId = null;
-                    if (getCurrentPlayer().isBot) endTurnBtn.click();
-                }, 2200);
-            }
+            showTurnSummaryModal(summaryHtml, () => {
+                if (getCurrentPlayer().isBot || state.autoAdvanceAfterDamage) {
+                    nextTurn();
+                } else {
+                    endTurnBtn.classList.remove('hidden');
+                }
+            });
         }
 
         function finishTurnNoAttack() {
             droppedKnifeBtn.classList.add('hidden');
             state.damageDealtThisTurn = true;
-            hitInfo.innerHTML = `<span class="hit-badge miss">No damage this turn</span>`;
+            const summaryHtml = `<h3 style="color: #feca57;">No damage this turn</h3><p style="color: rgba(255,255,255,0.8);">Dropped knife or no hits.</p>`;
+            hitInfo.innerHTML = '';
             attackPrompt.classList.add('hidden');
-            endTurnBtn.classList.remove('hidden');
+            endTurnBtn.classList.add('hidden');
             state.hasAttacked = true;
+            showTurnSummaryModal(summaryHtml, () => {
+                if (getCurrentPlayer().isBot || state.autoAdvanceAfterDamage) {
+                    nextTurn();
+                } else {
+                    endTurnBtn.classList.remove('hidden');
+                }
+            });
         }
 
         droppedKnifeBtn.addEventListener('click', () => {
@@ -3819,6 +3881,8 @@
 
         function nextTurn() {
             if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
+            if (turnSummaryModalTimerId) { clearTimeout(turnSummaryModalTimerId); turnSummaryModalTimerId = null; }
+            document.getElementById('turn-summary-modal')?.classList.remove('open');
             disableTargetSelection();
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
@@ -4201,6 +4265,8 @@ ${itemRows}
         document.getElementById('new-game-btn').addEventListener('click', resetGame);
                 function playAgain() {
             if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
+            if (turnSummaryModalTimerId) { clearTimeout(turnSummaryModalTimerId); turnSummaryModalTimerId = null; }
+            document.getElementById('turn-summary-modal')?.classList.remove('open');
             applySettingsForNewGame();
             const defaultHp = getDefaultHp(state.players.length);
             state.players.forEach(p => {
