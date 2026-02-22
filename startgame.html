@@ -7,11 +7,14 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://daggeranddie.us/startgame.html">
 <meta property="og:title" content="Dagger & Die - Prepare for Battle!">
-<meta property="og:description" content="Dagger & Die - Prepare for Battle!">
+<meta property="og:description" content="Prepare For Battle!">
+<meta name="description" content="Prepare For Battle!">
 <meta property="og:image" content="https://daggeranddie.us/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dagger & Die - Prepare for Battle!">
+<meta name="twitter:description" content="Prepare For Battle!">
 <meta name="twitter:image" content="https://daggeranddie.us/og-image.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
@@ -396,7 +399,7 @@
             <label for="custom-hp-input">Default HP per player (20–999)</label>
             <input type="number" id="custom-hp-input" min="20" max="999" placeholder="e.g. 50" disabled>
           </div>
-          <p id="custom-hp-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked, automatic values are used (2 players: 50, 3–4: 40, 5–6: 60).</p>
+          <p id="custom-hp-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked, automatic values are used (2 players: 40, 3–4: 50, 5–6: 60).</p>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="mod-buff-on-critical-cb" aria-describedby="mod-buff-hint">
             <label for="mod-buff-on-critical-cb">Buff on Critical</label>
@@ -422,10 +425,10 @@
 
       <section class="info-section">
         <h3>How to Play</h3>
-        <p>The physical game uses two log rounds painted with D20 patterns—one for odd numbers (1–19), one for even (2–20). Players throw at the targets based on what they roll!</p>
+        <p>The game can be played with one log round or two. Tap the Star at the top for target face options. Download the target stencil or open the Dynamic Target to use a projector target face!</p>
         <div class="rules-grid">
           <div class="rule-card"><strong>Setup</strong> Select 2–6 players, choose unique names and characters, roll D20 for turn order (highest first; ties reroll).</div>
-          <div class="rule-card"><strong>Gameplay</strong> HP scales by count (2: 50, 3–4: 40, 5–6: 60). Roll 3 D20s, throw at matching targets, tap highlighted zones to claim hits, assign each hit's full damage to one opponent.</div>
+          <div class="rule-card"><strong>Gameplay</strong> HP scales by count (2: 40, 3–4: 50, 5–6: 60). Roll 3 D20s, throw at matching targets, tap highlighted zones to claim hits, assign each hit's full damage to one opponent.</div>
           <div class="rule-card"><strong>Special Rules</strong> Dropped knife = -1 HP. Eliminated at 0 HP. Last player standing wins!</div>
         </div>
       </section>
@@ -655,6 +658,8 @@
     const botsEnabledCb = document.getElementById('bots-enabled-cb');
     botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
     botsEnabledCb.addEventListener('change', () => localStorage.setItem(BOTS_ENABLED_KEY, String(botsEnabledCb.checked)));
+
   </script>
+  <script src="m3-readme-modal.js"></script>
 </body>
 </html>
