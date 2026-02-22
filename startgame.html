@@ -388,6 +388,11 @@
             <label for="auto-deal-damage">Auto deal damage (randomly assign hits to opponents)</label>
           </div>
           <p id="auto-deal-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, damage from hits is automatically assigned to random opponents instead of choosing targets.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="auto-advance-after-damage" aria-describedby="auto-advance-after-damage-desc">
+            <label for="auto-advance-after-damage">Automatically advance to next player after damage</label>
+          </div>
+          <p id="auto-advance-after-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the turn summary appears briefly then the next player's turn starts automatically. No need to click End Turn.</p>
         </div>
         <div class="options-group">
           <h4>Mods</h4>
@@ -575,6 +580,7 @@
     const AUTO_BEGIN_GAME_KEY = 'daggerdie_autoBeginGame';
     const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
     const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
+    const AUTO_ADVANCE_AFTER_DAMAGE_KEY = 'daggerdie_autoAdvanceAfterDamage';
     const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
     const CUSTOM_HP_KEY = 'daggerdie_customHp';
     const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
@@ -606,6 +612,10 @@
     const autoDealDamageCheckbox = document.getElementById('auto-deal-damage');
     autoDealDamageCheckbox.checked = localStorage.getItem(AUTO_DEAL_DAMAGE_KEY) === 'true';
     autoDealDamageCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_DEAL_DAMAGE_KEY, autoDealDamageCheckbox.checked));
+
+    const autoAdvanceAfterDamageCheckbox = document.getElementById('auto-advance-after-damage');
+    autoAdvanceAfterDamageCheckbox.checked = localStorage.getItem(AUTO_ADVANCE_AFTER_DAMAGE_KEY) === 'true';
+    autoAdvanceAfterDamageCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_ADVANCE_AFTER_DAMAGE_KEY, autoAdvanceAfterDamageCheckbox.checked));
 
     const useCustomHpCb = document.getElementById('use-custom-hp-cb');
     const customHpInput = document.getElementById('custom-hp-input');
