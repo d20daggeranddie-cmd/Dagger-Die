@@ -1812,7 +1812,7 @@
                 <label for="custom-hp-input">Default HP per player (20–999)</label>
                 <input type="number" id="custom-hp-input" min="20" max="999" placeholder="e.g. 50" disabled>
             </div>
-            <p id="custom-hp-hint" class="setting-hint">When unchecked, automatic values are used (2 players: 50, 3–4: 40, 5–6: 60).</p>
+            <p id="custom-hp-hint" class="setting-hint">When unchecked, automatic values are used (2 players: 40, 3–4: 50, 5–6: 60).</p>
             <div class="option-row" style="margin-top: 20px;">
                 <input type="checkbox" id="persistent-settings-cb" aria-describedby="persistent-settings-hint">
                 <label for="persistent-settings-cb">Persistent settings</label>
@@ -2190,8 +2190,8 @@
                     if (!isNaN(n) && n >= 20 && n <= 999) return n;
                 }
             }
-            if (playerCount <= 2) return 50;
-            if (playerCount <= 4) return 40;
+            if (playerCount <= 2) return 40;
+            if (playerCount <= 4) return 50;
             return 60; // 5-6 players
         }
 
@@ -4274,5 +4274,6 @@ ${itemRows}
             window.location.href = 'charselect.html';
         }
     </script>
+    <script src="m3-readme-modal.js"></script>
 </body>
 </html>
