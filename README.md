@@ -11,8 +11,8 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 
 ### Gameplay
 - Starting HP varies by player count:
-  - **2 players**: 50 HP
-  - **3-4 players**: 40 HP
+  - **2 players**: 40 HP
+  - **3-4 players**: 50 HP
   - **5-6 players**: 60 HP
 - On your turn, roll 3 virtual D20s in the app
 - The app highlights the corresponding target zones on the odd/even boards
@@ -68,28 +68,11 @@ From the Resources dropdown on the landing page:
 - **Download target stencil (SVG)** — SVG file for painting D20 targets onto log rounds
 - **Open target face (projector)** — Opens a separate window to display the D20 target on a projector or second screen. Also available in-game via the gear menu (Dynamic Target). Syncs with the game via BroadcastChannel — highlights rolled zones (gold) and claimed hits (green). Scales smoothly to any window size.
 
-## Hosting on GitHub Pages
 
-1. Push this repository to GitHub
-2. Go to Settings → Pages
-3. Select "main" branch as source
-4. Your game will be available at `https://[username].github.io/[repo-name]/`
-
-## Files
-- `index.html` — Entry point; loads intro animation in iframe
-- `intro-animation.html` — Cover graphic and tap-to-enter; navigates to startgame
-- `startgame.html` — Landing page with Options menu, Resources dropdown, and player setup
-- `charselect.html` — Character/player selection (2–6 players, names, colors)
-- `game.html` — Full game application (turn order, dice rolling, HP tracking, hit claiming)
-- `projector.html` — Target display for projector mode; D20 face syncs with game, scales to window
-- `assets/ODD.svg` — Odd numbers target board (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)
-- `assets/EVEN.svg` — Even numbers target board (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
-- `assets/targetstencil.svg` — Target stencil for download
-
-## The Physical Game
-
-The actual game uses two log rounds painted with D20 patterns:
+The original game uses two log rounds painted with D20 patterns:
 - One log has all odd numbers (center is 1)
 - One log has all even numbers (center is 20)
 
-Players throw real knives at the targets based on what they roll on the dice!
+Single log round option is to use the stencil to transfer the icosahedron outline to a log round and leave the facets blank.
+
+Players throw knives at the targets based on what they roll on the dice!
