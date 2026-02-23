@@ -7,13 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Google Analytics (GA4) - Replace G-XXXXXXXXXX with your Measurement ID -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <!-- Google Analytics (GA4) - Replace G-NDL380JPBQ with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NDL380JPBQ"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX');
+        gtag('config', 'G-NDL380JPBQ');
     </script>
     <style>
         * {
@@ -3937,6 +3937,14 @@
                     if (nextPlayer.hp <= 0) {
                         nextPlayer.eliminated = true;
                         addLogEntry(`${nextPlayer.name} has been eliminated!`, 'info');
+                        updatePlayersPanel();
+                        const card = document.querySelector(`.player-card[data-player="${nextPlayer.id}"]`);
+                        const rect = card ? card.getBoundingClientRect() : null;
+                        spawnDeathGhost(rect);
+                        checkWinCondition();
+                        if (state.phase === 'finished') return;
+                        nextTurn();
+                        return;
                     }
                 }
             }
