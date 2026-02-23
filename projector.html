@@ -61,6 +61,19 @@
             stroke-width: 2;
             filter: url(#glow-green);
         }
+        /* ── Multi-hit (2+ rolls/hits on same section) — distinct from Aim (cyan) ── */
+        .highlight-zone.multi-hit.active .face-shape {
+            fill: #f59e0b;
+            stroke: #d97706;
+            stroke-width: 2.2;
+            filter: url(#glow-amber);
+        }
+        .highlight-zone.multi-hit.claimed .face-shape {
+            fill: #f97316;
+            stroke: #ea580c;
+            stroke-width: 2.2;
+            filter: url(#glow-orange);
+        }
         .highlight-zone.aimed .face-shape {
             fill: #22d3ee;
             stroke: #0e7490;
@@ -76,7 +89,8 @@
         }
 
         /* ── Pulse animation for active zones ── */
-        .highlight-zone.active .face-shape {
+        .highlight-zone.active .face-shape,
+        .highlight-zone.multi-hit.active .face-shape {
             animation: projectorPulse 1.5s ease-in-out infinite;
         }
         .highlight-zone.claimed .face-shape {
@@ -149,6 +163,18 @@
                     <feComposite in="color" in2="blur" operator="in" result="shadow"/>
                     <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
+                <filter id="glow-amber" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#f59e0b" flood-opacity="0.5" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-orange" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#f97316" flood-opacity="0.5" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
             </defs>
 
             <!-- D20 faces from resources/d20_blank.html -->
@@ -207,40 +233,45 @@
 
         function clearAll() {
             allZones.forEach(z => {
-                z.classList.remove('active', 'claimed', 'aimed');
+                z.classList.remove('active', 'claimed', 'aimed', 'multi-hit');
             });
         }
 
         function highlightRolls(rolls) {
-            // Collect unique pairs that were rolled
-            const activePairs = new Set();
+            // Count how many rolls map to each pair
+            const pairCounts = {};
             rolls.forEach(r => {
                 const pair = numberToPair[r];
-                if (pair) activePairs.add(pair);
+                if (pair) pairCounts[pair] = (pairCounts[pair] || 0) + 1;
             });
             allZones.forEach(z => {
                 const pair = z.getAttribute('data-pair');
-                if (activePairs.has(pair)) {
+                const count = pairCounts[pair] || 0;
+                if (count > 0) {
                     z.classList.add('active');
+                    z.classList.toggle('multi-hit', count >= 2);
                 } else {
-                    z.classList.remove('active');
+                    z.classList.remove('active', 'multi-hit');
                 }
             });
         }
 
         function highlightClaimed(claimed) {
-            const claimedPairs = new Set();
+            // Count how many claimed hits map to each pair
+            const pairCounts = {};
             claimed.forEach(r => {
                 const pair = numberToPair[r];
-                if (pair) claimedPairs.add(pair);
+                if (pair) pairCounts[pair] = (pairCounts[pair] || 0) + 1;
             });
             allZones.forEach(z => {
                 const pair = z.getAttribute('data-pair');
-                if (claimedPairs.has(pair)) {
+                const count = pairCounts[pair] || 0;
+                if (count > 0) {
                     z.classList.add('claimed');
                     z.classList.remove('active');
+                    z.classList.toggle('multi-hit', count >= 2);
                 } else {
-                    z.classList.remove('claimed');
+                    z.classList.remove('claimed', 'multi-hit');
                 }
             });
         }
