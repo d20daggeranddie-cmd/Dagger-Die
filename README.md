@@ -6,7 +6,7 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 
 ### Setup
 1. Select 2-6 players
-2. Each player chooses a name (2-30 characters, must be unique) and color
+2. Each player chooses a name (2-30 characters, must be unique) and character
 3. Roll for turn order (highest D20 roll goes first; ties are broken by rerolling only the tied players)
 
 ### Gameplay
@@ -76,3 +76,4 @@ The original game uses two log rounds painted with D20 patterns:
 Single log round option is to use the stencil to transfer the icosahedron outline to a log round and leave the facets blank.
 
 Players throw knives at the targets based on what they roll on the dice!
+
