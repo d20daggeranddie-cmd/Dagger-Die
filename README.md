@@ -1,14 +1,16 @@
 # Dagger & Die
 
 
-## How to Play
 ##Requirements
 -Target
-  Target with prepared the game target face
+  Target prepared with the game target face
   or 
   Access to a throwing lane with a projector 
 -Knives
   1-3 knives
+
+
+  ## How to Play
   
 ### Setup
 1. Select 2-6 players
