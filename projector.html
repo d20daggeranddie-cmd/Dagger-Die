@@ -74,6 +74,19 @@
             stroke-width: 2.2;
             filter: url(#glow-orange);
         }
+        /* ── Triple-hit (3 rolls/hits on same section) — glowing red ── */
+        .highlight-zone.triple-hit.active .face-shape {
+            fill: #ef4444;
+            stroke: #dc2626;
+            stroke-width: 2.2;
+            filter: url(#glow-red);
+        }
+        .highlight-zone.triple-hit.claimed .face-shape {
+            fill: #ef4444;
+            stroke: #dc2626;
+            stroke-width: 2.2;
+            filter: url(#glow-red);
+        }
         .highlight-zone.aimed .face-shape {
             fill: #22d3ee;
             stroke: #0e7490;
@@ -90,7 +103,8 @@
 
         /* ── Pulse animation for active zones ── */
         .highlight-zone.active .face-shape,
-        .highlight-zone.multi-hit.active .face-shape {
+        .highlight-zone.multi-hit.active .face-shape,
+        .highlight-zone.triple-hit.active .face-shape {
             animation: projectorPulse 1.5s ease-in-out infinite;
         }
         .highlight-zone.claimed .face-shape {
@@ -175,6 +189,12 @@
                     <feComposite in="color" in2="blur" operator="in" result="shadow"/>
                     <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
+                <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="blur"/>
+                    <feFlood flood-color="#ef4444" flood-opacity="0.6" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
             </defs>
 
             <!-- D20 faces from resources/d20_blank.html -->
@@ -233,7 +253,7 @@
 
         function clearAll() {
             allZones.forEach(z => {
-                z.classList.remove('active', 'claimed', 'aimed', 'multi-hit');
+                z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit');
             });
         }
 
@@ -249,9 +269,10 @@
                 const count = pairCounts[pair] || 0;
                 if (count > 0) {
                     z.classList.add('active');
-                    z.classList.toggle('multi-hit', count >= 2);
+                    z.classList.toggle('multi-hit', count === 2);
+                    z.classList.toggle('triple-hit', count >= 3);
                 } else {
-                    z.classList.remove('active', 'multi-hit');
+                    z.classList.remove('active', 'multi-hit', 'triple-hit');
                 }
             });
         }
@@ -269,9 +290,10 @@
                 if (count > 0) {
                     z.classList.add('claimed');
                     z.classList.remove('active');
-                    z.classList.toggle('multi-hit', count >= 2);
+                    z.classList.toggle('multi-hit', count === 2);
+                    z.classList.toggle('triple-hit', count >= 3);
                 } else {
-                    z.classList.remove('claimed', 'multi-hit');
+                    z.classList.remove('claimed', 'multi-hit', 'triple-hit');
                 }
             });
         }
@@ -283,6 +305,25 @@
                 z.classList.toggle('aimed', !!aimPair && pair === aimPair);
             });
         }
+
+        // ── URL params for standalone testing (e.g. ?rolls=1,2&claimed=1,2 for multi-hit) ──
+        (function initFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const rollsParam = params.get('rolls');
+            const claimedParam = params.get('claimed');
+            const aimParam = params.get('aim');
+            if (rollsParam) {
+                const rolls = rollsParam.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 20);
+                const claimed = claimedParam ? claimedParam.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 20) : [];
+                const aim = aimParam ? parseInt(aimParam, 10) : null;
+                if (rolls.length) {
+                    highlightRolls(rolls);
+                    if (claimed.length) highlightClaimed(claimed);
+                    if (aim) highlightAim(aim);
+                    statusDot.classList.add('connected', 'active');
+                }
+            }
+        })();
 
         // ── BroadcastChannel listener ──
         const channel = new BroadcastChannel('daggerdie-projector');
