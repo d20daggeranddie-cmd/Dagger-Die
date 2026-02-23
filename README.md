@@ -1,9 +1,15 @@
 # Dagger & Die
 
-A web-based game tracker for the physical knife-throwing dice game. *Throw knives. Roll dice. Take names.*
 
 ## How to Play
-
+##Requirements
+-Target
+  Target with prepared the game target face
+  or 
+  Access to a throwing lane with a projector 
+-Knives
+  1-3 knives
+  
 ### Setup
 1. Select 2-6 players
 2. Each player chooses a name (2-30 characters, must be unique) and character
@@ -75,5 +81,5 @@ The original game uses two log rounds painted with D20 patterns:
 
 Single log round option is to use the stencil to transfer the icosahedron outline to a log round and leave the facets blank.
 
-Players throw knives at the targets based on what they roll on the dice!
+
 
