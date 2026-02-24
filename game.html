@@ -1867,7 +1867,6 @@
             <div class="settings-modal-projector-row" style="margin-top: 20px;">
                 <button type="button" class="btn btn-secondary" id="open-projector-btn">Dynamic Target</button>
             </div>
-            <button type="button" class="btn btn-primary" id="settings-modal-done">Done</button>
         </div>
     </div>
 
@@ -2077,22 +2076,31 @@
         const autoDealDamageCb = document.getElementById('auto-deal-damage-cb');
         const autoAdvanceAfterDamageCb = document.getElementById('auto-advance-after-damage-cb');
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
-        const settingsModalDone = document.getElementById('settings-modal-done');
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
 
         useCustomHpCb.addEventListener('change', () => {
             customHpInput.disabled = !useCustomHpCb.checked;
+            applySettingsFromModal();
         });
+        customHpInput.addEventListener('blur', applySettingsFromModal);
+        persistentSettingsCb.addEventListener('change', applySettingsFromModal);
+        modBuffOnCriticalCb.addEventListener('change', applySettingsFromModal);
+        modNerfOnMissCb.addEventListener('change', applySettingsFromModal);
+        if (autoRollDiceCb) autoRollDiceCb.addEventListener('change', applySettingsFromModal);
+        if (autoDealDamageCb) autoDealDamageCb.addEventListener('change', applySettingsFromModal);
+        if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.addEventListener('change', applySettingsFromModal);
 
         if (itemsEnabledCb) itemsEnabledCb.addEventListener('change', () => {
             if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
                 itemsStartWithRandomCb.checked = false;
             }
+            applySettingsFromModal();
         });
         if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => {
             if (itemsStartWithRandomCb.checked && itemsEnabledCb) {
                 itemsEnabledCb.checked = true;
             }
+            applySettingsFromModal();
         });
 
         settingsGearBtn.addEventListener('click', () => {
@@ -2111,32 +2119,32 @@
             customHpInput.disabled = readOnly || !useCustomHpCb.checked;
             modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
             modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
-            if (itemsEnabledCb) itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+            if (itemsEnabledCb) itemsEnabledCb.checked = readOnly ? state.itemsEnabled : (localStorage.getItem(ITEMS_ENABLED_KEY) === 'true');
             if (itemsStartWithRandomCb) {
-                itemsStartWithRandomCb.checked = itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+                const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
+                itemsStartWithRandomCb.checked = !!startVal;
             }
             if (autoRollDiceCb) autoRollDiceCb.checked = localStorage.getItem('daggerdie_autoRollDice') === 'true';
             if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
-            if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
-            if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
+            if (itemsEnabledCb) { itemsEnabledCb.disabled = false; itemsEnabledCb.removeAttribute('disabled'); }
+            if (itemsStartWithRandomCb) { itemsStartWithRandomCb.disabled = false; itemsStartWithRandomCb.removeAttribute('disabled'); }
             if (autoRollDiceCb) autoRollDiceCb.disabled = readOnly;
             if (autoDealDamageCb) autoDealDamageCb.disabled = readOnly;
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = readOnly;
             if (settingsReadOnlyHint) settingsReadOnlyHint.style.display = readOnly ? 'block' : 'none';
-            settingsModalDone.textContent = readOnly ? 'Close' : 'Done';
             settingsModal.classList.add('open');
         });
 
-        settingsModalDone.addEventListener('click', () => {
+        function applySettingsFromModal() {
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
+            if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
+            if (itemsStartWithRandomCb) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
-                if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
-                if (itemsStartWithRandomCb) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
                 localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
                 if (useCustomHpCb.checked) {
                     const val = customHpInput.value.trim();
@@ -2150,8 +2158,6 @@
             } else {
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
-                localStorage.removeItem(ITEMS_ENABLED_KEY);
-                localStorage.removeItem(ITEMS_START_WITH_RANDOM_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -2165,45 +2171,51 @@
                 localStorage.setItem('daggerdie_autoAdvanceAfterDamage', String(autoAdvanceAfterDamageCb.checked));
                 state.autoAdvanceAfterDamage = autoAdvanceAfterDamageCb.checked;
             }
-            if (state.hasScoreBeenEntered) {
-                settingsModal.classList.remove('open');
-                return;
+            state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
+            const wasStartWithRandom = state.itemsStartWithRandom;
+            state.itemsStartWithRandom = itemsStartWithRandomCb ? itemsStartWithRandomCb.checked : false;
+            if (wasStartWithRandom && !state.itemsStartWithRandom && state.players.length > 0) {
+                state.players.forEach(removeStartItemFromPlayer);
+                updatePlayersPanel();
+                if (state.damageClaimedPhase) enableTargetSelection();
+            } else if (!wasStartWithRandom && state.itemsStartWithRandom && state.itemsEnabled && state.players.length > 0) {
+                state.players.forEach(givePlayerRandomStartItem);
+                updatePlayersPanel();
+                if (state.damageClaimedPhase) enableTargetSelection();
             }
-            if (useCustomHpCb.checked) {
-                const val = customHpInput.value.trim();
-                const n = val === '' ? NaN : parseInt(val, 10);
-                if (isNaN(n) || n < 20 || n > 999) {
-                    alert('Please enter a value between 20 and 999.');
-                    return;
-                }
-                localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
-                localStorage.setItem(CUSTOM_HP_KEY, String(n));
-                if (state.players.length > 0) {
-                    state.players.forEach(p => {
-                        p.hp = n;
-                        p.maxHp = n;
-                    });
-                    updatePlayersPanel();
-                    if (state.damageClaimedPhase) enableTargetSelection();
-                }
-            } else {
-                localStorage.setItem(USE_CUSTOM_HP_KEY, 'false');
-                if (state.players.length > 0) {
-                    const defaultHp = getDefaultHp(state.players.length);
-                    state.players.forEach(p => {
-                        p.hp = defaultHp;
-                        p.maxHp = defaultHp;
-                    });
-                    updatePlayersPanel();
-                    if (state.damageClaimedPhase) enableTargetSelection();
+            if (!state.hasScoreBeenEntered) {
+                if (useCustomHpCb.checked) {
+                    const val = customHpInput.value.trim();
+                    const n = val === '' ? NaN : parseInt(val, 10);
+                    if (!isNaN(n) && n >= 20 && n <= 999) {
+                        localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
+                        localStorage.setItem(CUSTOM_HP_KEY, String(n));
+                        if (state.players.length > 0) {
+                            state.players.forEach(p => {
+                                p.hp = n;
+                                p.maxHp = n;
+                            });
+                            updatePlayersPanel();
+                            if (state.damageClaimedPhase) enableTargetSelection();
+                        }
+                    } else if (val !== '') {
+                        alert('Please enter a value between 20 and 999.');
+                    }
+                } else {
+                    localStorage.setItem(USE_CUSTOM_HP_KEY, 'false');
+                    if (state.players.length > 0) {
+                        const defaultHp = getDefaultHp(state.players.length);
+                        state.players.forEach(p => {
+                            p.hp = defaultHp;
+                            p.maxHp = defaultHp;
+                        });
+                        updatePlayersPanel();
+                        if (state.damageClaimedPhase) enableTargetSelection();
+                    }
                 }
             }
             state.modBuffOnCritical = modBuffOnCriticalCb.checked;
             state.modNerfOnMiss = modNerfOnMissCb.checked;
-            state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
-            state.itemsStartWithRandom = itemsStartWithRandomCb ? itemsStartWithRandomCb.checked : false;
-            if (itemsEnabledCb && persistentSettingsCb.checked) localStorage.setItem(ITEMS_ENABLED_KEY, String(state.itemsEnabled));
-            if (itemsStartWithRandomCb && persistentSettingsCb.checked) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(state.itemsStartWithRandom));
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
@@ -2217,12 +2229,10 @@
             } else {
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
-                localStorage.removeItem(ITEMS_START_WITH_RANDOM_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
-            settingsModal.classList.remove('open');
-        });
+        }
 
         const openProjectorBtn = document.getElementById('open-projector-btn');
         if (openProjectorBtn) {
@@ -2237,6 +2247,9 @@
 
         settingsModal.addEventListener('click', (e) => {
             if (e.target === settingsModal) settingsModal.classList.remove('open');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && settingsModal.classList.contains('open')) settingsModal.classList.remove('open');
         });
 
         const CUSTOM_HP_KEY = 'daggerdie_customHp';
@@ -2537,14 +2550,36 @@
         }
 
         function givePlayerRandomStartItem(player) {
-            if (!state.itemsEnabled || !state.itemsStartWithRandom || !player) return;
+            if (!state.itemsEnabled || !state.itemsStartWithRandom || !player || player.hadStartItem) return;
             if (typeof DAGGERDIE_GET_ITEM_BY_D12 !== 'function') return;
-            const d12Roll = Math.floor(Math.random() * 12) + 1;
-            const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+            const slotIdx = (player.inventory || [null, null, null]).findIndex(s => s === null || s === undefined);
+            if (slotIdx < 0) return;
+            const itemId = player.rememberedStartItemId;
+            let item = itemId && typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+            if (!item) {
+                const d12Roll = Math.floor(Math.random() * 12) + 1;
+                item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                if (item) player.rememberedStartItemId = item.id;
+            }
             if (item && player.inventory) {
-                player.inventory[0] = item.id;
+                player.inventory[slotIdx] = item.id;
+                player.hadStartItem = true;
                 trackItemAcquired(player, item.id);
             }
+        }
+
+        function removeStartItemFromPlayer(player) {
+            if (!player || !player.hadStartItem || !player.inventory) return;
+            const targetId = player.rememberedStartItemId;
+            const idx = targetId
+                ? player.inventory.findIndex(s => s === targetId)
+                : player.inventory.findIndex(s => s !== null && s !== undefined);
+            if (idx < 0) { player.hadStartItem = false; return; }
+            if (!player.rememberedStartItemId) player.rememberedStartItemId = player.inventory[idx];
+            player.inventory[idx] = null;
+            if (player.inventoryLocked) player.inventoryLocked[idx] = false;
+            compactInventory(player);
+            player.hadStartItem = false;
         }
 
         function isItemLocked(player, slotIdx) {
@@ -4344,6 +4379,8 @@ ${itemRows}
                 p.inventory = [null, null, null];
                 p.inventoryLocked = [false, false, false];
                 p.itemStats = { acquired: 0, used: 0, acquiredById: {}, usedById: {} };
+                p.hadStartItem = false;
+                p.rememberedStartItemId = undefined;
             });
             state.players.forEach(givePlayerRandomStartItem);
             state.currentPlayerIndex = 0;
