@@ -2084,6 +2084,17 @@
             customHpInput.disabled = !useCustomHpCb.checked;
         });
 
+        if (itemsEnabledCb) itemsEnabledCb.addEventListener('change', () => {
+            if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
+                itemsStartWithRandomCb.checked = false;
+            }
+        });
+        if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => {
+            if (itemsStartWithRandomCb.checked && itemsEnabledCb) {
+                itemsEnabledCb.checked = true;
+            }
+        });
+
         settingsGearBtn.addEventListener('click', () => {
             const readOnly = state.hasScoreBeenEntered;
             persistentSettingsCb.checked = isPersistentSettings();
@@ -2101,7 +2112,9 @@
             modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
             modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
             if (itemsEnabledCb) itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
-            if (itemsStartWithRandomCb) itemsStartWithRandomCb.checked = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+            if (itemsStartWithRandomCb) {
+                itemsStartWithRandomCb.checked = itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+            }
             if (autoRollDiceCb) autoRollDiceCb.checked = localStorage.getItem('daggerdie_autoRollDice') === 'true';
             if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
