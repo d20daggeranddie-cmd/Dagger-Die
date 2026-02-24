@@ -640,7 +640,9 @@
     const itemsEnabledCb = document.getElementById('items-enabled-cb');
     itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
     const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
-    if (itemsStartWithRandomCb) itemsStartWithRandomCb.checked = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+    if (itemsStartWithRandomCb) {
+      itemsStartWithRandomCb.checked = itemsEnabledCb.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+    }
 
     useCustomHpCb.addEventListener('change', () => {
       customHpInput.disabled = !useCustomHpCb.checked;
@@ -671,8 +673,20 @@
 
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
-    itemsEnabledCb.addEventListener('change', () => localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked)));
-    if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked)));
+    itemsEnabledCb.addEventListener('change', () => {
+      localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
+      if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
+        itemsStartWithRandomCb.checked = false;
+        localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, 'false');
+      }
+    });
+    if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => {
+      localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
+      if (itemsStartWithRandomCb.checked && itemsEnabledCb) {
+        itemsEnabledCb.checked = true;
+        localStorage.setItem(ITEMS_ENABLED_KEY, 'true');
+      }
+    });
 
     const botsEnabledCb = document.getElementById('bots-enabled-cb');
     botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
