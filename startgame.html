@@ -420,6 +420,11 @@
             <label for="items-enabled-cb">Items</label>
           </div>
           <p id="items-enabled-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">3 inventory slots, earn items on critical (all 3 hits). Use items before dealing damage.</p>
+          <div class="option-row" style="margin-top: 12px; margin-left: 20px;">
+            <input type="checkbox" id="items-start-with-random-cb" aria-describedby="items-start-with-random-desc">
+            <label for="items-start-with-random-cb">Start with random item</label>
+          </div>
+          <p id="items-start-with-random-desc" class="option-desc" style="margin-top: 4px; margin-left: 20px; font-size: 0.9rem; opacity: 0.85;">Each player begins the game with one randomly generated item.</p>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="bots-enabled-cb" aria-describedby="bots-enabled-desc">
             <label for="bots-enabled-cb">Enable bots</label>
@@ -587,6 +592,7 @@
     const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
     const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
+    const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
 
     document.getElementById('options-toggle').addEventListener('click', () => {
@@ -633,6 +639,8 @@
     modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
     const itemsEnabledCb = document.getElementById('items-enabled-cb');
     itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+    const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
+    if (itemsStartWithRandomCb) itemsStartWithRandomCb.checked = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
 
     useCustomHpCb.addEventListener('change', () => {
       customHpInput.disabled = !useCustomHpCb.checked;
@@ -664,6 +672,7 @@
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
     itemsEnabledCb.addEventListener('change', () => localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked)));
+    if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked)));
 
     const botsEnabledCb = document.getElementById('bots-enabled-cb');
     botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
