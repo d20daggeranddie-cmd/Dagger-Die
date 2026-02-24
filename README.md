@@ -23,6 +23,7 @@
   - **3-4 players**: 50 HP
   - **5-6 players**: 60 HP
 - On your turn, roll 3 virtual D20s in the app
+- Throw at each rolled number in the order they're rolled in
 - The app highlights the corresponding target zones on the odd/even boards
 - Throw your physical knives at the **log round targets**:
   - **Odd board**: Numbers 1, 3, 5, 7, 9, 11, 13, 15, 17, 19
@@ -82,6 +83,7 @@ The original game uses two log rounds painted with D20 patterns:
 - One log has all even numbers (center is 20)
 
 Single log round option is to use the stencil to transfer the icosahedron outline to a log round and leave the facets blank.
+
 
 
 
