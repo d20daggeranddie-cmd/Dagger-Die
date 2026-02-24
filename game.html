@@ -1859,6 +1859,11 @@
                 <label for="items-enabled-cb">Items</label>
             </div>
             <p id="items-enabled-hint" class="setting-hint">3 inventory slots, earn items on critical (all 3 hits). Use items before dealing damage.</p>
+            <div class="option-row" style="margin-left: 20px;">
+                <input type="checkbox" id="items-start-with-random-cb" aria-describedby="items-start-with-random-hint">
+                <label for="items-start-with-random-cb">Start with random item</label>
+            </div>
+            <p id="items-start-with-random-hint" class="setting-hint" style="margin-left: 20px;">Each player begins the game with one randomly generated item.</p>
             <div class="settings-modal-projector-row" style="margin-top: 20px;">
                 <button type="button" class="btn btn-secondary" id="open-projector-btn">Dynamic Target</button>
             </div>
@@ -2019,6 +2024,7 @@
             modBuffOnCritical: false,
             modNerfOnMiss: false,
             itemsEnabled: false,
+            itemsStartWithRandom: false,
             itemUsePhase: false
         };
         let previousHpByPlayerId = {};
@@ -2066,6 +2072,7 @@
         const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
+        const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
         const autoRollDiceCb = document.getElementById('auto-roll-dice-cb');
         const autoDealDamageCb = document.getElementById('auto-deal-damage-cb');
         const autoAdvanceAfterDamageCb = document.getElementById('auto-advance-after-damage-cb');
@@ -2094,12 +2101,14 @@
             modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
             modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
             if (itemsEnabledCb) itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+            if (itemsStartWithRandomCb) itemsStartWithRandomCb.checked = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
             if (autoRollDiceCb) autoRollDiceCb.checked = localStorage.getItem('daggerdie_autoRollDice') === 'true';
             if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
             if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
+            if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
             if (autoRollDiceCb) autoRollDiceCb.disabled = readOnly;
             if (autoDealDamageCb) autoDealDamageCb.disabled = readOnly;
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = readOnly;
@@ -2114,6 +2123,7 @@
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
                 if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
+                if (itemsStartWithRandomCb) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
                 localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
                 if (useCustomHpCb.checked) {
                     const val = customHpInput.value.trim();
@@ -2128,6 +2138,7 @@
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
                 localStorage.removeItem(ITEMS_ENABLED_KEY);
+                localStorage.removeItem(ITEMS_START_WITH_RANDOM_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -2177,7 +2188,9 @@
             state.modBuffOnCritical = modBuffOnCriticalCb.checked;
             state.modNerfOnMiss = modNerfOnMissCb.checked;
             state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
+            state.itemsStartWithRandom = itemsStartWithRandomCb ? itemsStartWithRandomCb.checked : false;
             if (itemsEnabledCb && persistentSettingsCb.checked) localStorage.setItem(ITEMS_ENABLED_KEY, String(state.itemsEnabled));
+            if (itemsStartWithRandomCb && persistentSettingsCb.checked) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(state.itemsStartWithRandom));
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
@@ -2191,6 +2204,7 @@
             } else {
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
+                localStorage.removeItem(ITEMS_START_WITH_RANDOM_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -2217,6 +2231,7 @@
         const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
         const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
+        const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
         const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
 
         function isPersistentSettings() {
@@ -2228,10 +2243,12 @@
                 state.modBuffOnCritical = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
                 state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
                 state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+                state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
             } else {
                 state.modBuffOnCritical = false;
                 state.modNerfOnMiss = false;
                 state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+                state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
             }
         }
 
@@ -2447,6 +2464,7 @@
                     itemStats: { acquired: 0, used: 0, acquiredById: {}, usedById: {} }
                 };
             });
+            state.players.forEach(givePlayerRandomStartItem);
             clearHpFeedbackSnapshot();
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             state.autoAdvanceAfterDamage = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
@@ -2503,6 +2521,17 @@
             ensurePlayerItemStats(player);
             player.itemStats.used = (player.itemStats.used || 0) + 1;
             player.itemStats.usedById[itemId] = (player.itemStats.usedById[itemId] || 0) + 1;
+        }
+
+        function givePlayerRandomStartItem(player) {
+            if (!state.itemsEnabled || !state.itemsStartWithRandom || !player) return;
+            if (typeof DAGGERDIE_GET_ITEM_BY_D12 !== 'function') return;
+            const d12Roll = Math.floor(Math.random() * 12) + 1;
+            const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+            if (item && player.inventory) {
+                player.inventory[0] = item.id;
+                trackItemAcquired(player, item.id);
+            }
         }
 
         function isItemLocked(player, slotIdx) {
@@ -4303,6 +4332,7 @@ ${itemRows}
                 p.inventoryLocked = [false, false, false];
                 p.itemStats = { acquired: 0, used: 0, acquiredById: {}, usedById: {} };
             });
+            state.players.forEach(givePlayerRandomStartItem);
             state.currentPlayerIndex = 0;
             state.phase = 'turnOrder';
             state.currentRoll = [];
