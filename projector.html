@@ -144,8 +144,175 @@
 
         .m3-logo {
             position: fixed; bottom: 10px; right: 10px; z-index: 50;
-            width: 36px; height: auto; pointer-events: none;
+            width: 36px; height: auto; pointer-events: auto; cursor: pointer;
+            opacity: 0.85;
         }
+        .m3-logo:hover { opacity: 1; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: rgba(20,20,35,0.98);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 240px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .modal h3 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.1rem;
+            color: #f0f0f0;
+            margin-bottom: 16px;
+        }
+        .modal .btn-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .modal .btn {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 0.9rem;
+            background: rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.4);
+            color: #ffd700;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal .btn:hover {
+            background: rgba(255,215,0,0.3);
+            border-color: rgba(255,215,0,0.7);
+        }
+        .modal .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .modal .modal-close:hover { color: white; }
+        .modal-wrap { position: relative; }
+
+        /* Alignment mode */
+        body.alignment-mode .target-wrapper {
+            cursor: grab;
+            pointer-events: auto;
+            transform-origin: center center;
+        }
+        body.alignment-mode .target-wrapper:active { cursor: grabbing; }
+        body.alignment-mode .target-wrapper * { pointer-events: none; }
+        .alignment-hint {
+            display: none;
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #333;
+            text-shadow: 0 0 4px rgba(255,255,255,0.9);
+            z-index: 90;
+            pointer-events: none;
+        }
+        body.alignment-mode .alignment-hint { display: block; }
+        .alignment-lock-bar {
+            display: none;
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.5);
+            padding: 12px 20px;
+            border-radius: 8px;
+        }
+        body.alignment-mode .alignment-lock-bar { display: flex !important; }
+        .alignment-scale-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alignment-scale-row label {
+            font-size: 14px;
+            color: #f0f0f0;
+        }
+        .alignment-scale-row input[type="range"] {
+            width: 120px;
+            min-width: 80px;
+            height: 24px;
+            accent-color: #ffd700;
+            cursor: pointer;
+        }
+        .alignment-lock-bar .btn {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 0.9rem;
+            background: rgba(255,215,0,0.2);
+            border: 1px solid rgba(255,215,0,0.5);
+            color: #ffd700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .alignment-lock-bar .btn:hover {
+            background: rgba(255,215,0,0.35);
+            border-color: rgba(255,215,0,0.8);
+        }
+
+        /* Animated background (optional) */
+        .projector-bg-animated {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: radial-gradient(ellipse 120% 80% at 50% 50%, rgba(30,25,50,0.4) 0%, transparent 60%),
+                        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(40,30,70,0.3) 0%, transparent 50%);
+        }
+        .projector-bg-fog {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+        }
+        .projector-bg-fog-layer {
+            position: absolute; width: 200%; height: 100%; top: 0; left: -50%;
+            background: radial-gradient(ellipse 300px 80px at 20% 70%, rgba(100,80,140,0.08) 0%, transparent 70%);
+            animation: projectorFogDrift 50s ease-in-out infinite alternate;
+        }
+        .projector-bg-fog-layer:nth-child(2) {
+            background: radial-gradient(ellipse 350px 90px at 80% 60%, rgba(80,60,120,0.06) 0%, transparent 70%);
+            animation: projectorFogDrift2 60s ease-in-out infinite alternate;
+        }
+        @keyframes projectorFogDrift {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(5%); }
+        }
+        @keyframes projectorFogDrift2 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-4%); }
+        }
+        .projector-bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        body:not(.projector-animated-bg) .projector-bg-animated,
+        body:not(.projector-animated-bg) .projector-bg-fog,
+        body:not(.projector-animated-bg) .projector-bg-canvas { display: none; }
+        body.projector-animated-bg { background: #0a0c18; }
+        .target-wrapper { position: relative; z-index: 2; }
+
+        .modal .option-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .modal .option-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #ffd700; cursor: pointer; }
+        .modal .option-row label { cursor: pointer; font-size: 0.95rem; color: #e0e0e0; margin: 0; }
+
         .dimensions-label {
             position: fixed; top: 12px; left: 12px; z-index: 50;
             font-size: 10px; color: #888; font-family: sans-serif;
@@ -158,11 +325,45 @@
     </style>
 </head>
 <body>
-    <img src="assets/m3.png" alt="M3" class="m3-logo">
+    <div class="projector-bg-animated" id="projectorBgAnimated"></div>
+    <div class="projector-bg-fog" id="projectorBgFog">
+        <div class="projector-bg-fog-layer"></div>
+        <div class="projector-bg-fog-layer"></div>
+    </div>
+    <div class="projector-bg-canvas"><canvas id="projectorParticleCanvas"></canvas></div>
+    <img src="assets/m3.png" alt="M3" class="m3-logo" id="logoBtn" title="Settings">
     <div class="dimensions-label">360×315mm · 14.25×12.5"</div>
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
 
-    <div class="target-wrapper">
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-wrap">
+                <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+                <h3>Settings</h3>
+                <div class="option-row">
+                    <input type="checkbox" id="animated-background-cb" aria-describedby="animated-bg-hint">
+                    <label for="animated-background-cb">Animated background</label>
+                </div>
+                <p id="animated-bg-hint" class="setting-hint" style="margin: -8px 0 16px; font-size: 0.85rem; color: rgba(255,255,255,0.6);">Subtle fog and ambient gradient. Uncheck for plain white.</p>
+                <div class="btn-row">
+                    <button class="btn" id="alignBtn">Alignment</button>
+                    <button class="btn" id="resetAlignBtn">Reset alignment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alignment-hint" id="alignmentHint">Drag to move · Scroll or slider to scale</div>
+    <div class="alignment-lock-bar" id="alignmentLockBar">
+        <div class="alignment-scale-row">
+            <label for="alignScaleSlider">Scale</label>
+            <input type="range" id="alignScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale target" />
+        </div>
+        <button class="btn" id="lockAlignBtn">Lock position</button>
+        <button class="btn" id="cancelAlignBtn">Cancel</button>
+    </div>
+
+    <div class="target-wrapper" id="targetWrapper">
         <svg class="target-face" id="target-board" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <filter id="glow-gold" x="-20%" y="-20%" width="140%" height="140%">
@@ -196,6 +397,9 @@
                     <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
             </defs>
+
+            <!-- Thick white perimeter border (in/out line) -->
+            <path class="target-perimeter-border" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round" d="M 200,2 L 7,119 L 2,346 L 200,458 L 398,346 L 393,119 Z"/>
 
             <!-- D20 faces from resources/d20_blank.html -->
             <g id="face-tl" class="highlight-zone" data-pair="10-17">
@@ -306,6 +510,185 @@
             });
         }
 
+        // ── Alignment: scalable and draggable target (like Blade Aces) ──
+        var ALIGN_STORAGE_KEY = 'daggerdie_projector_alignment';
+        var targetWrapper = document.getElementById('targetWrapper');
+        var modalOverlay = document.getElementById('modalOverlay');
+        var logoBtn = document.getElementById('logoBtn');
+        var modalClose = document.getElementById('modalClose');
+        var alignBtn = document.getElementById('alignBtn');
+        var lockAlignBtn = document.getElementById('lockAlignBtn');
+        var cancelAlignBtn = document.getElementById('cancelAlignBtn');
+        var resetAlignBtn = document.getElementById('resetAlignBtn');
+        var alignScaleSlider = document.getElementById('alignScaleSlider');
+        var alignDragState = { ox: 0, oy: 0, scale: 1, dragging: false, startX: 0, startY: 0, startOx: 0, startOy: 0 };
+        var ALIGN_SCALE_MIN = 0.15, ALIGN_SCALE_MAX = 2.5, ALIGN_SCALE_STEP = 0.02;
+
+        function applyTransform(x, y, s) {
+            x = typeof x === 'number' ? x : 0;
+            y = typeof y === 'number' ? y : 0;
+            s = typeof s === 'number' && s > 0 ? s : 1;
+            if (targetWrapper) targetWrapper.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+        }
+
+        function parseTransform() {
+            if (!targetWrapper) return { x: 0, y: 0, s: 1 };
+            var t = targetWrapper.style.transform || '';
+            var m = t.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
+            var x = m ? parseFloat(m[1]) : 0;
+            var y = m ? parseFloat(m[2]) : 0;
+            var sm = t.match(/scale\(([^)]+)\)/);
+            var s = sm ? parseFloat(sm[1]) : 1;
+            if (isNaN(s) || s <= 0) s = 1;
+            return { x: x, y: y, s: s };
+        }
+
+        function loadAlignment() {
+            if (!targetWrapper) return;
+            try {
+                var raw = localStorage.getItem(ALIGN_STORAGE_KEY);
+                if (raw) {
+                    var o = JSON.parse(raw);
+                    if (typeof o.x === 'number' && typeof o.y === 'number') {
+                        var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
+                        applyTransform(o.x, o.y, s);
+                        return;
+                    }
+                }
+            } catch (e) {}
+            applyTransform(0, 0, 1);
+        }
+
+        function saveAlignment() {
+            try {
+                var p = parseTransform();
+                localStorage.setItem(ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
+            } catch (e) {}
+        }
+
+        function openModal() {
+            if (modalOverlay) modalOverlay.classList.add('open');
+        }
+        function closeModal() {
+            if (modalOverlay) modalOverlay.classList.remove('open');
+        }
+
+        function onAlignWheel(e) {
+            if (!document.body.classList.contains('alignment-mode')) return;
+            var el = document.elementFromPoint(e.clientX, e.clientY);
+            if (!el || !el.closest('.target-wrapper')) return;
+            e.preventDefault();
+            var p = parseTransform();
+            var delta = e.deltaY > 0 ? -ALIGN_SCALE_STEP : ALIGN_SCALE_STEP;
+            var s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, p.s + delta));
+            applyTransform(p.x, p.y, s);
+            if (alignScaleSlider) alignScaleSlider.value = String(s);
+        }
+
+        function onAlignMouseDown(e) {
+            if (!document.body.classList.contains('alignment-mode')) return;
+            if (!e.target.closest('.target-wrapper')) return;
+            var p = parseTransform();
+            alignDragState.dragging = true;
+            alignDragState.startX = e.clientX;
+            alignDragState.startY = e.clientY;
+            alignDragState.startOx = p.x;
+            alignDragState.startOy = p.y;
+            alignDragState.scale = p.s;
+            document.addEventListener('mousemove', onAlignMouseMove);
+            document.addEventListener('mouseup', onAlignMouseUp);
+            e.preventDefault();
+        }
+
+        function onAlignMouseMove(e) {
+            if (!alignDragState.dragging) return;
+            var ox = alignDragState.startOx + (e.clientX - alignDragState.startX);
+            var oy = alignDragState.startOy + (e.clientY - alignDragState.startY);
+            applyTransform(Math.round(ox), Math.round(oy), alignDragState.scale);
+        }
+
+        function onAlignMouseUp() {
+            alignDragState.dragging = false;
+            document.removeEventListener('mousemove', onAlignMouseMove);
+            document.removeEventListener('mouseup', onAlignMouseUp);
+        }
+
+        function onAlignScaleSliderInput() {
+            if (!alignScaleSlider) return;
+            var s = parseFloat(alignScaleSlider.value);
+            if (isNaN(s) || s <= 0) return;
+            s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, s));
+            var p = parseTransform();
+            applyTransform(p.x, p.y, s);
+        }
+
+        function startAlignmentMode() {
+            closeModal();
+            document.body.classList.add('alignment-mode');
+            var p = parseTransform();
+            if (alignScaleSlider) { alignScaleSlider.value = String(p.s); alignScaleSlider.addEventListener('input', onAlignScaleSliderInput); }
+            if (targetWrapper) targetWrapper.addEventListener('mousedown', onAlignMouseDown);
+            document.addEventListener('wheel', onAlignWheel, { passive: false });
+        }
+
+        function exitAlignmentMode() {
+            document.body.classList.remove('alignment-mode');
+            if (targetWrapper) targetWrapper.removeEventListener('mousedown', onAlignMouseDown);
+            document.removeEventListener('wheel', onAlignWheel);
+            if (alignScaleSlider) alignScaleSlider.removeEventListener('input', onAlignScaleSliderInput);
+            document.removeEventListener('mousemove', onAlignMouseMove);
+            document.removeEventListener('mouseup', onAlignMouseUp);
+        }
+
+        function lockAlignment() {
+            saveAlignment();
+            exitAlignmentMode();
+            loadAlignment();
+        }
+
+        function cancelAlignment() {
+            exitAlignmentMode();
+            loadAlignment();
+        }
+
+        function resetAlignment() {
+            try { localStorage.removeItem(ALIGN_STORAGE_KEY); } catch (e) {}
+            loadAlignment();
+            closeModal();
+        }
+
+        var ANIMATED_BG_KEY = 'daggerdie_projector_animatedBackground';
+        var animatedBgCb = document.getElementById('animated-background-cb');
+        function applyAnimatedBg() {
+            var on = animatedBgCb ? animatedBgCb.checked : (localStorage.getItem(ANIMATED_BG_KEY) === 'true');
+            document.body.classList.toggle('projector-animated-bg', !!on);
+        }
+        if (animatedBgCb) {
+            animatedBgCb.checked = localStorage.getItem(ANIMATED_BG_KEY) === 'true';
+            animatedBgCb.addEventListener('change', function() {
+                localStorage.setItem(ANIMATED_BG_KEY, String(animatedBgCb.checked));
+                applyAnimatedBg();
+            });
+            applyAnimatedBg();
+        }
+
+        if (logoBtn) logoBtn.addEventListener('click', openModal);
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modalOverlay) modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+        if (alignBtn) alignBtn.addEventListener('click', startAlignmentMode);
+        if (lockAlignBtn) lockAlignBtn.addEventListener('click', lockAlignment);
+        if (cancelAlignBtn) cancelAlignBtn.addEventListener('click', cancelAlignment);
+        if (resetAlignBtn) resetAlignBtn.addEventListener('click', resetAlignment);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.body.classList.contains('alignment-mode')) cancelAlignment();
+                else closeModal();
+            }
+        });
+
+        loadAlignment();
+
         // ── URL params for standalone testing (e.g. ?rolls=1,2&claimed=1,2 for multi-hit) ──
         (function initFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -360,6 +743,6 @@
         };
     })();
     </script>
-    <script src="m3-readme-modal.js"></script>
+    <script src="rpg-bg-canvas.js"></script>
 </body>
 </html>
