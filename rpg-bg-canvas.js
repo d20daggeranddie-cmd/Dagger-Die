@@ -4,7 +4,7 @@
  * Alternatively supports: gameParticleCanvas, idxParticleCanvas (legacy IDs)
  */
 (function() {
-    const canvas = document.getElementById('rpgParticleCanvas') || document.getElementById('gameParticleCanvas') || document.getElementById('idxParticleCanvas');
+    const canvas = document.getElementById('rpgParticleCanvas') || document.getElementById('gameParticleCanvas') || document.getElementById('idxParticleCanvas') || document.getElementById('projectorParticleCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, time = 0;
