@@ -149,65 +149,6 @@
         }
         .m3-logo:hover { opacity: 1; }
 
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.open { display: flex; }
-        .modal {
-            background: rgba(20,20,35,0.98);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 12px;
-            padding: 24px;
-            min-width: 240px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        }
-        .modal h3 {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 1.1rem;
-            color: #f0f0f0;
-            margin-bottom: 16px;
-        }
-        .modal .btn-row {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .modal .btn {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 0.9rem;
-            background: rgba(255,215,0,0.15);
-            border: 1px solid rgba(255,215,0,0.4);
-            color: #ffd700;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .modal .btn:hover {
-            background: rgba(255,215,0,0.3);
-            border-color: rgba(255,215,0,0.7);
-        }
-        .modal .modal-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.5);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .modal .modal-close:hover { color: white; }
-        .modal-wrap { position: relative; }
-
         /* Alignment mode */
         body.alignment-mode .target-wrapper {
             cursor: grab;
@@ -261,6 +202,23 @@
             accent-color: #ffd700;
             cursor: pointer;
         }
+        .alignment-lock-bar .align-option-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .alignment-lock-bar .align-option-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #ffd700;
+            cursor: pointer;
+        }
+        .alignment-lock-bar .align-option-row label {
+            font-size: 14px;
+            color: #f0f0f0;
+            cursor: pointer;
+            margin: 0;
+        }
         .alignment-lock-bar .btn {
             font-family: 'Cinzel Decorative', serif;
             font-size: 0.9rem;
@@ -309,15 +267,17 @@
         body.projector-animated-bg { background: #0a0c18; }
         .target-wrapper { position: relative; z-index: 2; }
 
-        .modal .option-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-        .modal .option-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #ffd700; cursor: pointer; }
-        .modal .option-row label { cursor: pointer; font-size: 0.95rem; color: #e0e0e0; margin: 0; }
-
         .dimensions-label {
             position: fixed; top: 12px; left: 12px; z-index: 50;
             font-size: 10px; color: #888; font-family: sans-serif;
             pointer-events: none;
         }
+        .fs-hint {
+            position: fixed; bottom: 10px; left: 12px; z-index: 50;
+            font-size: 10px; color: #888; font-family: sans-serif;
+            pointer-events: none;
+        }
+        body.projector-animated-bg .fs-hint { color: rgba(255,255,255,0.35); }
         @media (max-width: 480px) {
             .m3-logo { width: 28px; bottom: 8px; right: 8px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
@@ -331,27 +291,10 @@
         <div class="projector-bg-fog-layer"></div>
     </div>
     <div class="projector-bg-canvas"><canvas id="projectorParticleCanvas"></canvas></div>
-    <img src="assets/m3.png" alt="M3" class="m3-logo" id="logoBtn" title="Settings">
+    <img src="assets/m3.png" alt="M3" class="m3-logo" id="logoBtn" title="Alignment">
     <div class="dimensions-label">360×315mm · 14.25×12.5"</div>
+    <div class="fs-hint">F = fullscreen</div>
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
-
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
-            <div class="modal-wrap">
-                <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-                <h3>Settings</h3>
-                <div class="option-row">
-                    <input type="checkbox" id="animated-background-cb" aria-describedby="animated-bg-hint">
-                    <label for="animated-background-cb">Dark Mode</label>
-                </div>
-                <p id="animated-bg-hint" class="setting-hint" style="margin: -8px 0 16px; font-size: 0.85rem; color: rgba(255,255,255,0.6);">Dark theme with fog and ambient effects. Uncheck for plain white.</p>
-                <div class="btn-row">
-                    <button class="btn" id="alignBtn">Alignment</button>
-                    <button class="btn" id="resetAlignBtn">Reset alignment</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="alignment-hint" id="alignmentHint">Drag to move · Scroll or slider to scale</div>
     <div class="alignment-lock-bar" id="alignmentLockBar">
@@ -359,7 +302,12 @@
             <label for="alignScaleSlider">Scale</label>
             <input type="range" id="alignScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale target" />
         </div>
+        <div class="align-option-row">
+            <input type="checkbox" id="animated-background-cb" title="Dark theme with fog and ambient effects">
+            <label for="animated-background-cb">Dark Mode</label>
+        </div>
         <button class="btn" id="lockAlignBtn">Lock position</button>
+        <button class="btn" id="resetAlignBtn">Reset</button>
         <button class="btn" id="cancelAlignBtn">Cancel</button>
     </div>
 
@@ -513,10 +461,7 @@
         // ── Alignment: scalable and draggable target (like Blade Aces) ──
         var ALIGN_STORAGE_KEY = 'daggerdie_projector_alignment';
         var targetWrapper = document.getElementById('targetWrapper');
-        var modalOverlay = document.getElementById('modalOverlay');
         var logoBtn = document.getElementById('logoBtn');
-        var modalClose = document.getElementById('modalClose');
-        var alignBtn = document.getElementById('alignBtn');
         var lockAlignBtn = document.getElementById('lockAlignBtn');
         var cancelAlignBtn = document.getElementById('cancelAlignBtn');
         var resetAlignBtn = document.getElementById('resetAlignBtn');
@@ -564,13 +509,6 @@
                 var p = parseTransform();
                 localStorage.setItem(ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
             } catch (e) {}
-        }
-
-        function openModal() {
-            if (modalOverlay) modalOverlay.classList.add('open');
-        }
-        function closeModal() {
-            if (modalOverlay) modalOverlay.classList.remove('open');
         }
 
         function onAlignWheel(e) {
@@ -623,7 +561,6 @@
         }
 
         function startAlignmentMode() {
-            closeModal();
             document.body.classList.add('alignment-mode');
             var p = parseTransform();
             if (alignScaleSlider) { alignScaleSlider.value = String(p.s); alignScaleSlider.addEventListener('input', onAlignScaleSliderInput); }
@@ -654,7 +591,6 @@
         function resetAlignment() {
             try { localStorage.removeItem(ALIGN_STORAGE_KEY); } catch (e) {}
             loadAlignment();
-            closeModal();
         }
 
         var ANIMATED_BG_KEY = 'daggerdie_projector_animatedBackground';
@@ -672,18 +608,26 @@
             applyAnimatedBg();
         }
 
-        if (logoBtn) logoBtn.addEventListener('click', openModal);
-        if (modalClose) modalClose.addEventListener('click', closeModal);
-        if (modalOverlay) modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
-        if (alignBtn) alignBtn.addEventListener('click', startAlignmentMode);
+        if (logoBtn) logoBtn.addEventListener('click', startAlignmentMode);
         if (lockAlignBtn) lockAlignBtn.addEventListener('click', lockAlignment);
         if (cancelAlignBtn) cancelAlignBtn.addEventListener('click', cancelAlignment);
         if (resetAlignBtn) resetAlignBtn.addEventListener('click', resetAlignment);
 
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(function() {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.body.classList.contains('alignment-mode')) cancelAlignment();
-                else closeModal();
+                if (document.fullscreenElement) document.exitFullscreen();
+                else if (document.body.classList.contains('alignment-mode')) cancelAlignment();
+            }
+            if (e.key === 'f' || e.key === 'F') {
+                if (!e.target.matches('input, textarea')) toggleFullscreen();
             }
         });
 
