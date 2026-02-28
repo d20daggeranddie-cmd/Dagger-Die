@@ -144,7 +144,7 @@
 
         .m3-logo {
             position: fixed; bottom: 10px; right: 10px; z-index: 200;
-            width: 36px; height: auto; pointer-events: auto; cursor: pointer;
+            width: 72px; height: auto; pointer-events: auto; cursor: pointer;
             opacity: 0.85;
             transition: opacity 0.3s;
         }
@@ -172,7 +172,7 @@
         }
         .logo-spotlight-overlay.show { display: block; }
 
-        /* Callout glowy text + arrow */
+        /* Callout glowy text */
         .logo-callout {
             position: fixed;
             right: 68px;
@@ -226,8 +226,12 @@
             font-family: sans-serif;
             font-size: 36px;
             font-weight: 600;
-            color: #333;
-            text-shadow: 0 0 4px rgba(255,255,255,0.9);
+            color: #ffd700;
+            text-shadow:
+                0 0 6px  #fff,
+                0 0 14px #fff,
+                0 0 28px rgba(255,255,255,0.7),
+                0 0 50px rgba(255,220,80,0.5);
             z-index: 90;
             pointer-events: none;
         }
@@ -298,35 +302,53 @@
         /* Animated background (optional) */
         .projector-bg-animated {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background: radial-gradient(ellipse 120% 80% at 50% 50%, rgba(30,25,50,0.4) 0%, transparent 60%),
-                        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(40,30,70,0.3) 0%, transparent 50%);
+            background: none;
         }
         .projector-bg-fog {
             position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
         }
         .projector-bg-fog-layer {
             position: absolute; width: 200%; height: 100%; top: 0; left: -50%;
-            background: radial-gradient(ellipse 300px 80px at 20% 70%, rgba(100,80,140,0.08) 0%, transparent 70%);
-            animation: projectorFogDrift 50s ease-in-out infinite alternate;
-        }
-        .projector-bg-fog-layer:nth-child(2) {
-            background: radial-gradient(ellipse 350px 90px at 80% 60%, rgba(80,60,120,0.06) 0%, transparent 70%);
-            animation: projectorFogDrift2 60s ease-in-out infinite alternate;
-        }
-        @keyframes projectorFogDrift {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(5%); }
-        }
-        @keyframes projectorFogDrift2 {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-4%); }
+            background: none;
         }
         .projector-bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
         body:not(.projector-animated-bg) .projector-bg-animated,
         body:not(.projector-animated-bg) .projector-bg-fog,
         body:not(.projector-animated-bg) .projector-bg-canvas { display: none; }
-        body.projector-animated-bg { background: #0a0c18; }
+        body.projector-animated-bg { background: #000000; }
+        body.projector-bg-black { background: #000000; }
+        body.projector-bg-white { background: #ffffff; }
         .target-wrapper { position: relative; z-index: 2; }
+
+        /* Background selector buttons */
+        .bg-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bg-selector span {
+            font-size: 16px;
+            color: #f0f0f0;
+            white-space: nowrap;
+        }
+        .bg-btn {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 0.95rem;
+            padding: 7px 13px;
+            border-radius: 7px;
+            cursor: pointer;
+            border: 2px solid rgba(255,215,0,0.35);
+            background: rgba(255,255,255,0.06);
+            color: #ccc;
+            transition: all 0.15s;
+        }
+        .bg-btn:hover { border-color: rgba(255,215,0,0.7); color: #ffd700; }
+        .bg-btn.active {
+            background: rgba(255,215,0,0.22);
+            border-color: #ffd700;
+            color: #ffd700;
+            box-shadow: 0 0 8px rgba(255,215,0,0.3);
+        }
 
         .dimensions-label {
             position: fixed; top: 12px; left: 12px; z-index: 50;
@@ -340,8 +362,7 @@
         }
         body.projector-animated-bg .fs-hint { color: rgba(255,255,255,0.35); }
         @media (max-width: 480px) {
-            .m3-logo { width: 28px; bottom: 8px; right: 8px; }
-            .logo-callout { right: 44px; bottom: 60px; font-size: 16px; padding: 8px 12px; }
+            .m3-logo { width: 52px; bottom: 8px; right: 8px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
     </style>
@@ -366,9 +387,11 @@
             <label for="alignScaleSlider">Scale</label>
             <input type="range" id="alignScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale target" />
         </div>
-        <div class="align-option-row">
-            <input type="checkbox" id="animated-background-cb" title="Dark theme with fog and ambient effects">
-            <label for="animated-background-cb">Dark Mode</label>
+        <div class="bg-selector">
+            <span>Background:</span>
+            <button class="bg-btn" id="bg-btn-black" title="Solid black background">Black</button>
+            <button class="bg-btn" id="bg-btn-white" title="Solid white background">White</button>
+            <button class="bg-btn" id="bg-btn-animated" title="Animated RPG background">Animated</button>
         </div>
         <button class="btn" id="lockAlignBtn">Lock position</button>
         <button class="btn" id="resetAlignBtn">Reset</button>
@@ -659,32 +682,31 @@
             loadAlignment();
         }
 
-        function showLogoCallout() {
-            if (!logoCallout) return;
-            logoSpotlightOverlay && logoSpotlightOverlay.classList.add('show');
-            logoBtn && logoBtn.classList.add('logo-spotlight');
-            logoCallout.classList.add('show');
-            setTimeout(function() {
-                logoCallout.classList.remove('show');
-                logoSpotlightOverlay && logoSpotlightOverlay.classList.remove('show');
-                logoBtn && logoBtn.classList.remove('logo-spotlight');
-            }, 2500);
+        var BG_MODE_KEY = 'daggerdie_projector_bgMode';
+        var bgBtnBlack    = document.getElementById('bg-btn-black');
+        var bgBtnWhite    = document.getElementById('bg-btn-white');
+        var bgBtnAnimated = document.getElementById('bg-btn-animated');
+
+        function applyBgMode(mode) {
+            document.body.classList.remove('projector-bg-black', 'projector-bg-white', 'projector-animated-bg');
+            if (mode === 'white')    document.body.classList.add('projector-bg-white');
+            else if (mode === 'animated') document.body.classList.add('projector-animated-bg');
+            else                     document.body.classList.add('projector-bg-black');
+            if (bgBtnBlack)    bgBtnBlack.classList.toggle('active',    mode === 'black' || !mode);
+            if (bgBtnWhite)    bgBtnWhite.classList.toggle('active',    mode === 'white');
+            if (bgBtnAnimated) bgBtnAnimated.classList.toggle('active', mode === 'animated');
         }
 
-        var ANIMATED_BG_KEY = 'daggerdie_projector_animatedBackground';
-        var animatedBgCb = document.getElementById('animated-background-cb');
-        function applyAnimatedBg() {
-            var on = animatedBgCb ? animatedBgCb.checked : (localStorage.getItem(ANIMATED_BG_KEY) === 'true');
-            document.body.classList.toggle('projector-animated-bg', !!on);
+        function setBgMode(mode) {
+            try { localStorage.setItem(BG_MODE_KEY, mode); } catch(e) {}
+            applyBgMode(mode);
         }
-        if (animatedBgCb) {
-            animatedBgCb.checked = localStorage.getItem(ANIMATED_BG_KEY) === 'true';
-            animatedBgCb.addEventListener('change', function() {
-                localStorage.setItem(ANIMATED_BG_KEY, String(animatedBgCb.checked));
-                applyAnimatedBg();
-            });
-            applyAnimatedBg();
-        }
+
+        if (bgBtnBlack)    bgBtnBlack.addEventListener('click',    function() { setBgMode('black'); });
+        if (bgBtnWhite)    bgBtnWhite.addEventListener('click',    function() { setBgMode('white'); });
+        if (bgBtnAnimated) bgBtnAnimated.addEventListener('click', function() { setBgMode('animated'); });
+
+        applyBgMode(localStorage.getItem(BG_MODE_KEY) || 'black');
 
         if (logoBtn) logoBtn.addEventListener('click', startAlignmentMode);
         if (lockAlignBtn) lockAlignBtn.addEventListener('click', lockAlignment);
@@ -708,6 +730,18 @@
                 if (!e.target.matches('input, textarea')) toggleFullscreen();
             }
         });
+
+        function showLogoCallout() {
+            if (!logoCallout) return;
+            logoSpotlightOverlay && logoSpotlightOverlay.classList.add('show');
+            logoBtn && logoBtn.classList.add('logo-spotlight');
+            logoCallout.classList.add('show');
+            setTimeout(function() {
+                logoCallout.classList.remove('show');
+                logoSpotlightOverlay && logoSpotlightOverlay.classList.remove('show');
+                logoBtn && logoBtn.classList.remove('logo-spotlight');
+            }, 2500);
+        }
 
         loadAlignment();
         showLogoCallout();
@@ -766,6 +800,423 @@
         };
     })();
     </script>
-    <script src="rpg-bg-canvas.js"></script>
+    <script>
+// Projector-tuned canvas animations — high-visibility version for dark projected surfaces
+(function() {
+    const canvas = document.getElementById('projectorParticleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h, time = 0;
+    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    const GOLD = { r: 220, g: 175, b: 60 }, SILVER = { r: 190, g: 200, b: 220 }, BLUE = { r: 120, g: 160, b: 240 }, PURPLE = { r: 180, g: 110, b: 220 };
+
+    class Mote {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * w; this.y = Math.random() * h; this.size = Math.random() * 2 + 0.6;
+            this.speedX = (Math.random() - 0.5) * 0.3; this.speedY = (Math.random() - 0.5) * 0.2 - 0.1;
+            this.opacity = Math.random() * 0.6 + 0.25; this.pulse = Math.random() * Math.PI * 2; this.pulseSpeed = Math.random() * 0.02 + 0.005;
+            const t = Math.random();
+            if (t < 0.4) { this.r = 220+Math.random()*35; this.g = 160+Math.random()*30; this.b = 50+Math.random()*30; }
+            else if (t < 0.7) { this.r = 120+Math.random()*40; this.g = 150+Math.random()*40; this.b = 220+Math.random()*35; }
+            else { this.r = 190+Math.random()*30; this.g = 190+Math.random()*30; this.b = 200+Math.random()*30; }
+        }
+        update() { this.x += this.speedX; this.y += this.speedY; this.pulse += this.pulseSpeed; if (this.x < -10 || this.x > w+10 || this.y < -10 || this.y > h+10) this.reset(); }
+        draw() {
+            const o = this.opacity * (0.5 + 0.5 * Math.sin(this.pulse));
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${this.r|0},${this.g|0},${this.b|0},${o})`;
+            ctx.shadowColor = `rgba(${this.r|0},${this.g|0},${this.b|0},${o*0.9})`; ctx.shadowBlur = this.size * 8; ctx.fill(); ctx.shadowBlur = 0;
+        }
+    }
+    const motes = Array.from({ length: 80 }, () => new Mote());
+
+    class ThrowingKnife {
+        constructor() { this.reset(); }
+        reset() {
+            this.fromLeft = Math.random() > 0.5;
+            this.x = this.fromLeft ? -80 : w + 80;
+            this.y = Math.random() * h * 0.7 + h * 0.1;
+            this.speedX = (this.fromLeft ? 1 : -1) * (Math.random() * 1.5 + 0.8);
+            this.speedY = (Math.random() - 0.5) * 0.3;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = (this.fromLeft ? 1 : -1) * (Math.random() * 0.06 + 0.03);
+            this.scale = Math.random() * 0.5 + 0.6;
+            this.opacity = 0;
+            this.maxOpacity = Math.random() * 0.5 + 0.35;
+            this.trail = [];
+            this.wobbleAmp = Math.random() * 0.5;
+            this.wobbleFreq = Math.random() * 0.02 + 0.01;
+            this.wobblePhase = Math.random() * Math.PI * 2;
+        }
+        update() {
+            this.x += this.speedX;
+            this.wobblePhase += this.wobbleFreq;
+            this.y += this.speedY + Math.sin(this.wobblePhase) * this.wobbleAmp;
+            this.rotation += this.rotSpeed;
+            const margin = 200;
+            if (this.fromLeft) {
+                if (this.x < margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.004);
+                else if (this.x > w - margin) this.opacity = Math.max(0, this.opacity - 0.005);
+                else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.002);
+                if (this.x > w + 100) this.reset();
+            } else {
+                if (this.x > w - margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.004);
+                else if (this.x < margin) this.opacity = Math.max(0, this.opacity - 0.005);
+                else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.002);
+                if (this.x < -100) this.reset();
+            }
+            this.trail.push({ x: this.x, y: this.y, opacity: this.opacity * 0.6 });
+            if (this.trail.length > 18) this.trail.shift();
+        }
+        draw() {
+            for (let i = 0; i < this.trail.length; i++) {
+                const t = this.trail[i];
+                const a = (i / this.trail.length) * t.opacity * 0.7;
+                ctx.beginPath(); ctx.arc(t.x, t.y, 2 * this.scale, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(220,190,80,${a})`; ctx.fill();
+            }
+            if (this.opacity < 0.01) return;
+            ctx.save();
+            ctx.translate(this.x, this.y); ctx.rotate(this.rotation); ctx.scale(this.scale, this.scale); ctx.globalAlpha = this.opacity;
+            ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(-4.5, -10); ctx.lineTo(-3.5, 0); ctx.lineTo(3.5, 0); ctx.lineTo(4.5, -10); ctx.closePath();
+            const bladeGrad = ctx.createLinearGradient(-4, -30, 4, 0);
+            bladeGrad.addColorStop(0, '#e8f0ff'); bladeGrad.addColorStop(0.4, '#c0cce0'); bladeGrad.addColorStop(0.8, '#8a96aa'); bladeGrad.addColorStop(1, '#6a7488');
+            ctx.fillStyle = bladeGrad; ctx.fill();
+            ctx.strokeStyle = 'rgba(240,250,255,0.85)'; ctx.lineWidth = 0.6; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, -27); ctx.lineTo(0, -3); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-7, -1); ctx.lineTo(-6, 3); ctx.lineTo(6, 3); ctx.lineTo(7, -1); ctx.closePath();
+            ctx.fillStyle = '#d4a840'; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-3, 3); ctx.lineTo(-2.5, 20); ctx.lineTo(2.5, 20); ctx.lineTo(3, 3); ctx.closePath();
+            const gripGrad = ctx.createLinearGradient(-3, 3, 3, 20);
+            gripGrad.addColorStop(0, '#6a4d2a'); gripGrad.addColorStop(0.5, '#8a6845'); gripGrad.addColorStop(1, '#4e3a1e');
+            ctx.fillStyle = gripGrad; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-3.5, 20); ctx.lineTo(-4, 23); ctx.lineTo(0, 25); ctx.lineTo(4, 23); ctx.lineTo(3.5, 20); ctx.closePath();
+            ctx.fillStyle = '#d4a840'; ctx.fill();
+            ctx.shadowColor = 'rgba(200,225,255,0.7)'; ctx.shadowBlur = 14;
+            ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(-1.5, -22); ctx.lineTo(1.5, -22); ctx.closePath();
+            ctx.fillStyle = 'rgba(220,240,255,0.25)'; ctx.fill(); ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1; ctx.restore();
+        }
+    }
+    const knives = Array.from({ length: 4 }, () => { const k = new ThrowingKnife(); k.x = Math.random() * w; return k; });
+
+    class TumblingD20 {
+        constructor() { this.reset(); }
+        reset() {
+            this.fromLeft = Math.random() > 0.5;
+            this.x = this.fromLeft ? -60 : w + 60;
+            this.y = Math.random() * h * 0.6 + h * 0.2;
+            this.speedX = (this.fromLeft ? 1 : -1) * (Math.random() * 0.6 + 0.3);
+            this.speedY = (Math.random() - 0.5) * 0.15;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = (Math.random() - 0.5) * 0.018;
+            this.scale = Math.random() * 0.4 + 0.5;
+            this.opacity = 0;
+            this.maxOpacity = Math.random() * 0.4 + 0.35;
+            this.faceValue = Math.floor(Math.random() * 20) + 1;
+            this.faceTimer = 0;
+            const tints = [GOLD, SILVER, BLUE, PURPLE];
+            this.tint = tints[Math.floor(Math.random() * tints.length)];
+        }
+        update() {
+            this.x += this.speedX; this.y += this.speedY; this.rotation += this.rotSpeed; this.faceTimer++;
+            if (this.faceTimer > 50 + Math.random() * 40) { this.faceValue = Math.floor(Math.random() * 20) + 1; this.faceTimer = 0; }
+            const margin = 200;
+            if (this.fromLeft) {
+                if (this.x < margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.003);
+                else if (this.x > w - margin) this.opacity = Math.max(0, this.opacity - 0.004);
+                else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.0015);
+                if (this.x > w + 80) this.reset();
+            } else {
+                if (this.x > w - margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.003);
+                else if (this.x < margin) this.opacity = Math.max(0, this.opacity - 0.004);
+                else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.0015);
+                if (this.x < -80) this.reset();
+            }
+        }
+        draw() {
+            if (this.opacity < 0.005) return;
+            ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation); ctx.scale(this.scale, this.scale); ctx.globalAlpha = this.opacity;
+            const R = 28, { r, g, b } = this.tint;
+            const pts = [];
+            for (let i = 0; i < 3; i++) { const angle = (i * Math.PI * 2 / 3) - Math.PI / 2; pts.push({ x: Math.cos(angle) * R, y: Math.sin(angle) * R }); }
+            ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y); ctx.closePath();
+            const dGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+            dGrad.addColorStop(0, `rgba(${r+55},${g+55},${b+55},0.55)`); dGrad.addColorStop(1, `rgba(${r},${g},${b},0.2)`);
+            ctx.fillStyle = dGrad; ctx.fill();
+            ctx.strokeStyle = `rgba(${r},${g},${b},0.95)`; ctx.lineWidth = 1.8; ctx.stroke();
+            const inner = [];
+            for (let i = 0; i < 3; i++) { const angle = (i * Math.PI * 2 / 3) + Math.PI / 6; inner.push({ x: Math.cos(angle) * R * 0.4, y: Math.sin(angle) * R * 0.4 }); }
+            ctx.strokeStyle = `rgba(${r},${g},${b},0.5)`; ctx.lineWidth = 0.9;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(inner[i].x, inner[i].y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(inner[(i+2)%3].x, inner[(i+2)%3].y); ctx.stroke();
+            }
+            ctx.beginPath(); ctx.moveTo(inner[0].x, inner[0].y); ctx.lineTo(inner[1].x, inner[1].y); ctx.lineTo(inner[2].x, inner[2].y); ctx.closePath();
+            ctx.strokeStyle = `rgba(${r},${g},${b},0.6)`; ctx.lineWidth = 0.8; ctx.stroke();
+            ctx.font = 'bold 15px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.shadowColor = `rgba(${r},${g},${b},0.9)`; ctx.shadowBlur = 12;
+            ctx.fillStyle = `rgba(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)},1)`;
+            ctx.fillText(this.faceValue.toString(), 0, 1); ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(0, 0, R + 5, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${r},${g},${b},0.2)`; ctx.lineWidth = 3; ctx.stroke();
+            ctx.globalAlpha = 1; ctx.restore();
+        }
+    }
+    const dice = Array.from({ length: 3 }, () => { const d = new TumblingD20(); d.x = Math.random() * w; return d; });
+
+    class CrossedDaggers {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * w; this.y = Math.random() * h;
+            this.scale = Math.random() * 0.7 + 0.4;
+            this.opacity = 0; this.maxOpacity = Math.random() * 0.35 + 0.25;
+            this.phase = Math.random() * Math.PI * 2; this.phaseSpeed = Math.random() * 0.008 + 0.003;
+            this.rotation = (Math.random() - 0.5) * 0.3;
+            this.lifespan = Math.random() * 800 + 400; this.age = 0;
+        }
+        update() {
+            this.age++; this.phase += this.phaseSpeed;
+            const progress = this.age / this.lifespan;
+            if (progress < 0.2) this.opacity = (progress / 0.2) * this.maxOpacity;
+            else if (progress > 0.8) this.opacity = ((1 - progress) / 0.2) * this.maxOpacity;
+            else this.opacity = this.maxOpacity;
+            this.opacity *= (0.7 + 0.3 * Math.sin(this.phase));
+            if (this.age > this.lifespan) this.reset();
+        }
+        draw() {
+            if (this.opacity < 0.005) return;
+            ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation); ctx.scale(this.scale, this.scale); ctx.globalAlpha = this.opacity;
+            for (let side = -1; side <= 1; side += 2) {
+                ctx.save(); ctx.rotate(side * 0.5);
+                ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-3.5, -5); ctx.lineTo(0, 0); ctx.lineTo(3.5, -5); ctx.closePath();
+                ctx.fillStyle = 'rgba(210,220,245,0.9)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(240,245,255,0.7)'; ctx.lineWidth = 0.6; ctx.stroke();
+                ctx.shadowColor = 'rgba(180,200,255,0.6)'; ctx.shadowBlur = 8;
+                ctx.fillStyle = 'rgba(210,140,60,0.85)'; ctx.fillRect(-6, 0, 12, 2.5);
+                ctx.fillStyle = 'rgba(100,65,35,0.85)'; ctx.fillRect(-2, 2.5, 4, 13);
+                ctx.beginPath(); ctx.arc(0, 17, 2.8, 0, Math.PI * 2); ctx.fillStyle = 'rgba(210,140,60,0.8)'; ctx.fill();
+                ctx.shadowBlur = 0; ctx.restore();
+            }
+            ctx.globalAlpha = 1; ctx.restore();
+        }
+    }
+    const crossedDaggers = Array.from({ length: 5 }, () => new CrossedDaggers());
+
+    class PixelIcon {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * w; this.y = Math.random() * h;
+            this.opacity = 0; this.maxOpacity = Math.random() * 0.45 + 0.3;
+            this.bobSpeed = Math.random() * 0.015 + 0.008; this.bobAmp = Math.random() * 3 + 2;
+            this.bobPhase = Math.random() * Math.PI * 2; this.scale = Math.random() * 0.9 + 0.5;
+            this.lifespan = Math.random() * 600 + 300; this.age = 0;
+            this.type = ['sword','potion','shield','skull','chest','key','axe','heart'][Math.floor(Math.random() * 8)];
+        }
+        update() {
+            this.age++; this.bobPhase += this.bobSpeed;
+            const progress = this.age / this.lifespan;
+            if (progress < 0.15) this.opacity = (progress / 0.15) * this.maxOpacity;
+            else if (progress > 0.85) this.opacity = ((1 - progress) / 0.15) * this.maxOpacity;
+            else this.opacity = this.maxOpacity;
+            if (this.age > this.lifespan) this.reset();
+        }
+        draw() {
+            if (this.opacity < 0.005) return;
+            const bob = Math.sin(this.bobPhase) * this.bobAmp;
+            ctx.save(); ctx.translate(this.x, this.y + bob); ctx.scale(this.scale, this.scale); ctx.globalAlpha = this.opacity; ctx.imageSmoothingEnabled = false;
+            const s = 2.5;
+            switch(this.type) {
+                case 'sword': this.drawSword(s); break; case 'potion': this.drawPotion(s); break;
+                case 'shield': this.drawShield(s); break; case 'skull': this.drawSkull(s); break;
+                case 'chest': this.drawChest(s); break; case 'key': this.drawKey(s); break;
+                case 'axe': this.drawAxe(s); break; case 'heart': this.drawHeart(s); break;
+            }
+            ctx.globalAlpha = 1; ctx.restore();
+        }
+        px(x, y, s, color) { ctx.fillStyle = color; ctx.fillRect(x * s, y * s, s, s); }
+        drawSword(s) {
+            const bl='rgba(225,235,255,1)';const bs='rgba(175,190,210,0.85)';const gd='rgba(220,170,55,1)';const hd='rgba(130,80,40,0.9)';
+            this.px(0,-8,s,bl);this.px(-1,-7,s,bs);this.px(0,-7,s,bl);this.px(1,-7,s,bs);
+            for(let y=-6;y<=-1;y++){this.px(-1,y,s,bs);this.px(0,y,s,bl);this.px(1,y,s,bs);}
+            for(let x=-3;x<=3;x++)this.px(x,0,s,gd);
+            for(let y=1;y<=5;y++)this.px(0,y,s,hd);
+            this.px(-1,6,s,gd);this.px(0,6,s,gd);this.px(1,6,s,gd);
+        }
+        drawPotion(s) {
+            const lq='rgba(80,220,80,0.95)';const gl='rgba(200,210,220,0.85)';const ck='rgba(170,120,55,0.9)';
+            this.px(-1,-4,s,ck);this.px(0,-4,s,ck);this.px(1,-4,s,ck);
+            this.px(0,-3,s,gl);this.px(0,-2,s,gl);
+            for(let y=-1;y<=3;y++){this.px(-2,y,s,gl);this.px(-1,y,s,lq);this.px(0,y,s,lq);this.px(1,y,s,lq);this.px(2,y,s,gl);}
+            this.px(-1,4,s,gl);this.px(0,4,s,gl);this.px(1,4,s,gl);
+            this.px(-1,0,s,'rgba(180,255,180,0.6)');
+        }
+        drawShield(s) {
+            const wd='rgba(170,120,55,0.9)';const gd='rgba(220,170,65,1)';const dk='rgba(120,85,40,0.85)';
+            for(let x=-2;x<=2;x++)this.px(x,-4,s,gd);
+            for(let y=-3;y<=1;y++){this.px(-3,y,s,gd);this.px(-2,y,s,wd);this.px(-1,y,s,wd);this.px(0,y,s,dk);this.px(1,y,s,wd);this.px(2,y,s,wd);this.px(3,y,s,gd);}
+            this.px(-2,2,s,gd);this.px(-1,2,s,wd);this.px(0,2,s,wd);this.px(1,2,s,wd);this.px(2,2,s,gd);
+            this.px(-1,3,s,gd);this.px(0,3,s,wd);this.px(1,3,s,gd);this.px(0,4,s,gd);this.px(0,-1,s,gd);
+        }
+        drawSkull(s) {
+            const bn='rgba(230,230,215,0.9)';const sh='rgba(185,185,170,0.7)';const ey='rgba(30,30,40,1)';
+            this.px(-1,-3,s,bn);this.px(0,-3,s,bn);this.px(1,-3,s,bn);
+            for(let x=-2;x<=2;x++)this.px(x,-2,s,bn);
+            this.px(-2,-1,s,bn);this.px(-1,-1,s,ey);this.px(0,-1,s,sh);this.px(1,-1,s,ey);this.px(2,-1,s,bn);
+            this.px(-2,0,s,bn);this.px(-1,0,s,sh);this.px(0,0,s,ey);this.px(1,0,s,sh);this.px(2,0,s,bn);
+            this.px(-2,1,s,sh);this.px(-1,1,s,bn);this.px(0,1,s,sh);this.px(1,1,s,bn);this.px(2,1,s,sh);
+            this.px(-1,2,s,sh);this.px(0,2,s,bn);this.px(1,2,s,sh);
+        }
+        drawChest(s) {
+            const wd='rgba(170,110,50,0.9)';const gd='rgba(220,170,55,1)';
+            for(let x=-3;x<=3;x++)this.px(x,-3,s,gd);
+            for(let x=-3;x<=3;x++)this.px(x,-2,s,wd);
+            for(let y=-1;y<=2;y++){this.px(-3,y,s,gd);this.px(3,y,s,gd);for(let x=-2;x<=2;x++)this.px(x,y,s,y===-1?gd:wd);}
+            for(let x=-3;x<=3;x++)this.px(x,3,s,gd);
+            this.px(0,0,s,'rgba(255,215,60,1)');this.px(0,1,s,'rgba(255,200,50,0.9)');
+        }
+        drawKey(s) {
+            const gd='rgba(240,200,65,1)';const dk='rgba(195,155,45,0.85)';
+            this.px(-1,-3,s,gd);this.px(0,-3,s,gd);this.px(1,-3,s,gd);
+            this.px(-2,-2,s,gd);this.px(2,-2,s,gd);this.px(-2,-1,s,gd);this.px(2,-1,s,gd);
+            this.px(-1,0,s,gd);this.px(0,0,s,gd);this.px(1,0,s,gd);
+            for(let y=1;y<=4;y++)this.px(0,y,s,dk);
+            this.px(1,3,s,gd);this.px(1,4,s,gd);this.px(2,4,s,gd);
+        }
+        drawAxe(s) {
+            const bl='rgba(210,220,240,0.9)';const hd='rgba(145,95,45,0.9)';const gd='rgba(215,165,55,0.85)';
+            this.px(-3,-3,s,bl);this.px(-2,-3,s,bl);this.px(-1,-3,s,bl);
+            this.px(-4,-2,s,bl);this.px(-3,-2,s,bl);this.px(-2,-2,s,bl);this.px(-1,-2,s,bl);
+            this.px(-4,-1,s,bl);this.px(-3,-1,s,bl);this.px(-2,-1,s,bl);this.px(-1,-1,s,bl);
+            this.px(-3,0,s,bl);this.px(-2,0,s,bl);this.px(-1,0,s,bl);
+            for(let y=-2;y<=5;y++)this.px(0,y,s,hd);
+            this.px(0,6,s,gd);
+        }
+        drawHeart(s) {
+            const rd='rgba(240,60,70,0.9)';const lt='rgba(255,120,130,0.7)';const dk='rgba(180,35,45,0.8)';
+            this.px(-2,-2,s,rd);this.px(-1,-2,s,rd);this.px(1,-2,s,rd);this.px(2,-2,s,rd);
+            this.px(-3,-1,s,rd);this.px(-2,-1,s,lt);this.px(-1,-1,s,rd);this.px(0,-1,s,rd);this.px(1,-1,s,rd);this.px(2,-1,s,rd);this.px(3,-1,s,rd);
+            this.px(-3,0,s,rd);this.px(-2,0,s,rd);this.px(-1,0,s,rd);this.px(0,0,s,rd);this.px(1,0,s,rd);this.px(2,0,s,rd);this.px(3,0,s,rd);
+            this.px(-2,1,s,dk);this.px(-1,1,s,rd);this.px(0,1,s,rd);this.px(1,1,s,rd);this.px(2,1,s,dk);
+            this.px(-1,2,s,dk);this.px(0,2,s,rd);this.px(1,2,s,dk);this.px(0,3,s,dk);
+        }
+    }
+    const pixelIcons = Array.from({ length: 10 }, () => new PixelIcon());
+
+    class SparkBurst {
+        constructor() { this.sparks = []; this.active = false; this.timer = Math.random() * 400 + 200; }
+        reset() { this.active = false; this.timer = Math.random() * 500 + 300; this.sparks = []; }
+        trigger() {
+            this.active = true;
+            const x = Math.random() * w, y = Math.random() * h;
+            this.sparks = [];
+            const count = Math.floor(Math.random() * 12) + 8;
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2, speed = Math.random() * 3 + 0.8;
+                this.sparks.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, decay: Math.random()*0.015+0.008, size: Math.random()*3+0.8, isGold: Math.random() > 0.4 });
+            }
+        }
+        update() {
+            if (!this.active) { this.timer--; if (this.timer <= 0) this.trigger(); return; }
+            let alive = false;
+            for (const s of this.sparks) { s.x+=s.vx; s.y+=s.vy; s.vy+=0.012; s.vx*=0.995; s.life-=s.decay; if(s.life>0) alive=true; }
+            if (!alive) this.reset();
+        }
+        draw() {
+            if (!this.active) return;
+            for (const s of this.sparks) {
+                if (s.life <= 0) continue;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+                if (s.isGold) { ctx.fillStyle=`rgba(255,210,60,${s.life*0.85})`; ctx.shadowColor=`rgba(255,230,80,${s.life*0.7})`; }
+                else { ctx.fillStyle=`rgba(210,225,255,${s.life*0.75})`; ctx.shadowColor=`rgba(180,210,255,${s.life*0.6})`; }
+                ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
+            }
+        }
+    }
+    const sparkBursts = Array.from({ length: 3 }, () => new SparkBurst());
+
+    class FloatingD6 {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * w; this.y = Math.random() * h;
+            this.opacity = 0; this.maxOpacity = Math.random() * 0.45 + 0.3;
+            this.rotation = Math.random() * Math.PI * 2; this.rotSpeed = (Math.random()-0.5)*0.005;
+            this.bobPhase = Math.random() * Math.PI * 2; this.bobSpeed = Math.random()*0.01+0.005; this.bobAmp = Math.random()*4+2;
+            this.scale = Math.random()*0.6+0.4; this.face = Math.floor(Math.random()*6)+1;
+            this.lifespan = Math.random()*700+350; this.age = 0;
+            this.tint = [GOLD,SILVER,PURPLE][Math.floor(Math.random()*3)];
+        }
+        update() {
+            this.age++; this.rotation+=this.rotSpeed; this.bobPhase+=this.bobSpeed;
+            const progress = this.age / this.lifespan;
+            if (progress < 0.15) this.opacity=(progress/0.15)*this.maxOpacity;
+            else if (progress > 0.85) this.opacity=((1-progress)/0.15)*this.maxOpacity;
+            else this.opacity=this.maxOpacity;
+            if (Math.random() < 0.003) this.face=Math.floor(Math.random()*6)+1;
+            if (this.age > this.lifespan) this.reset();
+        }
+        draw() {
+            if (this.opacity < 0.005) return;
+            const bob = Math.sin(this.bobPhase) * this.bobAmp;
+            ctx.save(); ctx.translate(this.x, this.y+bob); ctx.rotate(this.rotation); ctx.scale(this.scale,this.scale); ctx.globalAlpha=this.opacity;
+            const sz=18, {r,g,b}=this.tint;
+            ctx.beginPath();
+            const rd2=3;
+            ctx.moveTo(-sz+rd2,-sz); ctx.lineTo(sz-rd2,-sz); ctx.quadraticCurveTo(sz,-sz,sz,-sz+rd2);
+            ctx.lineTo(sz,sz-rd2); ctx.quadraticCurveTo(sz,sz,sz-rd2,sz);
+            ctx.lineTo(-sz+rd2,sz); ctx.quadraticCurveTo(-sz,sz,-sz,sz-rd2);
+            ctx.lineTo(-sz,-sz+rd2); ctx.quadraticCurveTo(-sz,-sz,-sz+rd2,-sz); ctx.closePath();
+            const dGrad=ctx.createLinearGradient(-sz,-sz,sz,sz);
+            dGrad.addColorStop(0,`rgba(${Math.min(r+50,255)},${Math.min(g+50,255)},${Math.min(b+50,255)},0.45)`);
+            dGrad.addColorStop(1,`rgba(${r},${g},${b},0.2)`);
+            ctx.fillStyle=dGrad; ctx.fill();
+            ctx.strokeStyle=`rgba(${r},${g},${b},0.75)`; ctx.lineWidth=1.2; ctx.stroke();
+            const pipR=2.5;
+            const pipColor=`rgba(${Math.min(r+90,255)},${Math.min(g+90,255)},${Math.min(b+90,255)},1)`;
+            ctx.fillStyle=pipColor;
+            const pipPositions={1:[[0,0]],2:[[-7,-7],[7,7]],3:[[-7,-7],[0,0],[7,7]],4:[[-7,-7],[7,-7],[-7,7],[7,7]],5:[[-7,-7],[7,-7],[0,0],[-7,7],[7,7]],6:[[-7,-7],[7,-7],[-7,0],[7,0],[-7,7],[7,7]]};
+            for(const[px,py]of pipPositions[this.face]){ctx.beginPath();ctx.arc(px,py,pipR,0,Math.PI*2);ctx.fill();}
+            ctx.globalAlpha=1; ctx.restore();
+        }
+    }
+    const d6dice = Array.from({ length: 4 }, () => new FloatingD6());
+
+    function drawCenterD20(t) {
+        ctx.save(); ctx.translate(w*0.5, h*0.5);
+        const R=Math.min(w,h)*0.18, rot=t*0.0003, tilt=Math.sin(t*0.0002)*0.15;
+        const vertices=[{x:0,y:-R}];
+        for(let i=0;i<5;i++){const a=(i*Math.PI*2/5)+rot;vertices.push({x:Math.cos(a)*R*0.85,y:-R*0.35+Math.sin(a+tilt)*R*0.15});}
+        for(let i=0;i<5;i++){const a=(i*Math.PI*2/5)+rot+Math.PI/5;vertices.push({x:Math.cos(a)*R*0.85,y:R*0.35+Math.sin(a+tilt)*R*0.15});}
+        vertices.push({x:0,y:R});
+        const edges=[[0,1],[0,2],[0,3],[0,4],[0,5],[1,2],[2,3],[3,4],[4,5],[5,1],[1,6],[2,6],[2,7],[3,7],[3,8],[4,8],[4,9],[5,9],[5,10],[1,10],[6,7],[7,8],[8,9],[9,10],[10,6],[6,11],[7,11],[8,11],[9,11],[10,11]];
+        const baseOpacity=0.13+Math.sin(t*0.001)*0.04;
+        ctx.lineWidth=1.2;
+        for(const[a,b]of edges){ctx.beginPath();ctx.moveTo(vertices[a].x,vertices[a].y);ctx.lineTo(vertices[b].x,vertices[b].y);ctx.strokeStyle=`rgba(220,175,60,${baseOpacity})`;ctx.stroke();}
+        for(const v of vertices){ctx.beginPath();ctx.arc(v.x,v.y,2.2,0,Math.PI*2);ctx.fillStyle=`rgba(220,175,60,${baseOpacity*1.6})`;ctx.fill();}
+        ctx.font=`bold ${R*0.35}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.shadowColor=`rgba(220,175,60,${baseOpacity*3})`;ctx.shadowBlur=18;
+        ctx.fillStyle=`rgba(220,175,60,${baseOpacity*1.2})`;ctx.fillText('20',0,0);ctx.shadowBlur=0;
+        ctx.restore();
+    }
+
+    function animate() {
+        time++;
+        ctx.clearRect(0, 0, w, h);
+        drawCenterD20(time);
+        for(const m of motes){m.update();m.draw();}
+        for(const cd of crossedDaggers){cd.update();cd.draw();}
+        for(const pi of pixelIcons){pi.update();pi.draw();}
+        for(const d of d6dice){d.update();d.draw();}
+        for(const k of knives){k.update();k.draw();}
+        for(const d of dice){d.update();d.draw();}
+        for(const sb of sparkBursts){sb.update();sb.draw();}
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+    </script>
 </body>
 </html>
