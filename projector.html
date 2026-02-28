@@ -224,8 +224,8 @@
             left: 50%;
             transform: translate(-50%, 50%);
             font-family: sans-serif;
-            font-size: 36px;
-            font-weight: 600;
+            font-size: 72px;
+            font-weight: 700;
             color: #ffd700;
             text-shadow:
                 0 0 6px  #fff,
@@ -236,6 +236,8 @@
             pointer-events: none;
         }
         body.alignment-mode .alignment-hint { display: block; }
+
+        /* Options panel — 3 stacked rows */
         .alignment-lock-bar {
             display: none;
             position: fixed;
@@ -243,60 +245,56 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 90;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            background: rgba(0,0,0,0.5);
-            padding: 12px 20px;
-            border-radius: 8px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 18px;
+            background: rgba(0,0,0,0.72);
+            padding: 28px 36px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.25);
+            min-width: 420px;
         }
         body.alignment-mode .alignment-lock-bar { display: flex !important; }
+
+        /* Row 1 — Scale */
         .alignment-scale-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
         }
         .alignment-scale-row label {
-            font-size: 18px;
+            font-size: 26px;
+            font-family: sans-serif;
             color: #f0f0f0;
+            white-space: nowrap;
+            min-width: 70px;
         }
         .alignment-scale-row input[type="range"] {
-            width: 160px;
-            min-width: 100px;
-            height: 28px;
+            flex: 1;
+            height: 36px;
             accent-color: #ffd700;
             cursor: pointer;
         }
-        .alignment-lock-bar .align-option-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .alignment-lock-bar .align-option-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #ffd700;
-            cursor: pointer;
-        }
-        .alignment-lock-bar .align-option-row label {
-            font-size: 18px;
-            color: #f0f0f0;
-            cursor: pointer;
-            margin: 0;
-        }
+
+        /* Row 3 — action buttons */
         .alignment-lock-bar .btn {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 1.1rem;
-            background: rgba(255,215,0,0.2);
-            border: 1px solid rgba(255,215,0,0.5);
+            font-size: 1.4rem;
+            background: rgba(255,215,0,0.18);
+            border: 2px solid rgba(255,215,0,0.5);
             color: #ffd700;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 14px 0;
+            border-radius: 10px;
             cursor: pointer;
+            flex: 1;
         }
         .alignment-lock-bar .btn:hover {
             background: rgba(255,215,0,0.35);
-            border-color: rgba(255,215,0,0.8);
+            border-color: rgba(255,215,0,0.85);
+        }
+        .alignment-action-row {
+            display: flex;
+            gap: 14px;
         }
 
         /* Animated background (optional) */
@@ -320,34 +318,37 @@
         body.projector-bg-white { background: #ffffff; }
         .target-wrapper { position: relative; z-index: 2; }
 
-        /* Background selector buttons */
+        /* Row 2 — Background selector */
         .bg-selector {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 12px;
         }
         .bg-selector span {
-            font-size: 16px;
+            font-size: 26px;
+            font-family: sans-serif;
             color: #f0f0f0;
             white-space: nowrap;
+            min-width: 170px;
         }
         .bg-btn {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 0.95rem;
-            padding: 7px 13px;
-            border-radius: 7px;
+            font-size: 1.2rem;
+            padding: 12px 20px;
+            border-radius: 10px;
             cursor: pointer;
             border: 2px solid rgba(255,215,0,0.35);
             background: rgba(255,255,255,0.06);
             color: #ccc;
             transition: all 0.15s;
+            flex: 1;
         }
         .bg-btn:hover { border-color: rgba(255,215,0,0.7); color: #ffd700; }
         .bg-btn.active {
             background: rgba(255,215,0,0.22);
             border-color: #ffd700;
             color: #ffd700;
-            box-shadow: 0 0 8px rgba(255,215,0,0.3);
+            box-shadow: 0 0 10px rgba(255,215,0,0.35);
         }
 
         .dimensions-label {
@@ -393,9 +394,11 @@
             <button class="bg-btn" id="bg-btn-white" title="Solid white background">White</button>
             <button class="bg-btn" id="bg-btn-animated" title="Animated RPG background">Animated</button>
         </div>
-        <button class="btn" id="lockAlignBtn">Lock position</button>
-        <button class="btn" id="resetAlignBtn">Reset</button>
-        <button class="btn" id="cancelAlignBtn">Cancel</button>
+        <div class="alignment-action-row">
+            <button class="btn" id="lockAlignBtn">Lock position</button>
+            <button class="btn" id="resetAlignBtn">Reset</button>
+            <button class="btn" id="cancelAlignBtn">Cancel</button>
+        </div>
     </div>
 
     <div class="target-wrapper" id="targetWrapper">
@@ -809,7 +812,11 @@
     let w, h, time = 0;
     function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
     resize();
-    window.addEventListener('resize', resize);
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 120);
+    });
     const GOLD = { r: 220, g: 175, b: 60 }, SILVER = { r: 190, g: 200, b: 220 }, BLUE = { r: 120, g: 160, b: 240 }, PURPLE = { r: 180, g: 110, b: 220 };
 
     class Mote {
