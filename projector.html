@@ -143,11 +143,71 @@
         }
 
         .m3-logo {
-            position: fixed; bottom: 10px; right: 10px; z-index: 50;
+            position: fixed; bottom: 10px; right: 10px; z-index: 200;
             width: 36px; height: auto; pointer-events: auto; cursor: pointer;
             opacity: 0.85;
+            transition: opacity 0.3s;
         }
         .m3-logo:hover { opacity: 1; }
+        .m3-logo.logo-spotlight {
+            opacity: 1;
+            animation: logoBounce 0.5s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px #ffd700) drop-shadow(0 0 20px #ffd700);
+        }
+        @keyframes logoBounce {
+            0%   { transform: scale(1.1); }
+            100% { transform: scale(1.35); }
+        }
+
+        /* Spotlight overlay */
+        .logo-spotlight-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 150;
+            pointer-events: none;
+            background: radial-gradient(
+                circle 80px at calc(100% - 28px) calc(100% - 28px),
+                transparent 38px,
+                rgba(0,0,0,0.82) 72px
+            );
+        }
+        .logo-spotlight-overlay.show { display: block; }
+
+        /* Callout glowy text + arrow */
+        .logo-callout {
+            position: fixed;
+            right: 68px;
+            bottom: 80px;
+            z-index: 210;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.88);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-family: sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.3;
+            text-align: right;
+            white-space: nowrap;
+            background: none;
+            border: none;
+            padding: 0;
+            color: #ffd700;
+            text-shadow:
+                0 0 8px  #ffd700,
+                0 0 18px #ffd700,
+                0 0 38px rgba(255,200,0,0.9),
+                0 0 70px rgba(255,180,0,0.6);
+            animation: calloutFlicker 1.4s ease-in-out infinite alternate;
+        }
+        @keyframes calloutFlicker {
+            0%   { text-shadow: 0 0 8px #ffd700, 0 0 18px #ffd700, 0 0 38px rgba(255,200,0,0.9), 0 0 70px rgba(255,180,0,0.6); }
+            60%  { text-shadow: 0 0 10px #ffe066, 0 0 24px #ffd700, 0 0 50px rgba(255,210,0,1),   0 0 90px rgba(255,160,0,0.7); }
+            100% { text-shadow: 0 0 6px  #ffcc00, 0 0 14px #ffd700, 0 0 30px rgba(255,200,0,0.8), 0 0 55px rgba(255,140,0,0.5); }
+        }
+        .logo-callout.show {
+            opacity: 1;
+            transform: scale(1);
+        }
 
         /* Alignment mode */
         body.alignment-mode .target-wrapper {
@@ -164,7 +224,8 @@
             left: 50%;
             transform: translate(-50%, 50%);
             font-family: sans-serif;
-            font-size: 14px;
+            font-size: 36px;
+            font-weight: 600;
             color: #333;
             text-shadow: 0 0 4px rgba(255,255,255,0.9);
             z-index: 90;
@@ -174,9 +235,9 @@
         .alignment-lock-bar {
             display: none;
             position: fixed;
-            bottom: 16px;
+            top: 25%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             z-index: 90;
             gap: 12px;
             align-items: center;
@@ -192,13 +253,13 @@
             gap: 10px;
         }
         .alignment-scale-row label {
-            font-size: 14px;
+            font-size: 18px;
             color: #f0f0f0;
         }
         .alignment-scale-row input[type="range"] {
-            width: 120px;
-            min-width: 80px;
-            height: 24px;
+            width: 160px;
+            min-width: 100px;
+            height: 28px;
             accent-color: #ffd700;
             cursor: pointer;
         }
@@ -214,18 +275,18 @@
             cursor: pointer;
         }
         .alignment-lock-bar .align-option-row label {
-            font-size: 14px;
+            font-size: 18px;
             color: #f0f0f0;
             cursor: pointer;
             margin: 0;
         }
         .alignment-lock-bar .btn {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             background: rgba(255,215,0,0.2);
             border: 1px solid rgba(255,215,0,0.5);
             color: #ffd700;
-            padding: 8px 14px;
+            padding: 10px 18px;
             border-radius: 8px;
             cursor: pointer;
         }
@@ -280,6 +341,7 @@
         body.projector-animated-bg .fs-hint { color: rgba(255,255,255,0.35); }
         @media (max-width: 480px) {
             .m3-logo { width: 28px; bottom: 8px; right: 8px; }
+            .logo-callout { right: 44px; bottom: 60px; font-size: 16px; padding: 8px 12px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
     </style>
@@ -291,7 +353,9 @@
         <div class="projector-bg-fog-layer"></div>
     </div>
     <div class="projector-bg-canvas"><canvas id="projectorParticleCanvas"></canvas></div>
+    <div class="logo-spotlight-overlay" id="logoSpotlightOverlay"></div>
     <img src="assets/m3.png" alt="M3" class="m3-logo" id="logoBtn" title="Alignment">
+    <div class="logo-callout" id="logoCallout">Click the M3 logo<br>to open options</div>
     <div class="dimensions-label">360×315mm · 14.25×12.5"</div>
     <div class="fs-hint">F = fullscreen</div>
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
@@ -462,6 +526,8 @@
         var ALIGN_STORAGE_KEY = 'daggerdie_projector_alignment';
         var targetWrapper = document.getElementById('targetWrapper');
         var logoBtn = document.getElementById('logoBtn');
+        var logoCallout = document.getElementById('logoCallout');
+        var logoSpotlightOverlay = document.getElementById('logoSpotlightOverlay');
         var lockAlignBtn = document.getElementById('lockAlignBtn');
         var cancelAlignBtn = document.getElementById('cancelAlignBtn');
         var resetAlignBtn = document.getElementById('resetAlignBtn');
@@ -593,6 +659,18 @@
             loadAlignment();
         }
 
+        function showLogoCallout() {
+            if (!logoCallout) return;
+            logoSpotlightOverlay && logoSpotlightOverlay.classList.add('show');
+            logoBtn && logoBtn.classList.add('logo-spotlight');
+            logoCallout.classList.add('show');
+            setTimeout(function() {
+                logoCallout.classList.remove('show');
+                logoSpotlightOverlay && logoSpotlightOverlay.classList.remove('show');
+                logoBtn && logoBtn.classList.remove('logo-spotlight');
+            }, 2500);
+        }
+
         var ANIMATED_BG_KEY = 'daggerdie_projector_animatedBackground';
         var animatedBgCb = document.getElementById('animated-background-cb');
         function applyAnimatedBg() {
@@ -632,6 +710,7 @@
         });
 
         loadAlignment();
+        showLogoCallout();
 
         // ── URL params for standalone testing (e.g. ?rolls=1,2&claimed=1,2 for multi-hit) ──
         (function initFromUrl() {
