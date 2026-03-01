@@ -143,7 +143,7 @@
         }
 
         .m3-logo {
-            position: fixed; bottom: 36px; left: 20px; z-index: 200;
+            position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%); z-index: 200;
             width: 72px; height: auto; pointer-events: auto; cursor: pointer;
             opacity: 0.85;
             transition: opacity 0.3s;
@@ -165,7 +165,7 @@
             position: fixed; inset: 0; z-index: 150;
             pointer-events: none;
             background: radial-gradient(
-                circle 80px at 56px calc(100% - 72px),
+                circle 80px at 50% calc(100% - 72px),
                 transparent 38px,
                 rgba(0,0,0,0.82) 72px
             );
@@ -175,12 +175,12 @@
         /* Callout glowy text */
         .logo-callout {
             position: fixed;
-            left: 100px;
-            bottom: 90px;
+            left: 50%;
+            bottom: 120px;
             z-index: 210;
             pointer-events: none;
             opacity: 0;
-            transform: scale(0.88);
+            transform: translateX(-50%) scale(0.88);
             transition: opacity 0.3s ease, transform 0.3s ease;
             font-family: sans-serif;
             font-size: 26px;
@@ -206,7 +206,7 @@
         }
         .logo-callout.show {
             opacity: 1;
-            transform: scale(1);
+            transform: translateX(-50%) scale(1);
         }
 
         /* Alignment mode */
@@ -368,7 +368,7 @@
         }
         body.projector-animated-bg .fs-hint { color: rgba(255,255,255,0.35); }
         @media (max-width: 480px) {
-            .m3-logo { width: 52px; bottom: 28px; left: 16px; }
+            .m3-logo { width: 52px; bottom: 28px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
 
@@ -560,7 +560,7 @@
                     z.classList.add('active');
                     z.classList.toggle('multi-hit', count === 2);
                     z.classList.toggle('triple-hit', count >= 3);
-                    if (lbl) lbl.textContent = pairRollNums[pair].join('·');
+                    if (lbl) lbl.textContent = pairRollNums[pair].join('/');
                 } else {
                     z.classList.remove('active', 'multi-hit', 'triple-hit');
                     if (lbl) lbl.textContent = '';
