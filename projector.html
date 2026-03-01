@@ -371,6 +371,28 @@
             .m3-logo { width: 52px; bottom: 28px; left: 16px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
+
+        /* ── Roll-number section labels ── */
+        .zone-label {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 38px;
+            font-weight: 700;
+            fill: white;
+            stroke: rgba(0,0,0,0.82);
+            stroke-width: 5;
+            paint-order: stroke fill;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .highlight-zone.active .zone-label {
+            opacity: 1;
+        }
+        .highlight-zone.claimed .zone-label {
+            opacity: 0.45;
+        }
     </style>
 </head>
 <body>
@@ -449,33 +471,43 @@
             <!-- D20 faces from resources/d20_blank.html -->
             <g id="face-tl" class="highlight-zone" data-pair="10-17">
                 <polygon class="face-shape d20-face" points="200,2 7,119 200,59"/>
+                <text class="zone-label" x="136" y="62"></text>
             </g>
             <g id="face-tr" class="highlight-zone" data-pair="11-20">
                 <polygon class="face-shape d20-face" points="200,2 200,59 393,119"/>
+                <text class="zone-label" x="264" y="62"></text>
             </g>
             <g id="face-l" class="highlight-zone" data-pair="3-4">
                 <polygon class="face-shape d20-face" points="7,119 66,316 200,59"/>
+                <text class="zone-label" x="91" y="165"></text>
             </g>
             <g id="face-r" class="highlight-zone" data-pair="6-7">
                 <polygon class="face-shape d20-face" points="200,59 334,316 393,119"/>
+                <text class="zone-label" x="309" y="165"></text>
             </g>
             <g id="face-fl" class="highlight-zone" data-pair="12-15">
                 <polygon class="face-shape d20-face-outer" points="7,119 2,346 66,316"/>
+                <text class="zone-label" x="26" y="260" font-size="28"></text>
             </g>
             <g id="face-fr" class="highlight-zone" data-pair="9-14">
                 <polygon class="face-shape d20-face-outer" points="393,119 334,316 398,346"/>
+                <text class="zone-label" x="374" y="260" font-size="28"></text>
             </g>
             <g id="face-bl" class="highlight-zone" data-pair="13-18">
                 <polygon class="face-shape d20-face-outer" points="66,316 2,346 200,458"/>
+                <text class="zone-label" x="90" y="374"></text>
             </g>
             <g id="face-br" class="highlight-zone" data-pair="16-19">
                 <polygon class="face-shape d20-face-outer" points="334,316 200,458 398,346"/>
+                <text class="zone-label" x="311" y="374"></text>
             </g>
             <g id="face-bc" class="highlight-zone" data-pair="5-8">
                 <polygon class="face-shape d20-face" points="66,316 200,458 334,316"/>
+                <text class="zone-label" x="200" y="365"></text>
             </g>
             <g id="face-center" class="highlight-zone" data-pair="1-2">
                 <polygon class="face-shape d20-face-center" points="200,59 66,316 334,316"/>
+                <text class="zone-label" x="200" y="232"></text>
             </g>
         </svg>
     </div>
@@ -503,25 +535,35 @@
         function clearAll() {
             allZones.forEach(z => {
                 z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit');
+                const lbl = z.querySelector('.zone-label');
+                if (lbl) lbl.textContent = '';
             });
         }
 
         function highlightRolls(rolls) {
-            // Count how many rolls map to each pair
+            // Count how many rolls map to each pair, and track which roll numbers (1-based)
             const pairCounts = {};
-            rolls.forEach(r => {
+            const pairRollNums = {};
+            rolls.forEach((r, idx) => {
                 const pair = numberToPair[r];
-                if (pair) pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+                if (pair) {
+                    pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+                    if (!pairRollNums[pair]) pairRollNums[pair] = [];
+                    pairRollNums[pair].push(idx + 1);
+                }
             });
             allZones.forEach(z => {
                 const pair = z.getAttribute('data-pair');
                 const count = pairCounts[pair] || 0;
+                const lbl = z.querySelector('.zone-label');
                 if (count > 0) {
                     z.classList.add('active');
                     z.classList.toggle('multi-hit', count === 2);
                     z.classList.toggle('triple-hit', count >= 3);
+                    if (lbl) lbl.textContent = pairRollNums[pair].join('·');
                 } else {
                     z.classList.remove('active', 'multi-hit', 'triple-hit');
+                    if (lbl) lbl.textContent = '';
                 }
             });
         }
