@@ -717,6 +717,64 @@
             100% { opacity: 0; transform: translateY(-16px); }
         }
 
+        /* ── Item-applied animation overlay (fixed-position, survives DOM rebuilds) ── */
+        .item-applied-overlay {
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 9999;
+            animation: item-applied-anim 1.4s ease-out forwards;
+        }
+        .item-applied-overlay svg {
+            width: 72px;
+            height: 72px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 12px var(--item-glow)) drop-shadow(0 0 24px var(--item-glow));
+        }
+        .item-applied-overlay .item-label {
+            margin-top: 4px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            color: var(--item-glow);
+            text-shadow: 0 0 8px var(--item-glow), 0 1px 3px rgba(0,0,0,0.9);
+        }
+        @keyframes item-applied-anim {
+            0%   { opacity: 0; transform: scale(0.3); }
+            18%  { opacity: 1; transform: scale(1.2); }
+            45%  { opacity: 1; transform: scale(1.0); }
+            100% { opacity: 0; transform: scale(1.35) translateY(-18px); }
+        }
+        .player-card.item-flash-heal    { animation: item-flash-heal 0.8s ease; }
+        .player-card.item-flash-damage  { animation: item-flash-damage 0.8s ease; }
+        .player-card.item-flash-buff    { animation: item-flash-buff 0.8s ease; }
+        .player-card.item-flash-neutral { animation: item-flash-neutral 0.8s ease; }
+        @keyframes item-flash-heal {
+            0%   { box-shadow: 0 0 0 rgba(46,204,113,0); }
+            30%  { box-shadow: 0 0 28px rgba(46,204,113,0.7), inset 0 0 14px rgba(46,204,113,0.15); }
+            100% { box-shadow: 0 0 0 rgba(46,204,113,0); }
+        }
+        @keyframes item-flash-damage {
+            0%   { box-shadow: 0 0 0 rgba(231,76,60,0); }
+            30%  { box-shadow: 0 0 28px rgba(231,76,60,0.7), inset 0 0 14px rgba(231,76,60,0.15); }
+            100% { box-shadow: 0 0 0 rgba(231,76,60,0); }
+        }
+        @keyframes item-flash-buff {
+            0%   { box-shadow: 0 0 0 rgba(254,202,87,0); }
+            30%  { box-shadow: 0 0 28px rgba(254,202,87,0.7), inset 0 0 14px rgba(254,202,87,0.15); }
+            100% { box-shadow: 0 0 0 rgba(254,202,87,0); }
+        }
+        @keyframes item-flash-neutral {
+            0%   { box-shadow: 0 0 0 rgba(129,140,248,0); }
+            30%  { box-shadow: 0 0 28px rgba(129,140,248,0.7), inset 0 0 14px rgba(129,140,248,0.15); }
+            100% { box-shadow: 0 0 0 rgba(129,140,248,0); }
+        }
+
         .player-card-status {
             font-size: 0.75rem;
             font-weight: bold;
@@ -2787,6 +2845,50 @@
             setTimeout(() => bubble.remove(), 900);
         }
 
+        const ITEM_FLASH_CLASSES = {
+            HEALING: 'item-flash-heal', REGEN: 'item-flash-heal', RESURRECT: 'item-flash-heal',
+            DEFENSE: 'item-flash-neutral', CLEANSE: 'item-flash-neutral',
+            BUFF: 'item-flash-buff', UTILITY: 'item-flash-buff',
+            DEBUFF: 'item-flash-damage', LETHAL: 'item-flash-damage'
+        };
+        const ITEM_GLOW_COLORS = {
+            HEALING: '#2ecc71', REGEN: '#2ecc71', RESURRECT: '#67e8f9',
+            DEFENSE: '#818cf8', CLEANSE: '#c4b5fd',
+            BUFF: '#feca57', UTILITY: '#38bdf8',
+            DEBUFF: '#c084fc', LETHAL: '#ef4444'
+        };
+
+        function showItemAppliedAnimation(targetId, item) {
+            if (!item) return;
+            const card = playersPanel.querySelector(`.player-card[data-player="${targetId}"]`);
+            if (!card) return;
+
+            const rect = card.getBoundingClientRect();
+            const glowColor = ITEM_GLOW_COLORS[item.type] || '#818cf8';
+
+            const overlay = document.createElement('div');
+            overlay.className = 'item-applied-overlay';
+            overlay.style.setProperty('--item-glow', glowColor);
+            overlay.style.left = (rect.left + rect.width / 2 - 44) + 'px';
+            overlay.style.top = (rect.top + rect.height / 2 - 48) + 'px';
+            overlay.style.width = '88px';
+            overlay.innerHTML = item.svg + `<span class="item-label">${item.name}</span>`;
+            document.body.appendChild(overlay);
+            setTimeout(() => overlay.remove(), 1500);
+
+            function flashCard() {
+                const c = playersPanel.querySelector(`.player-card[data-player="${targetId}"]`);
+                if (!c) return;
+                const flashClass = ITEM_FLASH_CLASSES[item.type] || 'item-flash-neutral';
+                c.classList.remove('item-flash-heal', 'item-flash-damage', 'item-flash-buff', 'item-flash-neutral');
+                void c.offsetWidth;
+                c.classList.add(flashClass);
+                setTimeout(() => c.classList.remove(flashClass), 850);
+            }
+            flashCard();
+            setTimeout(flashCard, 50);
+        }
+
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             playersPanel.innerHTML = state.players.map(p => `
@@ -3741,6 +3843,7 @@
             trackItemUsed(user, item.id);
             state.itemUsesThisTurn++;
             updatePlayersPanel();
+            showItemAppliedAnimation(target.id, item);
             checkWinCondition();
             if (item.id === 'toy-rocket') syncHitRecorderUI();
             if (opts.closeModals) {
