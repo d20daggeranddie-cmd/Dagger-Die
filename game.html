@@ -1030,55 +1030,56 @@
             100% { opacity: 0; transform: translateY(-120px) scale(0.8) translateX(-5px); }
         }
 
-        /* Miss confirmation modal */
-        .miss-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 1100;
+        /* Per-die slot layout */
+        .dice-slot {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            gap: 4px;
+            min-width: 70px;
         }
-
-        .miss-modal-overlay.open {
-            display: flex;
-        }
-
-        .miss-modal {
-            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 360px;
+        .dice-slot .hit-toggle {
             width: 100%;
-            border: 2px solid rgba(231, 76, 60, 0.4);
+            min-width: 70px;
+            font-size: 1.3rem;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.15s;
         }
-
-        .miss-modal-player {
-            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
-            font-size: 1.5rem;
-            color: #d4a84b;
-            text-align: center;
-            margin-bottom: 8px;
+        .dice-slot .hit-toggle.dropped {
+            background: rgba(231, 76, 60, 0.25) !important;
+            border: 2px solid rgba(231, 76, 60, 0.6);
+            color: #ff8f8f;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            animation: dropChipIn 0.2s ease-out;
         }
-
-        .miss-modal-question {
-            font-size: 2rem;
-            font-weight: bold;
+        .dice-slot .hit-toggle.dropped:hover {
+            background: rgba(231, 76, 60, 0.45) !important;
+            border-color: #e74c3c;
+            transform: scale(1.05);
+        }
+        .drop-toggle {
+            background: none;
+            border: 1px solid rgba(231, 76, 60, 0.35);
+            color: rgba(231, 76, 60, 0.7);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 2px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            width: 100%;
+        }
+        .drop-toggle:hover {
+            background: rgba(231, 76, 60, 0.2);
             color: #e74c3c;
-            text-align: center;
-            margin-bottom: 24px;
+            border-color: rgba(231, 76, 60, 0.6);
         }
-
-        .miss-modal-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .miss-modal-buttons .btn {
-            flex: 1;
+        @keyframes dropChipIn {
+            0% { opacity: 0; transform: scale(0.7); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         /* Miss onscreen reaction */
@@ -1912,7 +1913,6 @@
                 <div class="hit-info" id="hit-info"></div>
                 <div class="attack-prompt hidden" id="attack-prompt">Select a player to attack!</div>
                 <div class="action-buttons">
-                    <button class="btn btn-danger hidden" id="dropped-knife-btn">Dropped Knife (-1 HP)</button>
                     <button class="btn btn-primary hidden" id="end-turn-btn">End Turn</button>
                 </div>
             </div>
@@ -2041,18 +2041,6 @@
         </div>
     </div>
 
-    <!-- Miss confirmation modal -->
-    <div class="miss-modal-overlay" id="miss-modal" role="dialog" aria-labelledby="miss-modal-title" aria-modal="true">
-        <div class="miss-modal">
-            <div class="miss-modal-player" id="miss-modal-player-name"></div>
-            <div class="miss-modal-question" id="miss-modal-title">Missed?</div>
-            <div class="miss-modal-buttons">
-                <button type="button" class="btn btn-secondary" id="miss-modal-no">No</button>
-                <button type="button" class="btn btn-primary" id="miss-modal-yes">Yes</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Damage confirmation modal -->
     <div class="player-stats-modal-overlay" id="damage-confirm-modal" role="dialog" aria-label="Confirm hits">
         <div class="player-stats-modal" id="damage-confirm-modal-content">
@@ -2151,6 +2139,7 @@
             lastDroppedKnifeLogIndex: undefined,
             dropsThisTurn: 0,
             dropsThisTurnLogIndices: [],
+            droppedDiceIndices: [],
             damageDealtThisTurn: false,
             modBuffOnCritical: false,
             modNerfOnMiss: false,
@@ -2165,11 +2154,11 @@
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
 
         const BOT_SKILLS = {
-            newb:    { min: 1,  max: 15, pct: 0.08 },
-            novice:  { min: 15, max: 30, pct: 0.225 },
-            skilled: { min: 30, max: 45, pct: 0.375 },
-            expert:  { min: 45, max: 75, pct: 0.6 },
-            master:  { min: 75, max: 99, pct: 0.87 }
+            newb:    { min: 1,  max: 15, pct: 0.08,  dropPct: 0.35 },
+            novice:  { min: 15, max: 30, pct: 0.225, dropPct: 0.25 },
+            skilled: { min: 30, max: 45, pct: 0.375, dropPct: 0.18 },
+            expert:  { min: 45, max: 75, pct: 0.6,   dropPct: 0.12 },
+            master:  { min: 75, max: 99, pct: 0.87,  dropPct: 0.10 }
         };
         const BOT_ITEM_AI = {
             newb:    { useChance: 0.22, smartChoiceChance: 0.45 },
@@ -2190,7 +2179,6 @@
         const hitInfo = document.getElementById('hit-info');
         const attackPrompt = document.getElementById('attack-prompt');
         const endTurnBtn = document.getElementById('end-turn-btn');
-        const droppedKnifeBtn = document.getElementById('dropped-knife-btn');
         const gameLogEntries = document.getElementById('game-log-entries');
 
         let botEndTurnTimerId = null;
@@ -2573,6 +2561,7 @@
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
+            state.droppedDiceIndices = [];
             state.damageDealtThisTurn = false;
             state.itemUsesThisTurn = 0;
             updateGameUI();
@@ -2785,7 +2774,6 @@
             state.itemUsesThisTurn = 0;
             rollDiceBtn.disabled = false;
             disableTargetSelection();
-            droppedKnifeBtn.classList.add('hidden');
 
             if (getCurrentPlayer().isBot) {
                 rollDiceBtn.classList.add('hidden');
@@ -2806,11 +2794,41 @@
                 if (!current.isBot || !state.hasRolled) return;
                 const skill = BOT_SKILLS[current.botSkill];
                 const hitChance = skill ? skill.pct : 0.225;
+                const dropChance = skill ? (skill.dropPct || 0) : 0;
                 state.hits = [];
+                let botEliminated = false;
                 for (let idx = 0; idx < state.currentRoll.length; idx++) {
-                    if (state.hits.length >= MAX_SCORES) break;
-                    if (Math.random() < hitChance) state.hits.push({ roll: state.currentRoll[idx], idx });
+                    if (state.hits.length + state.dropsThisTurn >= MAX_SCORES) break;
+                    if (Math.random() < hitChance) {
+                        state.hits.push({ roll: state.currentRoll[idx], idx });
+                    } else if (Math.random() < dropChance) {
+                        const freeDrop = state.itemsEnabled && ((current.freeDropsCount || 0) > 0);
+                        if (!freeDrop) {
+                            current.hp = Math.max(0, current.hp - 1);
+                        } else {
+                            current.freeDropsCount = Math.max(0, (current.freeDropsCount || 0) - 1);
+                            if (current.freeDropsCount === 0) current.freeDropsActive = false;
+                        }
+                        state.dropsThisTurn++;
+                        addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
+                        if (current.hp <= 0) {
+                            botEliminated = true;
+                            break;
+                        }
+                    }
                 }
+                if (botEliminated) {
+                    const card = document.querySelector(`.player-card[data-player="${current.id}"]`);
+                    const rect = card ? card.getBoundingClientRect() : null;
+                    current.eliminated = true;
+                    addLogEntry(`${current.name} has been eliminated!`, 'info');
+                    updatePlayersPanel();
+                    spawnDeathGhost(rect);
+                    checkWinCondition();
+                    if (state.phase === 'playing') nextTurn();
+                    return;
+                }
+
                 state.totalDamage = getHitsTotalDamage(state.hits);
                 if (state.totalDamage > 0) {
                     if (state.hits.length === MAX_SCORES) {
@@ -3047,7 +3065,6 @@
             current.totalRolled = (current.totalRolled || 0) + state.currentRoll.reduce((s, v) => s + v, 0);
             current.totalThrows = (current.totalThrows || 0) + 3;
             showHitRecorder();
-            droppedKnifeBtn.classList.remove('hidden');
         });
 
         function highlightTargets(rolls) {
@@ -3097,7 +3114,8 @@
             const number = parseInt(zone.getAttribute('data-number'));
             if (!state.currentRoll.includes(number)) return;
 
-            const rollIndices = state.currentRoll.map((r, i) => r === number ? i : -1).filter(i => i >= 0);
+            const droppedSet = new Set(state.droppedDiceIndices);
+            const rollIndices = state.currentRoll.map((r, i) => r === number ? i : -1).filter(i => i >= 0 && !droppedSet.has(i));
             const hitIndicesForNumber = new Set(state.hits.filter(h => h.roll === number).map(h => h.idx));
             const firstUnclaimed = rollIndices.find(idx => !hitIndicesForNumber.has(idx));
             if (firstUnclaimed !== undefined) {
@@ -3123,16 +3141,33 @@
 
         function syncHitRecorderUI() {
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
-            hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
-                const idx = parseInt(btn.dataset.idx);
-                if (hitIdxSet.has(idx)) {
+            const droppedSet = new Set(state.droppedDiceIndices);
+
+            hitInfo.querySelectorAll('.dice-slot').forEach(slot => {
+                const idx = parseInt(slot.dataset.idx);
+                const btn = slot.querySelector('.hit-toggle');
+                const dropBtn = slot.querySelector('.drop-toggle');
+                if (!btn) return;
+                const roll = btn.dataset.roll;
+
+                btn.classList.remove('hit', 'dropped');
+                btn.style.background = '';
+
+                if (droppedSet.has(idx)) {
+                    btn.classList.add('dropped');
+                    btn.textContent = 'DROP \u2715';
+                    if (dropBtn) dropBtn.style.display = 'none';
+                } else if (hitIdxSet.has(idx)) {
                     btn.classList.add('hit');
                     btn.style.background = '#2ecc71';
+                    btn.textContent = roll;
+                    if (dropBtn) dropBtn.style.display = '';
                 } else {
-                    btn.classList.remove('hit');
-                    btn.style.background = '';
+                    btn.textContent = roll;
+                    if (dropBtn) dropBtn.style.display = '';
                 }
             });
+
             const totalDamageEl = document.getElementById('total-damage-display');
             if (totalDamageEl) totalDamageEl.textContent = getHitsTotalDamage(state.hits);
             const scoreCounter = hitInfo.querySelector('.scores-counter');
@@ -3150,31 +3185,30 @@
 
         function showHitRecorder(initialHits) {
             const currentPlayer = getCurrentPlayer();
-            droppedKnifeBtn.classList.remove('hidden');
 
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice() : [];
 
             const maxDiceScores = Math.max(0, MAX_SCORES_PER_TURN - state.dropsThisTurn);
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice(0, maxDiceScores) : [];
 
-            attackPrompt.classList.remove('hidden');
-            attackPrompt.innerHTML = `<strong>Step 1:</strong> Throw your knives! Tap the target numbers you HIT, or use the buttons below (max 3 scores per turn).`;
+            attackPrompt.classList.add('hidden');
 
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
+            const droppedSet = new Set(state.droppedDiceIndices);
 
             hitInfo.innerHTML = `
-                <div style="width: 100%; text-align: center; margin-bottom: 15px;">
-                    <p style="font-size: 1.1rem;">Tap the <strong>highlighted targets</strong> or buttons below to claim hits (max 3 per turn):</p>
-                </div>
                 <div style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px;">
                     <div class="scores-counter" style="font-size: 0.9rem; opacity: 0.9;">Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}</div>
                     <p style="font-size: 1.3rem; margin: 0;">Damage Claimed: <strong id="total-damage-display" style="color: #feca57; font-size: 1.5rem;">${getHitsTotalDamage(state.hits)}</strong></p>
                 </div>
                 <div class="hit-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     ${state.currentRoll.map((roll, idx) => `
-                        <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''}" data-roll="${roll}" data-idx="${idx}" style="min-width: 70px; font-size: 1.3rem; ${hitIdxSet.has(idx) ? 'background: #2ecc71;' : ''}">
-                            ${roll}
-                        </button>
+                        <div class="dice-slot" data-idx="${idx}">
+                            <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''} ${droppedSet.has(idx) ? 'dropped' : ''}" data-roll="${roll}" data-idx="${idx}" style="${hitIdxSet.has(idx) ? 'background: #2ecc71;' : ''}">
+                                ${droppedSet.has(idx) ? 'DROP \u2715' : roll}
+                            </button>
+                            <button class="drop-toggle" data-idx="${idx}" type="button" ${droppedSet.has(idx) ? 'style="display:none;"' : ''}>drop</button>
+                        </div>
                     `).join('')}
                 </div>
                 <div style="margin-top: 12px;">
@@ -3188,17 +3222,30 @@
 
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const roll = parseInt(btn.dataset.roll);
                     const idx = parseInt(btn.dataset.idx);
 
+                    if (btn.classList.contains('dropped')) {
+                        undoDropForDie(idx);
+                        return;
+                    }
+
+                    const roll = parseInt(btn.dataset.roll);
                     if (btn.classList.contains('hit')) {
                         state.hits = state.hits.filter(h => h.idx !== idx);
                     } else {
+                        if (state.droppedDiceIndices.includes(idx)) return;
                         const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
                         if (state.hits.length >= slotsLeft) return;
                         state.hits.push({ roll, idx });
                     }
                     syncHitRecorderUI();
+                });
+            });
+
+            hitInfo.querySelectorAll('.drop-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.dataset.idx);
+                    performDrop(idx);
                 });
             });
 
@@ -3263,7 +3310,10 @@
                     } else {
                         const aimResult = consumeAimForCurrentPlayer(currentPlayer);
                         if (aimResult.hadAim) addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
-                        showMissModal(currentPlayer);
+                        if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
+                        addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
+                        showMissReaction();
+                        finishTurnNoAttack();
                     }
                 });
             });
@@ -3342,7 +3392,6 @@
         }
 
         function showTargetSelection() {
-            droppedKnifeBtn.classList.add('hidden');
             state.itemUsePhase = false;
             state.damageClaimedPhase = true;
             state.currentHitIndex = 0;
@@ -3593,7 +3642,6 @@
         }
 
         function finishTurnNoAttack() {
-            droppedKnifeBtn.classList.add('hidden');
             state.damageDealtThisTurn = true;
             const summaryHtml = `<h3 style="color: #feca57;">No damage this turn</h3><p style="color: rgba(255,255,255,0.8);">Dropped knife or no hits.</p>`;
             hitInfo.innerHTML = '';
@@ -3609,12 +3657,14 @@
             });
         }
 
-        droppedKnifeBtn.addEventListener('click', () => {
-            const MAX_SCORES_PER_TURN = 3;
-            if (state.hits.length + state.dropsThisTurn >= MAX_SCORES_PER_TURN) {
-                return;
-            }
+        function performDrop(dieIdx) {
+            if (state.hits.length + state.dropsThisTurn >= MAX_SCORES_PER_TURN) return;
+            if (state.droppedDiceIndices.includes(dieIdx)) return;
             const current = getCurrentPlayer();
+            if (!current) return;
+
+            state.hits = state.hits.filter(h => h.idx !== dieIdx);
+
             const freeDrop = state.itemsEnabled && ((current.freeDropsCount || 0) > 0);
             if (!freeDrop) {
                 current.hp = Math.max(0, current.hp - 1);
@@ -3624,12 +3674,12 @@
             }
             state.hasScoreBeenEntered = true;
             state.dropsThisTurn++;
+            state.droppedDiceIndices.push(dieIdx);
             addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
             state.lastDroppedKnifeLogIndex = state.gameLog.length - 1;
             if (!state.damageDealtThisTurn) state.dropsThisTurnLogIndices.push(state.gameLog.length - 1);
             updatePlayersPanel();
-            const scoreCounter = hitInfo.querySelector('.scores-counter');
-            if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
+            syncHitRecorderUI();
 
             requestAnimationFrame(() => {
                 const card = document.querySelector(`.player-card[data-player="${current.id}"]`);
@@ -3651,7 +3701,45 @@
                     nextTurn();
                 }
             }
-        });
+        }
+
+        function undoLastDrop() {
+            const current = getCurrentPlayer();
+            if (!current) return false;
+            if (state.damageDealtThisTurn || state.dropsThisTurnLogIndices.length === 0) return false;
+            const logIndex = state.dropsThisTurnLogIndices.pop();
+            const logEntry = state.gameLog[logIndex];
+            if (!logEntry || logEntry.type !== 'damage' || !logEntry.message.includes('dropped a knife') || !logEntry.message.includes(current.name)) {
+                state.dropsThisTurnLogIndices.push(logIndex);
+                return false;
+            }
+            const domIndex = state.gameLog.length - 1 - logIndex;
+            if (gameLogEntries.children[domIndex]) gameLogEntries.children[domIndex].remove();
+            state.gameLog.splice(logIndex, 1);
+            for (let i = 0; i < state.dropsThisTurnLogIndices.length; i++) {
+                if (state.dropsThisTurnLogIndices[i] > logIndex) state.dropsThisTurnLogIndices[i]--;
+            }
+            const wasFree = logEntry.message.includes('(free)');
+            if (!wasFree) {
+                current.hp = Math.min(current.maxHp, current.hp + 1);
+                if (current.hp > 0) current.eliminated = false;
+            } else {
+                current.freeDropsCount = (current.freeDropsCount || 0) + 1;
+                current.freeDropsActive = true;
+            }
+            state.dropsThisTurn = Math.max(0, state.dropsThisTurn - 1);
+            state.droppedDiceIndices.pop();
+            state.lastDroppedKnifeLogIndex = state.dropsThisTurnLogIndices.length > 0 ? state.dropsThisTurnLogIndices[state.dropsThisTurnLogIndices.length - 1] : undefined;
+            updatePlayersPanel();
+            syncHitRecorderUI();
+            checkWinCondition();
+            return true;
+        }
+
+        function undoDropForDie(dieIdx) {
+            if (!state.droppedDiceIndices.includes(dieIdx)) return false;
+            return undoLastDrop();
+        }
 
         const playerStatsModal = document.getElementById('player-stats-modal');
         const playerStatsTitle = document.getElementById('player-stats-title');
@@ -4123,28 +4211,9 @@
             if (playerStatsModalPlayerId === null) return;
             const current = getCurrentPlayer();
             if (current.id !== playerStatsModalPlayerId) return;
-            if (state.damageDealtThisTurn || state.dropsThisTurnLogIndices.length === 0) return;
-            const logIndex = state.dropsThisTurnLogIndices.pop();
-            const logEntry = state.gameLog[logIndex];
-            if (!logEntry || logEntry.type !== 'damage' || !logEntry.message.includes('dropped a knife') || !logEntry.message.includes(current.name)) {
-                state.dropsThisTurnLogIndices.push(logIndex);
-                return;
+            if (undoLastDrop()) {
+                openPlayerStatsModal(playerStatsModalPlayerId);
             }
-            const domIndex = state.gameLog.length - 1 - logIndex;
-            if (gameLogEntries.children[domIndex]) gameLogEntries.children[domIndex].remove();
-            state.gameLog.splice(logIndex, 1);
-            for (let i = 0; i < state.dropsThisTurnLogIndices.length; i++) {
-                if (state.dropsThisTurnLogIndices[i] > logIndex) state.dropsThisTurnLogIndices[i]--;
-            }
-            current.hp = Math.min(current.maxHp, current.hp + 1);
-            if (current.hp > 0) current.eliminated = false;
-            state.dropsThisTurn = Math.max(0, state.dropsThisTurn - 1);
-            state.lastDroppedKnifeLogIndex = state.dropsThisTurnLogIndices.length > 0 ? state.dropsThisTurnLogIndices[state.dropsThisTurnLogIndices.length - 1] : undefined;
-            updatePlayersPanel();
-            checkWinCondition();
-            const scoreCounter = hitInfo.querySelector('.scores-counter');
-            if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / 3`;
-            openPlayerStatsModal(playerStatsModalPlayerId);
         });
 
         playersPanel.addEventListener('click', (e) => {
@@ -4178,6 +4247,7 @@
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
+            state.droppedDiceIndices = [];
             state.damageDealtThisTurn = false;
 
             let nextIdx = state.currentPlayerIndex;
@@ -4517,20 +4587,6 @@ ${itemRows}
             }, 1000);
         }
 
-        const missModal = document.getElementById('miss-modal');
-        const missModalPlayerName = document.getElementById('miss-modal-player-name');
-        const missModalYes = document.getElementById('miss-modal-yes');
-        const missModalNo = document.getElementById('miss-modal-no');
-
-        function showMissModal(currentPlayer) {
-            missModalPlayerName.textContent = currentPlayer.name;
-            missModal.classList.add('open');
-        }
-
-        function closeMissModal() {
-            missModal.classList.remove('open');
-        }
-
         function showMissReaction() {
             const el = document.getElementById('miss-reaction');
             if (!el) return;
@@ -4544,23 +4600,6 @@ ${itemRows}
                 setTimeout(() => el.classList.remove('hide'), 300);
             }, 1000);
         }
-
-        missModalYes.addEventListener('click', () => {
-            const currentPlayer = getCurrentPlayer();
-            closeMissModal();
-            if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
-            addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
-            showMissReaction();
-            finishTurnNoAttack();
-        });
-
-        missModalNo.addEventListener('click', () => {
-            closeMissModal();
-        });
-
-        missModal.addEventListener('click', (e) => {
-            if (e.target === missModal) closeMissModal();
-        });
 
                 function playAgain() {
             if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
@@ -4607,6 +4646,7 @@ ${itemRows}
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
+            state.droppedDiceIndices = [];
             state.damageDealtThisTurn = false;
 
             winnerScreen.style.display = 'none';
