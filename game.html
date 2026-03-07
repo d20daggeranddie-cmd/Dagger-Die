@@ -454,23 +454,99 @@
         }
         #damage-confirm-modal-content,
         #critical-item-modal-content,
+        #turn-summary-modal.open {
+            animation: summary-overlay-in 0.25s ease-out;
+        }
+        @keyframes summary-overlay-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         #turn-summary-modal-content {
-            max-width: 430px;
-            border: 1px solid rgba(254, 202, 87, 0.28);
-            box-shadow: 0 24px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+            max-width: 520px;
+            padding: 0;
+            border: 2px solid rgba(212, 168, 75, 0.4);
+            box-shadow:
+                0 0 40px rgba(212, 168, 75, 0.15),
+                0 24px 70px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            text-align: center;
+            background: linear-gradient(180deg, #1a2440 0%, #12192e 50%, #0e1225 100%);
+            border-radius: 24px;
+            overflow: hidden;
+            animation: summary-pop-in 0.3s ease-out;
+        }
+        @keyframes summary-pop-in {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .turn-summary-header {
+            padding: 28px 36px 20px;
+            background:
+                radial-gradient(ellipse 80% 120% at 50% -20%, rgba(212, 168, 75, 0.12) 0%, transparent 70%);
         }
         .modal-eyebrow {
-            margin: 0 auto 8px auto;
+            margin: 0 auto 14px auto;
             width: fit-content;
-            padding: 4px 10px;
+            padding: 5px 16px;
             border-radius: 999px;
-            border: 1px solid rgba(254, 202, 87, 0.4);
-            background: rgba(254, 202, 87, 0.1);
-            color: #feca57;
-            font-size: 0.72rem;
-            letter-spacing: 0.08em;
+            border: 1px solid rgba(212, 168, 75, 0.45);
+            background: rgba(212, 168, 75, 0.12);
+            color: #d4a84b;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             font-weight: 700;
+        }
+        #turn-summary-body h3 {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            font-size: 1.5rem;
+            color: #feca57;
+            text-shadow: 0 0 20px rgba(254, 202, 87, 0.3), 0 2px 4px rgba(0,0,0,0.5);
+            margin: 0;
+            letter-spacing: 0.04em;
+        }
+        .turn-summary-body-inner {
+            padding: 0 36px 32px;
+        }
+        .turn-summary-attacks {
+            background: rgba(255, 107, 107, 0.08);
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 107, 107, 0.25);
+        }
+        .turn-summary-hit {
+            font-size: 1.15rem;
+            padding: 6px 0;
+            color: rgba(255,255,255,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .turn-summary-hit:last-of-type {
+            border-bottom: none;
+        }
+        .turn-summary-total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.75);
+        }
+        .turn-summary-total strong {
+            font-size: 2rem;
+            color: #ff6b6b;
+            text-shadow: 0 0 16px rgba(255, 107, 107, 0.4);
+        }
+        .turn-summary-no-damage {
+            padding: 10px 0;
+        }
+        .turn-summary-no-damage p {
+            font-size: 1.1rem;
+            margin-top: 6px;
+            color: rgba(255,255,255,0.6);
+        }
+        .turn-summary-divider {
+            height: 1px;
+            margin: 0 36px;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 168, 75, 0.3) 50%, transparent 100%);
         }
         .confirm-rolls {
             display: flex;
@@ -1193,6 +1269,10 @@
             .game-area {
                 grid-template-columns: 1fr;
             }
+
+            .game-area .targets-section {
+                order: -1;
+            }
         }
 
         /* Dice Section */
@@ -1273,6 +1353,50 @@
             background: rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 20px;
+        }
+
+        .targets-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .targets-title-row .section-title {
+            margin-bottom: 0;
+        }
+
+        .btn-board-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-board-toggle:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .btn-board-toggle svg {
+            opacity: 0.7;
+        }
+
+        .combined-board-wrapper {
+            display: flex;
+            justify-content: center;
+        }
+
+        .combined-target-container {
+            max-width: 300px;
         }
 
         .targets-container {
@@ -1380,6 +1504,10 @@
             filter: url(#glow-even);
         }
 
+        #combined-overlay .highlight-zone.active .face-shape {
+            filter: url(#glow-combined);
+        }
+
         .highlight-zone.claimed .face-shape {
             fill: rgba(34, 197, 94, 0.35);
             stroke: #22c55e;
@@ -1403,6 +1531,10 @@
 
         #even-overlay .highlight-zone.claimed .face-shape {
             filter: url(#glow-hit-even);
+        }
+
+        #combined-overlay .highlight-zone.claimed .face-shape {
+            filter: url(#glow-hit-combined);
         }
 
         .highlight-zone text {
@@ -1436,12 +1568,19 @@
             50% { opacity: 0.6; }
         }
 
-        /* Actions Section */
-        .actions-section {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 20px;
+        /* Actions (inside dice section) */
+        .dice-actions {
             text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dice-actions:empty {
+            display: none;
+            margin: 0;
+            padding: 0;
+            border: none;
         }
 
         .action-buttons {
@@ -1538,18 +1677,109 @@
         }
 
         /* Game Log */
-        .game-log {
-            background: rgba(0,0,0,0.3);
+        .ledger-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: none;
             border-radius: 10px;
-            padding: 10px;
-            max-height: 120px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .ledger-btn:hover {
+            background: rgba(254, 202, 87, 0.3);
+            color: #feca57;
+        }
+
+        .ledger-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .ledger-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: bold;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            pointer-events: none;
+        }
+
+        .ledger-badge:empty {
+            display: none;
+        }
+
+        .game-ledger-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-ledger-modal-overlay.open {
+            display: flex;
+        }
+
+        .game-ledger-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 480px;
+            width: 100%;
+            max-height: 75vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-ledger-modal h3 {
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+            color: #feca57;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .game-ledger-entries {
+            flex: 1;
             overflow-y: auto;
-            margin-top: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+        }
+
+        .game-ledger-entries::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .game-ledger-entries::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
         }
 
         .log-entry {
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             font-size: 0.85rem;
         }
 
@@ -1567,6 +1797,13 @@
 
         .log-info {
             color: #48dbfb;
+        }
+
+        .ledger-empty {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            padding: 30px 0;
+            font-style: italic;
         }
 
         /* Hidden class */
@@ -1621,7 +1858,7 @@
                 gap: 15px;
             }
 
-            .dice-section, .targets-section, .actions-section {
+            .dice-section, .targets-section {
                 padding: 15px;
                 border-radius: 15px;
             }
@@ -1663,11 +1900,6 @@
 
             .attack-prompt {
                 font-size: 1rem;
-            }
-
-            .game-log {
-                max-height: 100px;
-                padding: 10px;
             }
 
             .log-entry {
@@ -1812,6 +2044,15 @@
                     Turn: <span class="current-player-name" id="current-player-name">-</span>
                 </div>
                 <div class="game-header-actions">
+                    <button type="button" class="ledger-btn" id="open-ledger-btn" aria-label="Game Ledger" title="Game Ledger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            <line x1="8" y1="7" x2="16" y2="7"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                        <span class="ledger-badge" id="ledger-badge"></span>
+                    </button>
                     <button type="button" class="settings-gear-btn" id="settings-gear-btn" aria-label="Game settings">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
@@ -1833,11 +2074,24 @@
                     </div>
                     <button class="btn btn-primary roll-btn" id="roll-dice-btn">Roll Dice</button>
                     <div class="dice-results" id="dice-results"></div>
+                    <div class="dice-actions" id="actions-section">
+                        <div class="hit-info" id="hit-info"></div>
+                        <div class="attack-prompt hidden" id="attack-prompt">Select a player to attack!</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary hidden" id="end-turn-btn">End Turn</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="targets-section">
-                    <h3 class="section-title">Target Boards</h3>
-                    <div class="targets-container">
+                    <div class="targets-title-row">
+                        <h3 class="section-title" id="targets-title">Target Boards</h3>
+                        <button type="button" class="btn-board-toggle" id="board-toggle-btn" title="Switch between 1 board and 2 boards">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                            <span id="board-toggle-label">1 Board</span>
+                        </button>
+                    </div>
+                    <div class="targets-container" id="dual-boards">
                         <div class="target-wrapper">
                             <div class="target-label">Odd Numbers (1-19)</div>
                             <div class="target-image-container">
@@ -1905,22 +2159,41 @@
                             </div>
                         </div>
                     </div>
+                    <div class="combined-board-wrapper" id="combined-board" style="display:none;">
+                        <div class="target-image-container combined-target-container">
+                            <svg class="target-board-inline target-overlay" id="combined-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <filter id="glow-combined" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                                        <feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/>
+                                        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                                        <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                    <filter id="glow-hit-combined" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="5" result="blur"/>
+                                        <feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/>
+                                        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                                        <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                    <style>.d20-face{fill:#2a1f3d;stroke:#8a7fa8;stroke-width:1.5;stroke-linejoin:round}.d20-face-center{fill:#3d2a5c}.d20-face-outer{fill:#1e1630}.d20-num{fill:#b0a8c8;font-family:serif;text-anchor:middle;dominant-baseline:central}.d20-num-center{fill:#c8bfe0;font-weight:bold}</style>
+                                </defs>
+                                <rect width="400" height="460" fill="#2d3748" rx="12"/>
+                                <g class="highlight-zone" data-numbers="15,12"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="17" y="248" font-size="22">15</text><text class="d20-num" x="33" y="272" font-size="22">12</text></g>
+                                <g class="highlight-zone" data-numbers="9,14"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="367" y="248" font-size="22">9</text><text class="d20-num" x="383" y="272" font-size="22">14</text></g>
+                                <g class="highlight-zone" data-numbers="13,18"><polygon class="face-shape d20-face d20-face-outer" points="66,316 2,346 200,458"/><text class="d20-num" x="89" y="363" font-size="22">13</text><text class="d20-num" x="89" y="387" font-size="22">18</text></g>
+                                <g class="highlight-zone" data-numbers="19,16"><polygon class="face-shape d20-face d20-face-outer" points="334,316 200,458 398,346"/><text class="d20-num" x="311" y="363" font-size="22">19</text><text class="d20-num" x="311" y="387" font-size="22">16</text></g>
+                                <g class="highlight-zone" data-numbers="17,10"><polygon class="face-shape d20-face" points="200,2 7,119 200,59"/><text class="d20-num" x="136" y="50" font-size="24">17</text><text class="d20-num" x="136" y="74" font-size="24">10</text></g>
+                                <g class="highlight-zone" data-numbers="11,20"><polygon class="face-shape d20-face" points="200,2 200,59 393,119"/><text class="d20-num" x="264" y="50" font-size="24">11</text><text class="d20-num" x="264" y="74" font-size="24">20</text></g>
+                                <g class="highlight-zone" data-numbers="3,4"><polygon class="face-shape d20-face" points="7,119 66,316 200,59"/><text class="d20-num" x="91" y="155" font-size="26">3</text><text class="d20-num" x="91" y="181" font-size="26">4</text></g>
+                                <g class="highlight-zone" data-numbers="7,6"><polygon class="face-shape d20-face" points="200,59 334,316 393,119"/><text class="d20-num" x="309" y="155" font-size="26">7</text><text class="d20-num" x="309" y="181" font-size="26">6</text></g>
+                                <g class="highlight-zone" data-numbers="5,8"><polygon class="face-shape d20-face" points="66,316 200,458 334,316"/><text class="d20-num" x="200" y="353" font-size="26">5</text><text class="d20-num" x="200" y="379" font-size="26">8</text></g>
+                                <g class="highlight-zone" data-numbers="1,2"><polygon class="face-shape d20-face d20-face-center" points="200,59 66,316 334,316"/><text class="d20-num d20-num-center" x="200" y="215" font-size="38">1</text><text class="d20-num d20-num-center" x="200" y="253" font-size="38">2</text></g>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="actions-section" id="actions-section">
-                <h3 class="section-title">Actions</h3>
-                <div class="hit-info" id="hit-info"></div>
-                <div class="attack-prompt hidden" id="attack-prompt">Select a player to attack!</div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary hidden" id="end-turn-btn">End Turn</button>
-                </div>
-            </div>
-
-            <div class="game-log">
-                <h4>Game Log</h4>
-                <div id="game-log-entries"></div>
-            </div>
         </div>
 
         <!-- Winner Screen -->
@@ -2068,8 +2341,22 @@
     <!-- Turn summary modal (shows 2 sec then auto-dismisses) -->
     <div class="player-stats-modal-overlay" id="turn-summary-modal" role="dialog" aria-label="Turn summary">
         <div class="player-stats-modal" id="turn-summary-modal-content">
-            <div class="modal-eyebrow">Turn Complete</div>
-            <div id="turn-summary-body"></div>
+            <div class="turn-summary-header">
+                <div class="modal-eyebrow">Turn Complete</div>
+                <div id="turn-summary-title"></div>
+            </div>
+            <div class="turn-summary-divider"></div>
+            <div class="turn-summary-body-inner" id="turn-summary-body"></div>
+        </div>
+    </div>
+
+    <!-- Game Ledger modal -->
+    <div class="game-ledger-modal-overlay" id="game-ledger-modal" role="dialog" aria-label="Game Ledger">
+        <div class="game-ledger-modal">
+            <h3>Game Ledger</h3>
+            <div class="game-ledger-entries" id="game-log-entries">
+                <div class="ledger-empty">No entries yet.</div>
+            </div>
         </div>
     </div>
 
@@ -2363,6 +2650,72 @@
                 const features = 'width=534,height=534,menubar=no,toolbar=no,location=no,status=no';
                 window.open(url, 'DaggerDieProjector', features);
             });
+        }
+
+        // Game Ledger modal
+        const gameLedgerModal = document.getElementById('game-ledger-modal');
+        const openLedgerBtn = document.getElementById('open-ledger-btn');
+        const ledgerBadge = document.getElementById('ledger-badge');
+        let ledgerUnread = 0;
+
+        openLedgerBtn.addEventListener('click', () => {
+            gameLedgerModal.classList.add('open');
+            ledgerUnread = 0;
+            ledgerBadge.textContent = '';
+        });
+
+        gameLedgerModal.addEventListener('click', (e) => {
+            if (e.target === gameLedgerModal) gameLedgerModal.classList.remove('open');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && gameLedgerModal.classList.contains('open')) gameLedgerModal.classList.remove('open');
+        });
+
+        // Board toggle: 1 board (combined) vs 2 boards (odd/even)
+        const BOARD_MODE_KEY = 'daggerdie_boardMode';
+        const boardToggleBtn = document.getElementById('board-toggle-btn');
+        const boardToggleLabel = document.getElementById('board-toggle-label');
+        const dualBoards = document.getElementById('dual-boards');
+        const combinedBoard = document.getElementById('combined-board');
+        const targetsTitle = document.getElementById('targets-title');
+        let singleBoardMode = localStorage.getItem(BOARD_MODE_KEY) === 'single';
+
+        function applyBoardMode() {
+            if (singleBoardMode) {
+                dualBoards.style.display = 'none';
+                combinedBoard.style.display = '';
+                boardToggleLabel.textContent = '2 Boards';
+                targetsTitle.textContent = 'Target Board';
+            } else {
+                dualBoards.style.display = '';
+                combinedBoard.style.display = 'none';
+                boardToggleLabel.textContent = '1 Board';
+                targetsTitle.textContent = 'Target Boards';
+            }
+            if (state.currentRoll && state.currentRoll.length) {
+                highlightTargets(state.currentRoll);
+                syncHitRecorderUI();
+            }
+        }
+
+        boardToggleBtn.addEventListener('click', () => {
+            singleBoardMode = !singleBoardMode;
+            localStorage.setItem(BOARD_MODE_KEY, singleBoardMode ? 'single' : 'dual');
+            applyBoardMode();
+        });
+
+        applyBoardMode();
+
+        function getZonesForNumber(num) {
+            const zones = [];
+            const byNumber = document.querySelector(`.highlight-zone[data-number="${num}"]`);
+            if (byNumber) zones.push(byNumber);
+            document.querySelectorAll('.highlight-zone[data-numbers]').forEach(zone => {
+                const nums = zone.getAttribute('data-numbers').split(',').map(Number);
+                if (nums.includes(num)) zones.push(zone);
+            });
+            return zones;
         }
 
         settingsModal.addEventListener('click', (e) => {
@@ -3070,10 +3423,7 @@
         function highlightTargets(rolls) {
             clearHighlights();
             rolls.forEach(roll => {
-                const zone = document.querySelector(`.highlight-zone[data-number="${roll}"]`);
-                if (zone) {
-                    zone.classList.add('active');
-                }
+                getZonesForNumber(roll).forEach(zone => zone.classList.add('active'));
             });
             const aimZone = syncAimHighlights();
             try {
@@ -3083,8 +3433,7 @@
 
         function clearHighlights() {
             document.querySelectorAll('.highlight-zone').forEach(zone => {
-                zone.classList.remove('active');
-                zone.classList.remove('aimed');
+                zone.classList.remove('active', 'aimed', 'claimed');
             });
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'clear' });
@@ -3100,8 +3449,17 @@
         function syncAimHighlights() {
             const aimZone = getCurrentAimZone();
             document.querySelectorAll('.highlight-zone').forEach(zone => {
-                const num = parseInt(zone.getAttribute('data-number'), 10);
-                zone.classList.toggle('aimed', aimZone !== null && num === aimZone);
+                let match = false;
+                if (aimZone !== null) {
+                    const singleNum = zone.getAttribute('data-number');
+                    const multiNums = zone.getAttribute('data-numbers');
+                    if (singleNum !== null) {
+                        match = parseInt(singleNum, 10) === aimZone;
+                    } else if (multiNums) {
+                        match = multiNums.split(',').map(Number).includes(aimZone);
+                    }
+                }
+                zone.classList.toggle('aimed', match);
             });
             return aimZone;
         }
@@ -3111,30 +3469,49 @@
             if (!zone) return;
             const overlay = zone.closest('.target-overlay');
             if (!overlay || !overlay.classList.contains('clickable')) return;
-            const number = parseInt(zone.getAttribute('data-number'));
-            if (!state.currentRoll.includes(number)) return;
+
+            const singleNum = zone.getAttribute('data-number');
+            const multiNums = zone.getAttribute('data-numbers');
+            const candidates = singleNum !== null
+                ? [parseInt(singleNum)]
+                : (multiNums ? multiNums.split(',').map(Number) : []);
+            const activeNumbers = candidates.filter(n => state.currentRoll.includes(n));
+            if (!activeNumbers.length) return;
 
             const droppedSet = new Set(state.droppedDiceIndices);
-            const rollIndices = state.currentRoll.map((r, i) => r === number ? i : -1).filter(i => i >= 0 && !droppedSet.has(i));
-            const hitIndicesForNumber = new Set(state.hits.filter(h => h.roll === number).map(h => h.idx));
-            const firstUnclaimed = rollIndices.find(idx => !hitIndicesForNumber.has(idx));
-            if (firstUnclaimed !== undefined) {
-                const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
-                if (state.hits.length >= slotsLeft) return;
-                state.hits.push({ roll: number, idx: firstUnclaimed });
-            } else {
-                const toRemove = state.hits.find(h => h.roll === number);
+            let claimed = false;
+            for (const number of activeNumbers) {
+                const rollIndices = state.currentRoll.map((r, i) => r === number ? i : -1).filter(i => i >= 0 && !droppedSet.has(i));
+                const hitIndicesForNumber = new Set(state.hits.filter(h => h.roll === number).map(h => h.idx));
+                const firstUnclaimed = rollIndices.find(idx => !hitIndicesForNumber.has(idx));
+                if (firstUnclaimed !== undefined) {
+                    const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
+                    if (state.hits.length >= slotsLeft) break;
+                    state.hits.push({ roll: number, idx: firstUnclaimed });
+                    claimed = true;
+                    break;
+                }
+            }
+            if (!claimed) {
+                const toRemove = state.hits.find(h => activeNumbers.includes(h.roll));
                 if (toRemove) state.hits = state.hits.filter(h => h !== toRemove);
             }
             syncHitRecorderUI();
         });
 
         function displayRollResults() {
-            diceResults.innerHTML = `
-                <p>Rolled: <strong>${state.currentRoll.join(', ')}</strong></p>
-                <p>Odd targets: <span style="color: #ff6b6b;">${state.currentRoll.filter(r => r % 2 === 1).join(', ') || 'None'}</span></p>
-                <p>Even targets: <span style="color: #48dbfb;">${state.currentRoll.filter(r => r % 2 === 0).join(', ') || 'None'}</span></p>
-            `;
+            if (singleBoardMode) {
+                diceResults.innerHTML = `
+                    <p>Rolled: <strong>${state.currentRoll.join(', ')}</strong></p>
+                    <p>Targets: <span style="color: #feca57;">${state.currentRoll.join(', ')}</span></p>
+                `;
+            } else {
+                diceResults.innerHTML = `
+                    <p>Rolled: <strong>${state.currentRoll.join(', ')}</strong></p>
+                    <p>Odd targets: <span style="color: #ff6b6b;">${state.currentRoll.filter(r => r % 2 === 1).join(', ') || 'None'}</span></p>
+                    <p>Even targets: <span style="color: #48dbfb;">${state.currentRoll.filter(r => r % 2 === 0).join(', ') || 'None'}</span></p>
+                `;
+            }
         }
 
         const MAX_SCORES_PER_TURN = 3;
@@ -3173,9 +3550,16 @@
             const scoreCounter = hitInfo.querySelector('.scores-counter');
             if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
             document.querySelectorAll('.highlight-zone').forEach(zone => {
-                const num = parseInt(zone.getAttribute('data-number'));
-                const claimedForNumber = state.hits.some(h => h.roll === num);
-                zone.classList.toggle('claimed', claimedForNumber);
+                const singleNum = zone.getAttribute('data-number');
+                const multiNums = zone.getAttribute('data-numbers');
+                let claimed = false;
+                if (singleNum !== null) {
+                    claimed = state.hits.some(h => h.roll === parseInt(singleNum));
+                } else if (multiNums) {
+                    const nums = multiNums.split(',').map(Number);
+                    claimed = state.hits.some(h => nums.includes(h.roll));
+                }
+                zone.classList.toggle('claimed', claimed);
             });
             const aimZone = syncAimHighlights();
             try {
@@ -3218,6 +3602,7 @@
 
             document.getElementById('odd-overlay').classList.add('clickable');
             document.getElementById('even-overlay').classList.add('clickable');
+            document.getElementById('combined-overlay').classList.add('clickable');
             syncHitRecorderUI();
 
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
@@ -3254,6 +3639,7 @@
                 showDamageConfirmModal(`Total damage: ${state.totalDamage}`, () => {
                     document.getElementById('odd-overlay').classList.remove('clickable');
                     document.getElementById('even-overlay').classList.remove('clickable');
+                    document.getElementById('combined-overlay').classList.remove('clickable');
 
                     if (state.totalDamage > 0) {
                         const aimResult = consumeAimForCurrentPlayer(currentPlayer);
@@ -3604,10 +3990,12 @@
             }
         }
 
-        function showTurnSummaryModal(bodyHtml, onDismiss) {
+        function showTurnSummaryModal(titleHtml, bodyHtml, onDismiss) {
             if (turnSummaryModalTimerId) clearTimeout(turnSummaryModalTimerId);
             const modal = document.getElementById('turn-summary-modal');
+            const titleEl = document.getElementById('turn-summary-title');
             const body = document.getElementById('turn-summary-body');
+            if (titleEl) titleEl.innerHTML = titleHtml;
             if (body) body.innerHTML = bodyHtml;
             if (modal) modal.classList.add('open');
             turnSummaryModalTimerId = setTimeout(() => {
@@ -3619,20 +4007,18 @@
 
         function finishAttackPhase() {
             const totalDealt = getHitsTotalDamage(state.hits);
-            const summaryHtml = `
-                <h3 style="color: #feca57; margin-bottom: 16px;">Attacks Complete!</h3>
-                <div style="background: rgba(255, 107, 107, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #ff6b6b;">
-                    <div style="font-size: 0.9rem;">
-                        ${state.attackLog.map(log => `<div>${log}</div>`).join('')}
-                    </div>
-                    <p style="margin-top: 8px;">Total Damage: <strong style="color: #ff6b6b;">${totalDealt}</strong></p>
+            const titleHtml = `<h3>Attacks Complete!</h3>`;
+            const bodyHtml = `
+                <div class="turn-summary-attacks">
+                    ${state.attackLog.map(log => `<div class="turn-summary-hit">${log}</div>`).join('')}
+                    <div class="turn-summary-total">Total Damage: <strong>${totalDealt}</strong></div>
                 </div>
             `;
             hitInfo.innerHTML = '';
             attackPrompt.classList.add('hidden');
             endTurnBtn.classList.add('hidden');
             state.hasAttacked = true;
-            showTurnSummaryModal(summaryHtml, () => {
+            showTurnSummaryModal(titleHtml, bodyHtml, () => {
                 if (getCurrentPlayer().isBot || state.autoAdvanceAfterDamage) {
                     nextTurn();
                 } else {
@@ -3643,12 +4029,13 @@
 
         function finishTurnNoAttack() {
             state.damageDealtThisTurn = true;
-            const summaryHtml = `<h3 style="color: #feca57;">No damage this turn</h3><p style="color: rgba(255,255,255,0.8);">Dropped knife or no hits.</p>`;
+            const titleHtml = `<h3>No Damage</h3>`;
+            const bodyHtml = `<div class="turn-summary-no-damage"><p>Dropped knife or no hits this turn.</p></div>`;
             hitInfo.innerHTML = '';
             attackPrompt.classList.add('hidden');
             endTurnBtn.classList.add('hidden');
             state.hasAttacked = true;
-            showTurnSummaryModal(summaryHtml, () => {
+            showTurnSummaryModal(titleHtml, bodyHtml, () => {
                 if (getCurrentPlayer().isBot || state.autoAdvanceAfterDamage) {
                     nextTurn();
                 } else {
@@ -4567,10 +4954,16 @@ ${itemRows}
 
         function addLogEntry(message, type = 'info') {
             state.gameLog.push({ message, type });
+            const empty = gameLogEntries.querySelector('.ledger-empty');
+            if (empty) empty.remove();
             const entry = document.createElement('div');
             entry.className = `log-entry log-${type}`;
             entry.textContent = message;
             gameLogEntries.insertBefore(entry, gameLogEntries.firstChild);
+            if (!gameLedgerModal.classList.contains('open')) {
+                ledgerUnread++;
+                ledgerBadge.textContent = ledgerUnread > 99 ? '99+' : ledgerUnread;
+            }
         }
 
         function showCriticalReaction(playerName) {
@@ -4672,7 +5065,9 @@ ${itemRows}
             const tieMsg = document.getElementById('tie-reroll-message');
             if (tieMsg) tieMsg.style.display = 'none';
 
-            gameLogEntries.innerHTML = '';
+            gameLogEntries.innerHTML = '<div class="ledger-empty">No entries yet.</div>';
+            ledgerUnread = 0;
+            ledgerBadge.textContent = '';
         }
 
         document.getElementById('play-again-btn').addEventListener('click', playAgain);
