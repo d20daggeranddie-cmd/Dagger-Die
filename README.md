@@ -82,7 +82,7 @@ Items are earned by landing a critical (all 3 hits in a single turn). A D12 is r
 | 5 | Tiger's Eye | BUFF | Self | Focus +5 DP to next attack |
 | 6 | Toy Rocket | UTILITY | Self | Aim — call a rolled zone; if hit, +3 DP |
 | 7 | Monkey Paw | LETHAL | Opponent | Cursed — halve target's current HP |
-| 8 | Flame | BUFF | Self | Rage +5 DP to highest hit for 1 turn |
+| 8 | Freeze | DEBUFF | Opponent | Freeze — target skips next turn |
 | 9 | Potion | DEBUFF | Opponent | Poison -15 HP (5/turn over 3 turns) |
 | 10 | Ticket | UTILITY | Self | Free drops for 1 turn (no HP penalty for dropped knives) |
 | 11 | Red Rose | HEALING | Self | Recover all HP lost to drops |
