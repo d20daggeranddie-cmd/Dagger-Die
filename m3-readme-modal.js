@@ -14,7 +14,7 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 
 ### Setup
 1. Select 2-6 players
-2. Each player chooses a name (2-30 characters, must be unique) and color
+2. Each player chooses a name (2-30 characters, must be unique) and character
 3. Roll for turn order (highest D20 roll goes first; ties are broken by rerolling only the tied players)
 
 ### Gameplay
@@ -56,18 +56,45 @@ The landing page includes an Options menu with gameplay preferences (saved in br
 - **Automatically begin game after turn order** - Game starts immediately after turn order is determined
 - **Automatically roll dice on player turn** - Dice roll automatically when each player's turn begins
 - **Auto deal damage** - Damage from hits is automatically assigned to random opponents (no manual target selection)
+- **Automatically advance to next player after damage** - Turn summary appears briefly then the next turn starts automatically
 
-## Game Settings
+## Mods
 
-During a game, open the gear icon to access in-game settings (locked after first damage is dealt):
+Mods are optional gameplay modifiers found in the Options menu. All are off by default.
 
 - **Use custom HP** - Override the default HP per player (20-999) instead of using automatic values by player count
+- **Buff on Critical** - Take half damage for 1 turn after scoring a critical (all 3 dice hit)
+- **Nerf on Miss** - Take 125% damage for 1 turn after missing all throws
+- **Items** - Enables the item inventory system (see Items below)
+- **Start with random item** - Each player begins the game with one randomly generated item (requires Items)
+- **Enable bots** - Allows marking players as bots with selectable difficulty on the character select screen
 
-## Item Inventory Behavior
+## Items
 
-- Inventory has 3 slots and fills left to right.
-- When an item is used, remaining items shift left to fill empty space.
-- New items are added to the next open slot at the end (behind current items), not inserted in front.
+Items are earned by landing a critical (all 3 hits in a single turn). A D12 is rolled to determine which item you receive. Items can be used before dealing damage on your turn.
+
+### Inventory
+
+- 3 slots per player, fills left to right
+- When an item is used, remaining items shift left to fill the gap
+- New items are added to the next open slot at the end
+
+### Item List
+
+| # | Item | Type | Target | Effect |
+|---|------|------|--------|--------|
+| 1 | Scroll | HEALING | Self | Heal +15 HP |
+| 2 | Feather | REGEN | Self | Regen +15 HP (5/turn over 3 turns) |
+| 3 | Glowing Orb | RESURRECT | Eliminated | Resurrect 1 eliminated player with 20 HP |
+| 4 | Metal Fragment | DEFENSE | Self | Shield - immune to next attack |
+| 5 | Tiger's Eye | BUFF | Self | Focus +5 DP to next attack |
+| 6 | Toy Rocket | UTILITY | Self | Aim - call a rolled zone; if hit, +3 DP |
+| 7 | Monkey Paw | LETHAL | Opponent | Cursed - halve target's current HP |
+| 8 | Flame | BUFF | Self | Rage +5 DP to highest hit for 1 turn |
+| 9 | Potion | DEBUFF | Opponent | Poison -15 HP (5/turn over 3 turns) |
+| 10 | Ticket | UTILITY | Self | Free drops for 1 turn (no HP penalty for dropped knives) |
+| 11 | Red Rose | HEALING | Self | Recover all HP lost to drops |
+| 12 | Medkit | CLEANSE | Self | Clear Status - remove all status effects |
 
 ## Resources
 
@@ -110,7 +137,8 @@ Players throw knives at the targets based on what they roll on the dice!`;
       transition:background .2s ease,border-color .2s ease;
     }
     .readme-close-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(240,192,64,.4)}
-    .readme-modal-content{padding:20px;overflow:auto;color:rgba(255,255,255,.93)}
+    .readme-modal-content{padding:20px;overflow:auto;color:rgba(255,255,255,.93);scrollbar-width:none}
+    .readme-modal-content::-webkit-scrollbar{display:none}
     .readme-loading{opacity:.8}
     .readme-md h1,.readme-md h2,.readme-md h3,.readme-md h4{color:#feca57;margin:18px 0 8px;line-height:1.2}
     .readme-md h1{font-size:1.6rem;margin-top:0}
@@ -129,6 +157,18 @@ Players throw knives at the targets based on what they roll on the dice!`;
     }
     .readme-md a{color:#6be9ff;text-decoration:underline}
     .readme-md a:hover{color:#9cf2ff}
+    .readme-md table{
+      width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:.92em;
+    }
+    .readme-md th{
+      text-align:left;padding:8px 10px;color:#feca57;border-bottom:2px solid rgba(254,202,87,.3);
+      background:rgba(0,0,0,.2);white-space:nowrap;
+    }
+    .readme-md td{
+      padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88);
+    }
+    .readme-md tr:hover td{background:rgba(255,255,255,.04)}
+    .readme-md tbody tr:last-child td{border-bottom:none}
     @media (max-width:600px){
       .readme-modal{width:95vw;max-height:88vh}
       .readme-modal-header{padding:14px}
@@ -197,6 +237,8 @@ Players throw knives at the targets based on what they roll on the dice!`;
     const html = [];
     let inUl = false;
     let inOl = false;
+    let inTable = false;
+    let tableHeaderDone = false;
 
     function closeLists() {
       if (inUl) {
@@ -209,12 +251,52 @@ Players throw knives at the targets based on what they roll on the dice!`;
       }
     }
 
+    function closeTable() {
+      if (inTable) {
+        html.push('</tbody></table>');
+        inTable = false;
+        tableHeaderDone = false;
+      }
+    }
+
+    function parseTableRow(line) {
+      return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    }
+
+    function isTableSeparator(line) {
+      return /^\|?[\s\-:|]+\|[\s\-:|]+\|?$/.test(line);
+    }
+
     for (const line of lines) {
-      const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-      const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+      const trimmed = line.trim();
+      const isTableRow = /^\|.+\|$/.test(trimmed);
+
+      if (isTableRow || (inTable && isTableSeparator(trimmed))) {
+        closeLists();
+        if (isTableSeparator(trimmed)) continue;
+        const cells = parseTableRow(trimmed);
+        if (!inTable) {
+          inTable = true;
+          tableHeaderDone = false;
+          html.push('<table><thead><tr>');
+          cells.forEach(c => html.push(`<th>${renderInlineMarkdown(c)}</th>`));
+          html.push('</tr></thead><tbody>');
+          tableHeaderDone = true;
+          continue;
+        }
+        html.push('<tr>');
+        cells.forEach(c => html.push(`<td>${renderInlineMarkdown(c)}</td>`));
+        html.push('</tr>');
+        continue;
+      }
+
+      closeTable();
+
+      const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+      const orderedMatch = trimmed.match(/^\d+\.\s+(.*)$/);
       const unorderedMatch = line.match(/^(\s*)-\s+(.*)$/);
 
-      if (!line.trim()) {
+      if (!trimmed) {
         closeLists();
         continue;
       }
@@ -254,6 +336,7 @@ Players throw knives at the targets based on what they roll on the dice!`;
       html.push(`<p>${renderInlineMarkdown(line)}</p>`);
     }
     closeLists();
+    closeTable();
     return `<div class="readme-md">${html.join('')}</div>`;
   }
 
