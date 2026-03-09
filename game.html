@@ -753,7 +753,7 @@
         }
         .player-card.shielded { box-shadow: 0 0 14px rgba(129, 140, 248, 0.35); }
         .player-card.focused { box-shadow: 0 0 14px rgba(250, 204, 21, 0.35); }
-        .player-card.enraged { box-shadow: 0 0 14px rgba(251, 113, 133, 0.35); }
+        .player-card.frozen { box-shadow: 0 0 14px rgba(96, 184, 240, 0.45); }
         .player-card.regening { box-shadow: 0 0 14px rgba(74, 222, 128, 0.35); }
         .player-card.poisoned { box-shadow: 0 0 14px rgba(196, 132, 252, 0.35); }
         .player-card.free-drops { box-shadow: 0 0 14px rgba(56, 189, 248, 0.35); }
@@ -1062,8 +1062,8 @@
         .item-target-status-chip.nerf,
         .item-target-status-chip.poison { background: rgba(231, 76, 60, 0.3); border-color: rgba(231, 76, 60, 0.55); color: #ff8f8f; }
         .item-target-status-chip.shield { background: rgba(128, 144, 176, 0.35); border-color: rgba(128, 144, 176, 0.6); color: #d1d9f4; }
-        .item-target-status-chip.focus,
-        .item-target-status-chip.rage { background: rgba(240, 192, 64, 0.3); border-color: rgba(240, 192, 64, 0.6); color: #ffd98a; }
+        .item-target-status-chip.focus { background: rgba(240, 192, 64, 0.3); border-color: rgba(240, 192, 64, 0.6); color: #ffd98a; }
+        .item-target-status-chip.freeze { background: rgba(96, 184, 240, 0.3); border-color: rgba(96, 184, 240, 0.6); color: #a0d8f8; }
         .item-target-status-chip.regen { background: rgba(80, 208, 112, 0.28); border-color: rgba(80, 208, 112, 0.55); color: #86efac; }
         .item-target-status-chip.free { background: rgba(72, 219, 251, 0.28); border-color: rgba(72, 219, 251, 0.55); color: #8feaff; }
         .item-target-status-chip.eliminated { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.28); color: rgba(255,255,255,0.8); }
@@ -1079,7 +1079,7 @@
         }
         .player-card-status.shield { background: rgba(129, 140, 248, 0.25); color: #c7d2fe; }
         .player-card-status.focus { background: rgba(250, 204, 21, 0.24); color: #fde68a; }
-        .player-card-status.rage { background: rgba(251, 113, 133, 0.24); color: #fecdd3; }
+        .player-card-status.freeze { background: rgba(96, 184, 240, 0.24); color: #a0d8f8; }
         .player-card-status.regen { background: rgba(74, 222, 128, 0.24); color: #bbf7d0; }
         .player-card-status.poison { background: rgba(196, 132, 252, 0.24); color: #e9d5ff; }
         .player-card-status.free { background: rgba(56, 189, 248, 0.24); color: #bae6fd; }
@@ -3340,7 +3340,7 @@
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             playersPanel.innerHTML = state.players.map(p => `
-                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.rageActive ? 'enraged' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
+                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.freezeActive ? 'frozen' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
                      data-player="${p.id}">
                     <button type="button" class="player-card-stats-btn" data-player="${p.id}" aria-label="Stats and drops">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -3818,11 +3818,6 @@
                     modNote += ' (focus +5)';
                     modLabel += ', focus';
                 }
-                if (attacker.rageActive && state.hits && hitRoll === Math.max(...state.hits.map(h => getHitEffectiveRoll(h)))) {
-                    damage += (attacker.rageBonus || 5);
-                    modNote += ' (rage +5)';
-                    modLabel += ', rage';
-                }
             }
             return { damage, modNote, modLabel };
         }
@@ -4265,7 +4260,7 @@
             if (player.nerfActive) statuses.push({ label: 'Nerf', kind: 'nerf' });
             if (player.shieldActive) statuses.push({ label: 'Shield', kind: 'shield' });
             if (player.focusActive) statuses.push({ label: 'Focus', kind: 'focus' });
-            if (player.rageActive) statuses.push({ label: 'Rage', kind: 'rage' });
+            if (player.freezeActive) statuses.push({ label: 'Frozen', kind: 'freeze' });
             if ((player.regenTurns || 0) > 0 && (player.regenRemaining || 0) > 0) statuses.push({ label: `Regen ${player.regenRemaining}`, kind: 'regen' });
             if ((player.poisonTurns || 0) > 0 && (player.poisonRemaining || 0) > 0) statuses.push({ label: `Poison ${player.poisonRemaining}`, kind: 'poison' });
             if (player.aimActive && player.aimCalledZone !== null) statuses.push({ label: `Aim ${player.aimCalledZone} +${player.aimBonus || 3}`, kind: 'focus' });
@@ -4349,10 +4344,9 @@
                 target.hp = Math.max(0, target.hp - halfHp);
                 if (target.hp <= 0) target.eliminated = true;
                 addLogEntry(`${user.name} used ${item.name} on ${target.name} — Cursed! Lost ${halfHp} HP (half current HP)!`, 'info');
-            } else if (item.id === 'flame') {
-                target.rageActive = true;
-                target.rageBonus = 5;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Rage +5 DP to highest hit!`, 'info');
+            } else if (item.id === 'freeze') {
+                target.freezeActive = true;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Frozen! Skips next turn!`, 'info');
             } else if (item.id === 'potion') {
                 const immediatePoison = Math.min(5, Math.max(0, target.hp));
                 target.hp = Math.max(0, target.hp - immediatePoison);
@@ -4375,8 +4369,7 @@
                 target.shieldTurns = 0;
                 target.focusActive = false;
                 target.focusBonus = 0;
-                target.rageActive = false;
-                target.rageBonus = 0;
+                target.freezeActive = false;
                 target.freeDropsActive = false;
                 target.freeDropsCount = 0;
                 target.aimActive = false;
@@ -4428,7 +4421,7 @@
 
             if (item.id === 'metal-fragment') return (user.shieldActive || (user.shieldTurns || 0) > 0) ? null : user;
             if (item.id === 'tigers-eye') return user.focusActive ? null : user;
-            if (item.id === 'flame') return user.rageActive ? null : user;
+            if (item.id === 'freeze') return byHighestHp(opponents.filter(p => !p.freezeActive)) || null;
             if (item.id === 'ticket') return (user.freeDropsActive || (user.freeDropsCount || 0) > 0) ? null : user;
             if (item.id === 'toy-rocket') return (state.hasRolled && !user.aimActive && state.hits && state.hits.length > 0) ? user : null;
 
@@ -4463,7 +4456,7 @@
             else if (item.id === 'potion') score = 72 + Math.min(25, target.hp);
             else if (item.id === 'metal-fragment') score = (user.shieldActive || (user.shieldTurns || 0) > 0) ? -50 : (userCriticalHp ? 78 : 52);
             else if (item.id === 'tigers-eye') score = user.focusActive ? -30 : 54;
-            else if (item.id === 'flame') score = user.rageActive ? -30 : 56;
+            else if (item.id === 'freeze') score = target.freezeActive ? -30 : 68;
             else if (item.id === 'scroll') score = missingHp > 0 ? (35 + missingHp + (userCriticalHp ? 20 : 0)) : -20;
             else if (item.id === 'feather') score = missingHp > 0 ? (30 + missingHp + (userCriticalHp ? 15 : 0)) : -20;
             else if (item.id === 'medkit') score = (target.nerfActive || (target.poisonRemaining || 0) > 0) ? 66 : -15;
@@ -4651,10 +4644,8 @@
                 nextIdx = (nextIdx + 1) % state.players.length;
             } while (state.players[nextIdx].eliminated);
 
-            // Clear buff/nerf/rage for the player whose turn just ended
             const prevPlayer = state.players[state.currentPlayerIndex];
             if (prevPlayer) {
-                prevPlayer.rageActive = false;
                 prevPlayer.freeDropsActive = false;
                 prevPlayer.freeDropsCount = 0;
                 prevPlayer.aimActive = false;
@@ -4701,6 +4692,16 @@
             }
 
             state.currentPlayerIndex = nextIdx;
+
+            const nextPlayer2 = state.players[nextIdx];
+            if (nextPlayer2 && nextPlayer2.freezeActive) {
+                nextPlayer2.freezeActive = false;
+                addLogEntry(`${nextPlayer2.name} is frozen and skips their turn!`, 'info');
+                updatePlayersPanel();
+                setTimeout(() => nextTurn(), 800);
+                return;
+            }
+
             addLogEntry(`${getCurrentPlayer().name}'s turn begins.`, 'info');
             updateGameUI();
         }
