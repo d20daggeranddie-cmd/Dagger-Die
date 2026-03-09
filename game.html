@@ -1135,23 +1135,24 @@
             transform: scale(1.05);
         }
         .drop-toggle {
-            background: none;
-            border: 1px solid rgba(231, 76, 60, 0.35);
-            color: rgba(231, 76, 60, 0.7);
-            font-size: 0.65rem;
+            background: rgba(231, 76, 60, 0.12);
+            border: 1.5px solid rgba(231, 76, 60, 0.55);
+            color: #e74c3c;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            padding: 2px 12px;
+            padding: 4px 14px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
             width: 100%;
         }
         .drop-toggle:hover {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border-color: rgba(231, 76, 60, 0.6);
+            background: rgba(231, 76, 60, 0.28);
+            color: #ff6b6b;
+            border-color: #e74c3c;
+            transform: scale(1.05);
         }
         @keyframes dropChipIn {
             0% { opacity: 0; transform: scale(0.7); }
@@ -4344,9 +4345,10 @@
                 target.aimBonus = 3;
                 addLogEntry(`${user.name} used ${item.name} on ${target.name} — Called zone ${aimZone} (+3 DP if hit).`, 'info');
             } else if (item.id === 'monkey-paw') {
-                target.hp = 0;
-                target.eliminated = true;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Instakill!`, 'info');
+                const halfHp = Math.ceil(target.hp / 2);
+                target.hp = Math.max(0, target.hp - halfHp);
+                if (target.hp <= 0) target.eliminated = true;
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Cursed! Lost ${halfHp} HP (half current HP)!`, 'info');
             } else if (item.id === 'flame') {
                 target.rageActive = true;
                 target.rageBonus = 5;
@@ -4421,7 +4423,7 @@
 
             // Free-for-all bots avoid resurrecting opponents.
             if (item.id === 'orb') return null;
-            if (item.id === 'monkey-paw') return byLowestHp(opponents);
+            if (item.id === 'monkey-paw') return byHighestHp(opponents);
             if (item.id === 'potion') return byHighestHp(opponents.filter(p => (p.poisonTurns || 0) === 0)) || byHighestHp(opponents);
 
             if (item.id === 'metal-fragment') return (user.shieldActive || (user.shieldTurns || 0) > 0) ? null : user;
@@ -4457,7 +4459,7 @@
             const userCriticalHp = user.hp <= Math.ceil(user.maxHp * 0.35);
 
             let score = 0;
-            if (item.id === 'monkey-paw') score = 95 + Math.min(30, target.maxHp - target.hp);
+            if (item.id === 'monkey-paw') score = 75 + Math.min(30, target.hp);
             else if (item.id === 'potion') score = 72 + Math.min(25, target.hp);
             else if (item.id === 'metal-fragment') score = (user.shieldActive || (user.shieldTurns || 0) > 0) ? -50 : (userCriticalHp ? 78 : 52);
             else if (item.id === 'tigers-eye') score = user.focusActive ? -30 : 54;
@@ -4473,7 +4475,7 @@
 
             if (target.id !== user.id && item.targetType !== 'opponent') score -= 10;
             if (userMissingHp >= 12 && (item.id === 'scroll' || item.id === 'feather') && target.id === user.id) score += 18;
-            if (item.id === 'monkey-paw' && target.hp <= 12) score += 15;
+            if (item.id === 'monkey-paw' && target.hp >= 20) score += 15;
             if (item.id === 'potion' && (target.poisonTurns || 0) > 0) score -= 14;
 
             return score;
