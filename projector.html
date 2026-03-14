@@ -318,7 +318,8 @@
         body.projector-animated-bg { background: #000000; }
         body.projector-bg-black { background: #000000; }
         body.projector-bg-white { background: #ffffff; }
-        .target-wrapper { position: relative; z-index: 2; }
+        .targets-container { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .target-wrapper { position: relative; }
 
         /* Row 2 — Background selector */
         .bg-selector {
@@ -393,6 +394,42 @@
         .highlight-zone.claimed .zone-label {
             opacity: 0.45;
         }
+
+        /* ── Dual-target mode ── */
+        .targets-container.dual-mode { gap: 0; }
+        .targets-container.dual-mode .target-wrapper {
+            width: 50%;
+            padding: 24px;
+        }
+        .target-board-label {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(12px, 1.8vw, 22px);
+            font-weight: 700;
+            color: rgba(255,215,0,0.65);
+            text-shadow: 0 0 6px rgba(255,215,0,0.3);
+            pointer-events: none;
+            z-index: 5;
+            white-space: nowrap;
+            letter-spacing: 0.15em;
+        }
+        .targets-container.dual-mode .target-board-label { display: block; }
+
+        /* ── Target-mode selector row (reuses bg-btn styling) ── */
+        .target-mode-row {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(5px, 0.8vw, 10px);
+        }
+        .target-mode-row span {
+            font-size: clamp(14px, 1.8vw, 26px);
+            font-family: sans-serif;
+            color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +460,13 @@
                 <button class="bg-btn" id="bg-btn-animated" title="Animated RPG background">Animated</button>
             </div>
         </div>
+        <div class="target-mode-row">
+            <span>Targets:</span>
+            <div class="bg-selector-btns">
+                <button class="bg-btn" id="mode-btn-1" title="Single combined target">1 Target</button>
+                <button class="bg-btn" id="mode-btn-2" title="Separate odd and even targets">2 Targets</button>
+            </div>
+        </div>
         <div class="alignment-action-row">
             <button class="btn" id="lockAlignBtn">Lock position</button>
             <button class="btn" id="resetAlignBtn">Reset</button>
@@ -430,7 +474,9 @@
         </div>
     </div>
 
+    <div class="targets-container" id="targetsContainer">
     <div class="target-wrapper" id="targetWrapper">
+        <span class="target-board-label">ODD</span>
         <svg class="target-face" id="target-board" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <filter id="glow-gold" x="-20%" y="-20%" width="140%" height="140%">
@@ -511,11 +557,14 @@
             </g>
         </svg>
     </div>
+    <div class="target-wrapper" id="targetWrapperEven" style="display:none">
+        <span class="target-board-label">EVEN</span>
+    </div>
+    </div>
 
     <script>
     (function() {
         // ── Number-to-pair lookup ──
-        // Each d20 number maps to its face's data-pair attribute
         const numberToPair = {
             1: '1-2',    2: '1-2',
             3: '3-4',    4: '3-4',
@@ -529,33 +578,55 @@
            16: '16-19', 19: '16-19'
         };
 
-        const allZones = document.querySelectorAll('.highlight-zone');
-        const statusDot = document.getElementById('status-dot');
+        // ── Target mode (1 = single combined, 2 = separate odd/even) ──
+        var TARGET_MODE_KEY = 'daggerdie_projector_targetMode';
+        var targetMode = 1;
 
+        // ── DOM references ──
+        var oddBoard = document.getElementById('target-board');
+        var targetsContainer = document.getElementById('targetsContainer');
+        var targetWrapper = document.getElementById('targetWrapper');
+        var targetWrapperEven = document.getElementById('targetWrapperEven');
+        var statusDot = document.getElementById('status-dot');
+
+        // Clone SVG for even target (reuse filter defs from original)
+        var evenSvg = oddBoard.cloneNode(true);
+        evenSvg.id = 'target-board-even';
+        evenSvg.querySelectorAll('g.highlight-zone[id]').forEach(function(el) {
+            el.id = 'even-' + el.id;
+        });
+        targetWrapperEven.appendChild(evenSvg);
+
+        var oddZones = oddBoard.querySelectorAll('.highlight-zone');
+        var evenZones = evenSvg.querySelectorAll('.highlight-zone');
+        var allZones = document.querySelectorAll('.highlight-zone');
+
+        // ── Clear all zones on both targets ──
         function clearAll() {
-            allZones.forEach(z => {
+            allZones.forEach(function(z) {
                 z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit');
-                const lbl = z.querySelector('.zone-label');
+                var lbl = z.querySelector('.zone-label');
                 if (lbl) lbl.textContent = '';
             });
         }
 
-        function highlightRolls(rolls) {
-            // Count how many rolls map to each pair, and track which roll numbers (1-based)
-            const pairCounts = {};
-            const pairRollNums = {};
-            rolls.forEach((r, idx) => {
-                const pair = numberToPair[r];
+        // ── Highlight rolls on a specific set of zones ──
+        // originalIndices preserves throw order from the full rolls array
+        function highlightRollsOnZones(zones, rolls, originalIndices) {
+            var pairCounts = {};
+            var pairRollNums = {};
+            rolls.forEach(function(r, i) {
+                var pair = numberToPair[r];
                 if (pair) {
                     pairCounts[pair] = (pairCounts[pair] || 0) + 1;
                     if (!pairRollNums[pair]) pairRollNums[pair] = [];
-                    pairRollNums[pair].push(idx + 1);
+                    pairRollNums[pair].push(originalIndices[i] + 1);
                 }
             });
-            allZones.forEach(z => {
-                const pair = z.getAttribute('data-pair');
-                const count = pairCounts[pair] || 0;
-                const lbl = z.querySelector('.zone-label');
+            zones.forEach(function(z) {
+                var pair = z.getAttribute('data-pair');
+                var count = pairCounts[pair] || 0;
+                var lbl = z.querySelector('.zone-label');
                 if (count > 0) {
                     z.classList.add('active');
                     z.classList.toggle('multi-hit', count === 2);
@@ -568,38 +639,73 @@
             });
         }
 
-        function highlightClaimed(claimed) {
-            // Count how many claimed hits map to each pair
-            const pairCounts = {};
-            claimed.forEach(r => {
-                const pair = numberToPair[r];
+        function highlightRolls(rolls) {
+            if (targetMode === 2) {
+                var oddRolls = [], evenRolls = [];
+                var oddIndices = [], evenIndices = [];
+                rolls.forEach(function(r, idx) {
+                    if (r % 2 === 1) { oddRolls.push(r); oddIndices.push(idx); }
+                    else { evenRolls.push(r); evenIndices.push(idx); }
+                });
+                highlightRollsOnZones(oddZones, oddRolls, oddIndices);
+                highlightRollsOnZones(evenZones, evenRolls, evenIndices);
+            } else {
+                highlightRollsOnZones(oddZones, rolls, rolls.map(function(_, i) { return i; }));
+            }
+        }
+
+        // ── Highlight claimed hits on a specific set of zones ──
+        function highlightClaimedOnZones(zones, claimed) {
+            var pairCounts = {};
+            claimed.forEach(function(r) {
+                var pair = numberToPair[r];
                 if (pair) pairCounts[pair] = (pairCounts[pair] || 0) + 1;
             });
-            allZones.forEach(z => {
-                const pair = z.getAttribute('data-pair');
-                const count = pairCounts[pair] || 0;
+            zones.forEach(function(z) {
+                var pair = z.getAttribute('data-pair');
+                var count = pairCounts[pair] || 0;
                 if (count > 0) {
                     z.classList.add('claimed');
                     z.classList.remove('active');
                     z.classList.toggle('multi-hit', count === 2);
                     z.classList.toggle('triple-hit', count >= 3);
                 } else {
-                    z.classList.remove('claimed', 'multi-hit', 'triple-hit');
+                    z.classList.remove('claimed');
                 }
             });
         }
 
-        function highlightAim(aimZone) {
-            const aimPair = numberToPair[aimZone];
-            allZones.forEach(z => {
-                const pair = z.getAttribute('data-pair');
-                z.classList.toggle('aimed', !!aimPair && pair === aimPair);
-            });
+        function highlightClaimed(claimed) {
+            if (targetMode === 2) {
+                var oddClaimed = claimed.filter(function(r) { return r % 2 === 1; });
+                var evenClaimed = claimed.filter(function(r) { return r % 2 === 0; });
+                highlightClaimedOnZones(oddZones, oddClaimed);
+                highlightClaimedOnZones(evenZones, evenClaimed);
+            } else {
+                highlightClaimedOnZones(oddZones, claimed);
+            }
         }
 
-        // ── Alignment: scalable and draggable target (like Blade Aces) ──
+        function highlightAim(aimZone) {
+            var aimPair = numberToPair[aimZone];
+            if (targetMode === 2) {
+                var isOdd = aimZone && aimZone % 2 === 1;
+                oddZones.forEach(function(z) {
+                    z.classList.toggle('aimed', !!aimPair && isOdd && z.getAttribute('data-pair') === aimPair);
+                });
+                evenZones.forEach(function(z) {
+                    z.classList.toggle('aimed', !!aimPair && !isOdd && z.getAttribute('data-pair') === aimPair);
+                });
+            } else {
+                oddZones.forEach(function(z) {
+                    z.classList.toggle('aimed', !!aimPair && z.getAttribute('data-pair') === aimPair);
+                });
+            }
+        }
+
+        // ── Alignment: scalable and individually draggable targets ──
         var ALIGN_STORAGE_KEY = 'daggerdie_projector_alignment';
-        var targetWrapper = document.getElementById('targetWrapper');
+        var ALIGN_STORAGE_KEY_DUAL = 'daggerdie_projector_alignment_dual';
         var logoBtn = document.getElementById('logoBtn');
         var logoCallout = document.getElementById('logoCallout');
         var logoSpotlightOverlay = document.getElementById('logoSpotlightOverlay');
@@ -607,19 +713,19 @@
         var cancelAlignBtn = document.getElementById('cancelAlignBtn');
         var resetAlignBtn = document.getElementById('resetAlignBtn');
         var alignScaleSlider = document.getElementById('alignScaleSlider');
-        var alignDragState = { ox: 0, oy: 0, scale: 1, dragging: false, startX: 0, startY: 0, startOx: 0, startOy: 0 };
+        var alignDragState = { dragging: false, activeEl: null, startX: 0, startY: 0, startOx: 0, startOy: 0, scale: 1 };
         var ALIGN_SCALE_MIN = 0.15, ALIGN_SCALE_MAX = 2.5, ALIGN_SCALE_STEP = 0.02;
 
-        function applyTransform(x, y, s) {
+        function applyTransformTo(el, x, y, s) {
             x = typeof x === 'number' ? x : 0;
             y = typeof y === 'number' ? y : 0;
             s = typeof s === 'number' && s > 0 ? s : 1;
-            if (targetWrapper) targetWrapper.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+            if (el) el.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
         }
 
-        function parseTransform() {
-            if (!targetWrapper) return { x: 0, y: 0, s: 1 };
-            var t = targetWrapper.style.transform || '';
+        function parseTransformOf(el) {
+            if (!el) return { x: 0, y: 0, s: 1 };
+            var t = el.style.transform || '';
             var m = t.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
             var x = m ? parseFloat(m[1]) : 0;
             var y = m ? parseFloat(m[2]) : 0;
@@ -630,25 +736,47 @@
         }
 
         function loadAlignment() {
-            if (!targetWrapper) return;
-            try {
-                var raw = localStorage.getItem(ALIGN_STORAGE_KEY);
-                if (raw) {
-                    var o = JSON.parse(raw);
-                    if (typeof o.x === 'number' && typeof o.y === 'number') {
+            if (targetMode === 2) {
+                try {
+                    var raw = localStorage.getItem(ALIGN_STORAGE_KEY_DUAL);
+                    if (raw) {
+                        var o = JSON.parse(raw);
                         var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
-                        applyTransform(o.x, o.y, s);
+                        applyTransformTo(targetWrapper, typeof o.oddX === 'number' ? o.oddX : 0, typeof o.oddY === 'number' ? o.oddY : 0, s);
+                        applyTransformTo(targetWrapperEven, typeof o.evenX === 'number' ? o.evenX : 0, typeof o.evenY === 'number' ? o.evenY : 0, s);
+                        if (alignScaleSlider) alignScaleSlider.value = String(s);
                         return;
                     }
-                }
-            } catch (e) {}
-            applyTransform(0, 0, 1);
+                } catch (e) {}
+                applyTransformTo(targetWrapper, 0, 0, 1);
+                applyTransformTo(targetWrapperEven, 0, 0, 1);
+            } else {
+                try {
+                    var raw = localStorage.getItem(ALIGN_STORAGE_KEY);
+                    if (raw) {
+                        var o = JSON.parse(raw);
+                        if (typeof o.x === 'number' && typeof o.y === 'number') {
+                            var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
+                            applyTransformTo(targetWrapper, o.x, o.y, s);
+                            if (alignScaleSlider) alignScaleSlider.value = String(s);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+                applyTransformTo(targetWrapper, 0, 0, 1);
+            }
         }
 
         function saveAlignment() {
             try {
-                var p = parseTransform();
-                localStorage.setItem(ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
+                if (targetMode === 2) {
+                    var p1 = parseTransformOf(targetWrapper);
+                    var p2 = parseTransformOf(targetWrapperEven);
+                    localStorage.setItem(ALIGN_STORAGE_KEY_DUAL, JSON.stringify({ oddX: p1.x, oddY: p1.y, evenX: p2.x, evenY: p2.y, s: p1.s }));
+                } else {
+                    var p = parseTransformOf(targetWrapper);
+                    localStorage.setItem(ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
+                }
             } catch (e) {}
         }
 
@@ -657,18 +785,24 @@
             var el = document.elementFromPoint(e.clientX, e.clientY);
             if (!el || !el.closest('.target-wrapper')) return;
             e.preventDefault();
-            var p = parseTransform();
+            var p1 = parseTransformOf(targetWrapper);
             var delta = e.deltaY > 0 ? -ALIGN_SCALE_STEP : ALIGN_SCALE_STEP;
-            var s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, p.s + delta));
-            applyTransform(p.x, p.y, s);
+            var s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, p1.s + delta));
+            applyTransformTo(targetWrapper, p1.x, p1.y, s);
+            if (targetMode === 2) {
+                var p2 = parseTransformOf(targetWrapperEven);
+                applyTransformTo(targetWrapperEven, p2.x, p2.y, s);
+            }
             if (alignScaleSlider) alignScaleSlider.value = String(s);
         }
 
         function onAlignMouseDown(e) {
             if (!document.body.classList.contains('alignment-mode')) return;
-            if (!e.target.closest('.target-wrapper')) return;
-            var p = parseTransform();
+            var wrapper = e.target.closest('.target-wrapper');
+            if (!wrapper) return;
+            var p = parseTransformOf(wrapper);
             alignDragState.dragging = true;
+            alignDragState.activeEl = wrapper;
             alignDragState.startX = e.clientX;
             alignDragState.startY = e.clientY;
             alignDragState.startOx = p.x;
@@ -680,14 +814,15 @@
         }
 
         function onAlignMouseMove(e) {
-            if (!alignDragState.dragging) return;
+            if (!alignDragState.dragging || !alignDragState.activeEl) return;
             var ox = alignDragState.startOx + (e.clientX - alignDragState.startX);
             var oy = alignDragState.startOy + (e.clientY - alignDragState.startY);
-            applyTransform(Math.round(ox), Math.round(oy), alignDragState.scale);
+            applyTransformTo(alignDragState.activeEl, Math.round(ox), Math.round(oy), alignDragState.scale);
         }
 
         function onAlignMouseUp() {
             alignDragState.dragging = false;
+            alignDragState.activeEl = null;
             document.removeEventListener('mousemove', onAlignMouseMove);
             document.removeEventListener('mouseup', onAlignMouseUp);
         }
@@ -697,43 +832,39 @@
             var s = parseFloat(alignScaleSlider.value);
             if (isNaN(s) || s <= 0) return;
             s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, s));
-            var p = parseTransform();
-            applyTransform(p.x, p.y, s);
+            var p1 = parseTransformOf(targetWrapper);
+            applyTransformTo(targetWrapper, p1.x, p1.y, s);
+            if (targetMode === 2) {
+                var p2 = parseTransformOf(targetWrapperEven);
+                applyTransformTo(targetWrapperEven, p2.x, p2.y, s);
+            }
         }
 
         function startAlignmentMode() {
             document.body.classList.add('alignment-mode');
-            var p = parseTransform();
+            var p = parseTransformOf(targetWrapper);
             if (alignScaleSlider) { alignScaleSlider.value = String(p.s); alignScaleSlider.addEventListener('input', onAlignScaleSliderInput); }
-            if (targetWrapper) targetWrapper.addEventListener('mousedown', onAlignMouseDown);
+            if (targetsContainer) targetsContainer.addEventListener('mousedown', onAlignMouseDown);
             document.addEventListener('wheel', onAlignWheel, { passive: false });
         }
 
         function exitAlignmentMode() {
             document.body.classList.remove('alignment-mode');
-            if (targetWrapper) targetWrapper.removeEventListener('mousedown', onAlignMouseDown);
+            if (targetsContainer) targetsContainer.removeEventListener('mousedown', onAlignMouseDown);
             document.removeEventListener('wheel', onAlignWheel);
             if (alignScaleSlider) alignScaleSlider.removeEventListener('input', onAlignScaleSliderInput);
             document.removeEventListener('mousemove', onAlignMouseMove);
             document.removeEventListener('mouseup', onAlignMouseUp);
         }
 
-        function lockAlignment() {
-            saveAlignment();
-            exitAlignmentMode();
-            loadAlignment();
-        }
-
-        function cancelAlignment() {
-            exitAlignmentMode();
-            loadAlignment();
-        }
-
+        function lockAlignment() { saveAlignment(); exitAlignmentMode(); loadAlignment(); }
+        function cancelAlignment() { exitAlignmentMode(); loadAlignment(); }
         function resetAlignment() {
-            try { localStorage.removeItem(ALIGN_STORAGE_KEY); } catch (e) {}
+            try { localStorage.removeItem(ALIGN_STORAGE_KEY); localStorage.removeItem(ALIGN_STORAGE_KEY_DUAL); } catch (e) {}
             loadAlignment();
         }
 
+        // ── Background mode ──
         var BG_MODE_KEY = 'daggerdie_projector_bgMode';
         var bgBtnBlack    = document.getElementById('bg-btn-black');
         var bgBtnWhite    = document.getElementById('bg-btn-white');
@@ -760,6 +891,35 @@
 
         applyBgMode(localStorage.getItem(BG_MODE_KEY) || 'black');
 
+        // ── Target mode toggle ──
+        var modeBtn1 = document.getElementById('mode-btn-1');
+        var modeBtn2 = document.getElementById('mode-btn-2');
+
+        function setTargetMode(mode) {
+            targetMode = mode;
+            try { localStorage.setItem(TARGET_MODE_KEY, String(mode)); } catch(e) {}
+            if (mode === 2) {
+                targetsContainer.classList.add('dual-mode');
+                targetWrapperEven.style.display = '';
+            } else {
+                targetsContainer.classList.remove('dual-mode');
+                targetWrapperEven.style.display = 'none';
+            }
+            if (modeBtn1) modeBtn1.classList.toggle('active', mode === 1);
+            if (modeBtn2) modeBtn2.classList.toggle('active', mode === 2);
+            loadAlignment();
+        }
+
+        if (modeBtn1) modeBtn1.addEventListener('click', function() { setTargetMode(1); });
+        if (modeBtn2) modeBtn2.addEventListener('click', function() { setTargetMode(2); });
+
+        try {
+            var savedMode = parseInt(localStorage.getItem(TARGET_MODE_KEY), 10);
+            if (savedMode === 2) targetMode = 2;
+        } catch(e) {}
+        setTargetMode(targetMode);
+
+        // ── Button and keyboard handlers ──
         if (logoBtn) logoBtn.addEventListener('click', startAlignmentMode);
         if (lockAlignBtn) lockAlignBtn.addEventListener('click', lockAlignment);
         if (cancelAlignBtn) cancelAlignBtn.addEventListener('click', cancelAlignment);
@@ -795,19 +955,18 @@
             }, 2500);
         }
 
-        loadAlignment();
         showLogoCallout();
 
         // ── URL params for standalone testing (e.g. ?rolls=1,2&claimed=1,2 for multi-hit) ──
         (function initFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const rollsParam = params.get('rolls');
-            const claimedParam = params.get('claimed');
-            const aimParam = params.get('aim');
+            var params = new URLSearchParams(window.location.search);
+            var rollsParam = params.get('rolls');
+            var claimedParam = params.get('claimed');
+            var aimParam = params.get('aim');
             if (rollsParam) {
-                const rolls = rollsParam.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 20);
-                const claimed = claimedParam ? claimedParam.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 20) : [];
-                const aim = aimParam ? parseInt(aimParam, 10) : null;
+                var rolls = rollsParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; });
+                var claimed = claimedParam ? claimedParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; }) : [];
+                var aim = aimParam ? parseInt(aimParam, 10) : null;
                 if (rolls.length) {
                     highlightRolls(rolls);
                     if (claimed.length) highlightClaimed(claimed);
@@ -818,12 +977,10 @@
         })();
 
         // ── BroadcastChannel listener ──
-        const channel = new BroadcastChannel('daggerdie-projector');
+        var channel = new BroadcastChannel('daggerdie-projector');
 
         channel.onmessage = function(event) {
-            const msg = event.data;
-
-            // Flash status dot on any message
+            var msg = event.data;
             statusDot.classList.add('connected');
 
             if (msg.type === 'clear') {
@@ -841,7 +998,6 @@
             }
 
             if (msg.type === 'update') {
-                // Full state update: rolls + claimed
                 clearAll();
                 highlightRolls(msg.rolls || []);
                 highlightClaimed(msg.claimed || []);
