@@ -453,6 +453,7 @@
             width: 100%;
         }
         #damage-confirm-modal-content,
+        #attack-confirm-modal-content,
         #critical-item-modal-content,
         #turn-summary-modal.open {
             animation: summary-overlay-in 0.25s ease-out;
@@ -611,6 +612,41 @@
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
+
+        /* Inventory swap modal */
+        .item-swap-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .item-swap-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 8px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.25);
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .item-swap-card:hover {
+            border-color: #e74c3c;
+            box-shadow: 0 0 12px rgba(231,76,60,0.4);
+            transform: scale(1.03);
+        }
+        .item-swap-card.swap-new-item {
+            border-color: rgba(254,202,87,0.5);
+            background: rgba(254,202,87,0.08);
+        }
+        .item-swap-card .swap-item-icon { width: 48px; height: 48px; }
+        .item-swap-card .swap-item-icon svg { width: 100%; height: 100%; }
+        .item-swap-card .swap-item-name { font-size: 0.85rem; font-weight: 700; text-align: center; }
+        .item-swap-card .swap-item-effect { font-size: 0.72rem; color: rgba(255,255,255,0.7); text-align: center; }
+        .item-swap-card .swap-item-slot-label { font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em; }
+        .item-swap-hint { font-size: 0.85rem; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; }
 
         /* Critical hit onscreen reaction */
         .critical-reaction {
@@ -1117,6 +1153,7 @@
         .dice-slot .hit-toggle {
             width: 100%;
             min-width: 70px;
+            min-height: 44px;
             font-size: 1.3rem;
             transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.15s;
         }
@@ -1954,9 +1991,14 @@
 
         .m3-logo {
             position: fixed; bottom: 10px; right: 10px; z-index: 50;
-            width: 36px; height: auto; pointer-events: none;
+            width: 36px; height: auto; pointer-events: auto; cursor: pointer;
         }
         @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
+        .d20-face { fill: #2a1f3d; stroke: #8a7fa8; stroke-width: 1.5; stroke-linejoin: round; }
+        .d20-face-center { fill: #3d2a5c; }
+        .d20-face-outer { fill: #1e1630; }
+        .d20-num { fill: #b0a8c8; font-family: serif; text-anchor: middle; dominant-baseline: central; }
+        .d20-num-center { fill: #c8bfe0; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -2092,26 +2134,21 @@
                             <span id="board-toggle-label">1 Board</span>
                         </button>
                     </div>
+                    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+                        <defs>
+                            <filter id="glow-odd" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="glow-even" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="glow-combined" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="glow-hit-odd" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur"/><feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="glow-hit-even" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur"/><feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="glow-hit-combined" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur"/><feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/><feComposite in="color" in2="blur" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        </defs>
+                    </svg>
                     <div class="targets-container" id="dual-boards">
                         <div class="target-wrapper">
                             <div class="target-label">Odd Numbers (1-19)</div>
                             <div class="target-image-container">
                                 <svg class="target-board-inline target-overlay" id="odd-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <filter id="glow-odd" x="-50%" y="-50%" width="200%" height="200%">
-                                            <feGaussianBlur stdDeviation="4" result="blur"/>
-                                            <feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/>
-                                            <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                            <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                        </filter>
-                                        <filter id="glow-hit-odd" x="-50%" y="-50%" width="200%" height="200%">
-                                            <feGaussianBlur stdDeviation="5" result="blur"/>
-                                            <feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/>
-                                            <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                            <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                        </filter>
-                                        <style>.d20-face{fill:#2a1f3d;stroke:#8a7fa8;stroke-width:1.5;stroke-linejoin:round}.d20-face-center{fill:#3d2a5c}.d20-face-outer{fill:#1e1630}.d20-num{fill:#b0a8c8;font-family:serif;text-anchor:middle;dominant-baseline:central}.d20-num-center{fill:#c8bfe0;font-weight:bold}</style>
-                                    </defs>
                                     <rect width="400" height="460" fill="#2d3748" rx="12"/>
                                     <g class="highlight-zone" data-number="15"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="25" y="260" font-size="28">15</text></g>
                                     <g class="highlight-zone" data-number="9"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="375" y="260" font-size="28">9</text></g>
@@ -2130,21 +2167,6 @@
                             <div class="target-label">Even Numbers (2-20)</div>
                             <div class="target-image-container">
                                 <svg class="target-board-inline target-overlay" id="even-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <filter id="glow-even" x="-50%" y="-50%" width="200%" height="200%">
-                                            <feGaussianBlur stdDeviation="4" result="blur"/>
-                                            <feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/>
-                                            <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                            <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                        </filter>
-                                        <filter id="glow-hit-even" x="-50%" y="-50%" width="200%" height="200%">
-                                            <feGaussianBlur stdDeviation="5" result="blur"/>
-                                            <feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/>
-                                            <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                            <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                        </filter>
-                                        <style>.d20-face{fill:#2a1f3d;stroke:#8a7fa8;stroke-width:1.5;stroke-linejoin:round}.d20-face-center{fill:#3d2a5c}.d20-face-outer{fill:#1e1630}.d20-num{fill:#b0a8c8;font-family:serif;text-anchor:middle;dominant-baseline:central}.d20-num-center{fill:#c8bfe0;font-weight:bold}</style>
-                                    </defs>
                                     <rect width="400" height="460" fill="#2d3748" rx="12"/>
                                     <g class="highlight-zone" data-number="12"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="25" y="260" font-size="28">12</text></g>
                                     <g class="highlight-zone" data-number="14"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="375" y="260" font-size="28">14</text></g>
@@ -2163,21 +2185,6 @@
                     <div class="combined-board-wrapper" id="combined-board" style="display:none;">
                         <div class="target-image-container combined-target-container">
                             <svg class="target-board-inline target-overlay" id="combined-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <filter id="glow-combined" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                                        <feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/>
-                                        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                        <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                    </filter>
-                                    <filter id="glow-hit-combined" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur stdDeviation="5" result="blur"/>
-                                        <feFlood flood-color="#22c55e" flood-opacity="0.9" result="color"/>
-                                        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
-                                        <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                    </filter>
-                                    <style>.d20-face{fill:#2a1f3d;stroke:#8a7fa8;stroke-width:1.5;stroke-linejoin:round}.d20-face-center{fill:#3d2a5c}.d20-face-outer{fill:#1e1630}.d20-num{fill:#b0a8c8;font-family:serif;text-anchor:middle;dominant-baseline:central}.d20-num-center{fill:#c8bfe0;font-weight:bold}</style>
-                                </defs>
                                 <rect width="400" height="460" fill="#2d3748" rx="12"/>
                                 <g class="highlight-zone" data-numbers="15,12"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="17" y="248" font-size="22">15</text><text class="d20-num" x="33" y="272" font-size="22">12</text></g>
                                 <g class="highlight-zone" data-numbers="9,14"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="367" y="248" font-size="22">9</text><text class="d20-num" x="383" y="272" font-size="22">14</text></g>
@@ -2264,6 +2271,11 @@
             </div>
             <p id="mod-nerf-hint" class="setting-hint">Take 125% damage for 1 turn after missing all throws.</p>
             <div class="option-row">
+                <input type="checkbox" id="mod-vampire-cb" aria-describedby="mod-vampire-hint">
+                <label for="mod-vampire-cb">Vampire</label>
+            </div>
+            <p id="mod-vampire-hint" class="setting-hint">Gain HP equal to the target's remaining HP when you deliver a killing blow.</p>
+            <div class="option-row">
                 <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
                 <label for="items-enabled-cb">Items</label>
             </div>
@@ -2329,6 +2341,19 @@
         </div>
     </div>
 
+    <!-- Attack confirmation modal -->
+    <div class="player-stats-modal-overlay" id="attack-confirm-modal" role="dialog" aria-label="Confirm attack">
+        <div class="player-stats-modal" id="attack-confirm-modal-content">
+            <div class="modal-eyebrow">Attack Confirm</div>
+            <h3 id="attack-confirm-title" style="color: #feca57;"></h3>
+            <div id="attack-confirm-detail"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="attack-confirm-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="attack-confirm-yes-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Critical item acquired modal -->
     <div class="player-stats-modal-overlay" id="critical-item-modal" role="dialog" aria-label="Item acquired">
         <div class="player-stats-modal" id="critical-item-modal-content">
@@ -2336,6 +2361,17 @@
             <h3 style="color: #feca57;">Item Acquired</h3>
             <div id="critical-item-display"></div>
             <button type="button" class="btn btn-primary" id="critical-item-dismiss-btn">Got it!</button>
+        </div>
+    </div>
+
+    <!-- Inventory swap modal -->
+    <div class="player-stats-modal-overlay" id="item-swap-modal" role="dialog" aria-label="Inventory full">
+        <div class="player-stats-modal" id="item-swap-modal-content">
+            <div class="modal-eyebrow">Inventory Full</div>
+            <h3 style="color: #feca57;">Choose an Item to Drop</h3>
+            <div id="item-swap-new-item"></div>
+            <p class="item-swap-hint">Tap an item to <strong>drop</strong> it and keep the other three.</p>
+            <div id="item-swap-grid" class="item-swap-grid"></div>
         </div>
     </div>
 
@@ -2431,6 +2467,7 @@
             damageDealtThisTurn: false,
             modBuffOnCritical: false,
             modNerfOnMiss: false,
+            modVampire: false,
             itemsEnabled: false,
             itemsStartWithRandom: false,
             itemUsePhase: false
@@ -2440,6 +2477,7 @@
         const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
 
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
+        const GAME_STATE_KEY = 'daggerdie_gameState';
 
         const BOT_SKILLS = {
             newb:    { min: 1,  max: 15, pct: 0.08,  dropPct: 0.35 },
@@ -2471,6 +2509,7 @@
 
         let botEndTurnTimerId = null;
         let turnSummaryModalTimerId = null;
+        let _lastPlayersPanelHtml = '';
 
         const settingsModal = document.getElementById('settings-modal');
         const settingsGearBtn = document.getElementById('settings-gear-btn');
@@ -2478,6 +2517,7 @@
         const customHpInput = document.getElementById('custom-hp-input');
         const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
+        const modVampireCb = document.getElementById('mod-vampire-cb');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
         const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
         const autoRollDiceCb = document.getElementById('auto-roll-dice-cb');
@@ -2494,6 +2534,7 @@
         persistentSettingsCb.addEventListener('change', applySettingsFromModal);
         modBuffOnCriticalCb.addEventListener('change', applySettingsFromModal);
         modNerfOnMissCb.addEventListener('change', applySettingsFromModal);
+        modVampireCb.addEventListener('change', applySettingsFromModal);
         if (autoRollDiceCb) autoRollDiceCb.addEventListener('change', applySettingsFromModal);
         if (autoDealDamageCb) autoDealDamageCb.addEventListener('change', applySettingsFromModal);
         if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.addEventListener('change', applySettingsFromModal);
@@ -2514,8 +2555,7 @@
         settingsGearBtn.addEventListener('click', () => {
             const readOnly = state.hasScoreBeenEntered;
             persistentSettingsCb.checked = isPersistentSettings();
-            const usePersistent = persistentSettingsCb.checked;
-            const useCustom = usePersistent && localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
+            const useCustom = localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
             useCustomHpCb.checked = useCustom;
             if (useCustom) {
                 const savedHp = localStorage.getItem(CUSTOM_HP_KEY);
@@ -2525,8 +2565,9 @@
             }
             useCustomHpCb.disabled = readOnly;
             customHpInput.disabled = readOnly || !useCustomHpCb.checked;
-            modBuffOnCriticalCb.checked = usePersistent ? (localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true') : false;
-            modNerfOnMissCb.checked = usePersistent ? (localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true') : false;
+            modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
+            modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+            modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
             if (itemsEnabledCb) itemsEnabledCb.checked = readOnly ? state.itemsEnabled : (localStorage.getItem(ITEMS_ENABLED_KEY) === 'true');
             if (itemsStartWithRandomCb) {
                 const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
@@ -2537,11 +2578,12 @@
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
-            if (itemsEnabledCb) { itemsEnabledCb.disabled = false; itemsEnabledCb.removeAttribute('disabled'); }
-            if (itemsStartWithRandomCb) { itemsStartWithRandomCb.disabled = false; itemsStartWithRandomCb.removeAttribute('disabled'); }
-            if (autoRollDiceCb) autoRollDiceCb.disabled = readOnly;
-            if (autoDealDamageCb) autoDealDamageCb.disabled = readOnly;
-            if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = readOnly;
+            modVampireCb.disabled = readOnly;
+            if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
+            if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
+            if (autoRollDiceCb) autoRollDiceCb.disabled = false;
+            if (autoDealDamageCb) autoDealDamageCb.disabled = false;
+            if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = false;
             if (settingsReadOnlyHint) settingsReadOnlyHint.style.display = readOnly ? 'block' : 'none';
             settingsModal.classList.add('open');
         });
@@ -2550,23 +2592,19 @@
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
             if (itemsStartWithRandomCb) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
-            if (persistentSettingsCb.checked) {
-                localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
-                localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
-                localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
-                if (useCustomHpCb.checked) {
-                    const val = customHpInput.value.trim();
-                    const n = val === '' ? NaN : parseInt(val, 10);
-                    if (!isNaN(n) && n >= 20 && n <= 999) {
-                        localStorage.setItem(CUSTOM_HP_KEY, String(n));
-                    }
+            localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
+            localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
+            localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked));
+            localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
+            if (useCustomHpCb.checked) {
+                const val = customHpInput.value.trim();
+                const n = val === '' ? NaN : parseInt(val, 10);
+                if (!isNaN(n) && n >= 20 && n <= 999) {
+                    localStorage.setItem(CUSTOM_HP_KEY, String(n));
                 } else {
                     localStorage.removeItem(CUSTOM_HP_KEY);
                 }
             } else {
-                localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
-                localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
-                localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
             state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
@@ -2579,17 +2617,16 @@
                 localStorage.setItem('daggerdie_autoAdvanceAfterDamage', String(autoAdvanceAfterDamageCb.checked));
                 state.autoAdvanceAfterDamage = autoAdvanceAfterDamageCb.checked;
             }
-            state.itemsEnabled = itemsEnabledCb ? itemsEnabledCb.checked : false;
             const wasStartWithRandom = state.itemsStartWithRandom;
             state.itemsStartWithRandom = itemsStartWithRandomCb ? itemsStartWithRandomCb.checked : false;
             if (wasStartWithRandom && !state.itemsStartWithRandom && state.players.length > 0) {
                 state.players.forEach(removeStartItemFromPlayer);
                 updatePlayersPanel();
-                if (state.damageClaimedPhase) enableTargetSelection();
+                if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             } else if (!wasStartWithRandom && state.itemsStartWithRandom && state.itemsEnabled && state.players.length > 0) {
                 state.players.forEach(givePlayerRandomStartItem);
                 updatePlayersPanel();
-                if (state.damageClaimedPhase) enableTargetSelection();
+                if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             }
             if (!state.hasScoreBeenEntered) {
                 if (useCustomHpCb.checked) {
@@ -2604,7 +2641,7 @@
                                 p.maxHp = n;
                             });
                             updatePlayersPanel();
-                            if (state.damageClaimedPhase) enableTargetSelection();
+                            if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
                         }
                     } else if (val !== '') {
                         alert('Please enter a value between 20 and 999.');
@@ -2618,16 +2655,18 @@
                             p.maxHp = defaultHp;
                         });
                         updatePlayersPanel();
-                        if (state.damageClaimedPhase) enableTargetSelection();
+                        if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
                     }
                 }
             }
             state.modBuffOnCritical = modBuffOnCriticalCb.checked;
             state.modNerfOnMiss = modNerfOnMissCb.checked;
+            state.modVampire = modVampireCb.checked;
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(state.modNerfOnMiss));
+                localStorage.setItem(MOD_VAMPIRE_KEY, String(state.modVampire));
                 if (useCustomHpCb.checked) {
                     localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
                     localStorage.setItem(CUSTOM_HP_KEY, String(customHpInput.value.trim()));
@@ -2637,6 +2676,7 @@
             } else {
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
+                localStorage.removeItem(MOD_VAMPIRE_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -2730,6 +2770,7 @@
         const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
         const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
         const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
+        const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
         const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
@@ -2739,21 +2780,70 @@
         }
 
         function applySettingsForNewGame() {
-            if (isPersistentSettings()) {
-                state.modBuffOnCritical = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
-                state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
-                state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
-                state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
-            } else {
-                state.modBuffOnCritical = false;
-                state.modNerfOnMiss = false;
-                state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
-                state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+            state.modBuffOnCritical = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
+            state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+            state.modVampire = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
+            state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
+            state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+            state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
+            state.autoAdvanceAfterDamage = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
+        }
+
+        function saveGameState() {
+            if (state.phase !== 'playing' && state.phase !== 'turnOrder') return;
+            try {
+                sessionStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error('Failed to save game state:', e);
             }
         }
 
+        function clearSavedGameState() {
+            sessionStorage.removeItem(GAME_STATE_KEY);
+        }
+
+        function restoreGameState(snapshot) {
+            Object.assign(state, snapshot);
+            applySettingsForNewGame();
+            clearHpFeedbackSnapshot();
+
+            if (state.phase === 'playing') {
+                turnOrderScreen.style.display = 'none';
+                winnerScreen.style.display = 'none';
+                gameScreen.style.display = 'block';
+                rebuildGameLedger();
+                updatePlayersPanel();
+                updateCurrentPlayerDisplay();
+                updateGameUI();
+            } else if (state.phase === 'turnOrder') {
+                gameScreen.style.display = 'none';
+                winnerScreen.style.display = 'none';
+                showTurnOrderScreen();
+            } else if (state.phase === 'finished') {
+                clearSavedGameState();
+                const alivePlayers = state.players.filter(p => !p.eliminated);
+                showWinner(alivePlayers.length === 1 ? alivePlayers[0] : null);
+            }
+        }
+
+        function rebuildGameLedger() {
+            gameLogEntries.innerHTML = '';
+            if (!state.gameLog || state.gameLog.length === 0) {
+                gameLogEntries.innerHTML = '<div class="ledger-empty">No entries yet.</div>';
+                return;
+            }
+            state.gameLog.forEach(entry => {
+                const el = document.createElement('div');
+                el.className = `log-entry log-${entry.type || 'info'}`;
+                el.textContent = entry.message;
+                gameLogEntries.insertBefore(el, gameLogEntries.firstChild);
+            });
+            ledgerUnread = 0;
+            ledgerBadge.textContent = '';
+        }
+
         function getDefaultHp(playerCount) {
-            if (isPersistentSettings() && localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true') {
+            if (localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true') {
                 const custom = localStorage.getItem(CUSTOM_HP_KEY);
                 if (custom !== null && custom !== '') {
                     const n = parseInt(custom, 10);
@@ -2762,7 +2852,7 @@
             }
             if (playerCount <= 2) return 40;
             if (playerCount <= 4) return 50;
-            return 60; // 5-6 players
+            return 60;
         }
 
         function showTurnOrderScreen() {
@@ -2806,13 +2896,14 @@
             state.players.sort((a, b) => b.turnOrderRoll - a.turnOrderRoll);
 
             const rollsDiv = document.getElementById('turn-order-rolls');
-            const tieMessage = document.createElement('p');
-            tieMessage.id = 'tie-reroll-message';
-            tieMessage.style.cssText = 'color: #feca57; margin: 15px 0; font-weight: bold;';
-            tieMessage.style.display = 'none';
-            if (!document.getElementById('tie-reroll-message')) {
+            let tieMessage = document.getElementById('tie-reroll-message');
+            if (!tieMessage) {
+                tieMessage = document.createElement('p');
+                tieMessage.id = 'tie-reroll-message';
+                tieMessage.style.cssText = 'color: #feca57; margin: 15px 0; font-weight: bold;';
                 rollsDiv.parentNode.insertBefore(tieMessage, rollsDiv.nextSibling);
             }
+            tieMessage.style.display = 'none';
 
             function updateTurnOrderDisplay() {
                 rollsDiv.innerHTML = state.players.map((p, idx) => `
@@ -2917,16 +3008,31 @@
             state.dropsThisTurnLogIndices = [];
             state.droppedDiceIndices = [];
             state.damageDealtThisTurn = false;
-            state.itemUsesThisTurn = 0;
             updateGameUI();
         });
 
         (function initFromCharSelect() {
-            const saved = sessionStorage.getItem(PLAYERS_SETUP_KEY);
-            if (!saved) {
+            const freshSetup = sessionStorage.getItem(PLAYERS_SETUP_KEY);
+            const savedGame = sessionStorage.getItem(GAME_STATE_KEY);
+
+            if (savedGame && !freshSetup) {
+                try {
+                    restoreGameState(JSON.parse(savedGame));
+                    sessionStorage.removeItem(GAME_STATE_KEY);
+                    return;
+                } catch (e) {
+                    console.error('Failed to restore game state:', e);
+                    sessionStorage.removeItem(GAME_STATE_KEY);
+                }
+            } else if (savedGame) {
+                sessionStorage.removeItem(GAME_STATE_KEY);
+            }
+
+            if (!freshSetup) {
                 window.location.href = 'charselect.html';
                 return;
             }
+            const saved = freshSetup;
             let payload;
             try {
                 payload = JSON.parse(saved);
@@ -3134,15 +3240,16 @@
                 setTimeout(() => runBotTurn(), 500);
             } else if (localStorage.getItem('daggerdie_autoRollDice') === 'true') {
                 rollDiceBtn.classList.add('hidden');
-                setTimeout(() => rollDiceBtn.click(), 300);
+                setTimeout(() => performDiceRoll(), 300);
             } else {
                 rollDiceBtn.classList.remove('hidden');
             }
+
+            saveGameState();
         }
 
         function runBotTurn() {
-            const MAX_SCORES = 3;
-            rollDiceBtn.click();
+            performDiceRoll();
             setTimeout(() => {
                 const current = getCurrentPlayer();
                 if (!current.isBot || !state.hasRolled) return;
@@ -3152,7 +3259,7 @@
                 state.hits = [];
                 let botEliminated = false;
                 for (let idx = 0; idx < state.currentRoll.length; idx++) {
-                    if (state.hits.length + state.dropsThisTurn >= MAX_SCORES) break;
+                    if (state.hits.length + state.dropsThisTurn >= MAX_SCORES_PER_TURN) break;
                     if (Math.random() < hitChance) {
                         state.hits.push({ roll: state.currentRoll[idx], idx });
                     } else if (Math.random() < dropChance) {
@@ -3185,27 +3292,26 @@
 
                 state.totalDamage = getHitsTotalDamage(state.hits);
                 if (state.totalDamage > 0) {
-                    if (state.hits.length === MAX_SCORES) {
+                    if (state.hits.length === MAX_SCORES_PER_TURN) {
                         current.criticals = (current.criticals || 0) + 1;
                         if (state.modBuffOnCritical) current.buffActive = true;
                         if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
                             compactInventory(current);
                             const slotIdx = (current.inventory || [null, null, null]).findIndex(s => s === null);
-                            if (slotIdx >= 0) {
-                                const d12Roll = Math.floor(Math.random() * 12) + 1;
-                                const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
-                                if (item) {
-                                    if (!current.inventory) current.inventory = [null, null, null];
-                                    if (!current.inventoryLocked) current.inventoryLocked = [false, false, false];
-                                    current.inventory[slotIdx] = item.id;
-                                    current.inventoryLocked[slotIdx] = true;
-                                    trackItemAcquired(current, item.id);
-                                    addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
-                                } else {
-                                    addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
-                                }
+                            const d12Roll = Math.floor(Math.random() * 12) + 1;
+                            const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                            if (item && slotIdx >= 0) {
+                                if (!current.inventory) current.inventory = [null, null, null];
+                                if (!current.inventoryLocked) current.inventoryLocked = [false, false, false];
+                                current.inventory[slotIdx] = item.id;
+                                current.inventoryLocked[slotIdx] = true;
+                                trackItemAcquired(current, item.id);
+                                addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
+                            } else if (item && slotIdx < 0) {
+                                addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}! (inventory full)`, 'info');
+                                botAutoSwapItem(current, item);
                             } else {
-                                addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! (inventory full)`, 'info');
+                                addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
                             }
                         } else {
                             addLogEntry(`${current.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
@@ -3339,7 +3445,7 @@
 
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
-            playersPanel.innerHTML = state.players.map(p => `
+            const newHtml = state.players.map(p => `
                 <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.freezeActive ? 'frozen' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
                      data-player="${p.id}">
                     <button type="button" class="player-card-stats-btn" data-player="${p.id}" aria-label="Stats and drops">
@@ -3357,6 +3463,10 @@
                     ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '">' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
                 </div>
             `).join('');
+            if (newHtml !== _lastPlayersPanelHtml) {
+                playersPanel.innerHTML = newHtml;
+                _lastPlayersPanelHtml = newHtml;
+            }
             state.players.forEach(p => {
                 const prevHp = previousHpByPlayerId[p.id];
                 if (typeof prevHp === 'number' && prevHp !== p.hp) {
@@ -3376,7 +3486,7 @@
             currentPlayerNameEl.style.color = current.color.hex;
         }
 
-        rollDiceBtn.addEventListener('click', async () => {
+        async function performDiceRoll() {
             if (state.hasRolled) return;
 
             rollDiceBtn.disabled = true;
@@ -3419,7 +3529,9 @@
             current.totalRolled = (current.totalRolled || 0) + state.currentRoll.reduce((s, v) => s + v, 0);
             current.totalThrows = (current.totalThrows || 0) + 3;
             showHitRecorder();
-        });
+        }
+
+        rollDiceBtn.addEventListener('click', () => performDiceRoll());
 
         function highlightTargets(rolls) {
             clearHighlights();
@@ -3534,15 +3646,15 @@
                 if (droppedSet.has(idx)) {
                     btn.classList.add('dropped');
                     btn.textContent = 'DROP \u2715';
-                    if (dropBtn) dropBtn.style.display = 'none';
+                    if (dropBtn) dropBtn.style.visibility = 'hidden';
                 } else if (hitIdxSet.has(idx)) {
                     btn.classList.add('hit');
                     btn.style.background = '#2ecc71';
                     btn.textContent = roll;
-                    if (dropBtn) dropBtn.style.display = '';
+                    if (dropBtn) dropBtn.style.visibility = '';
                 } else {
                     btn.textContent = roll;
-                    if (dropBtn) dropBtn.style.display = '';
+                    if (dropBtn) dropBtn.style.visibility = '';
                 }
             });
 
@@ -3571,8 +3683,6 @@
         function showHitRecorder(initialHits) {
             const currentPlayer = getCurrentPlayer();
 
-            state.hits = initialHits && initialHits.length > 0 ? initialHits.slice() : [];
-
             const maxDiceScores = Math.max(0, MAX_SCORES_PER_TURN - state.dropsThisTurn);
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice(0, maxDiceScores) : [];
 
@@ -3592,7 +3702,7 @@
                             <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''} ${droppedSet.has(idx) ? 'dropped' : ''}" data-roll="${roll}" data-idx="${idx}" style="${hitIdxSet.has(idx) ? 'background: #2ecc71;' : ''}">
                                 ${droppedSet.has(idx) ? 'DROP \u2715' : roll}
                             </button>
-                            <button class="drop-toggle" data-idx="${idx}" type="button" ${droppedSet.has(idx) ? 'style="display:none;"' : ''}>drop</button>
+                            <button class="drop-toggle" data-idx="${idx}" type="button" ${droppedSet.has(idx) ? 'style="visibility:hidden;"' : ''}>drop</button>
                         </div>
                     `).join('')}
                 </div>
@@ -3653,6 +3763,7 @@
                         state.totalDamage = getHitsTotalDamage(state.hits);
                         const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
                         let acquiredItem = null;
+                        let swapItem = null;
                         let d12Roll = null;
                         if (isCritical) {
                             currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
@@ -3660,22 +3771,21 @@
                             if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
                                 compactInventory(currentPlayer);
                                 const slotIdx = (currentPlayer.inventory || [null,null,null]).findIndex(s => s === null);
-                                if (slotIdx >= 0) {
-                                    d12Roll = Math.floor(Math.random() * 12) + 1;
-                                    const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
-                                    if (item) {
-                                        if (!currentPlayer.inventory) currentPlayer.inventory = [null, null, null];
+                                d12Roll = Math.floor(Math.random() * 12) + 1;
+                                const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                                if (item && slotIdx >= 0) {
+                                    if (!currentPlayer.inventory) currentPlayer.inventory = [null, null, null];
                                     if (!currentPlayer.inventoryLocked) currentPlayer.inventoryLocked = [false, false, false];
-                                        currentPlayer.inventory[slotIdx] = item.id;
+                                    currentPlayer.inventory[slotIdx] = item.id;
                                     currentPlayer.inventoryLocked[slotIdx] = true;
-                                        trackItemAcquired(currentPlayer, item.id);
-                                        acquiredItem = item;
-                                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
-                                    } else {
-                                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
-                                    }
+                                    trackItemAcquired(currentPlayer, item.id);
+                                    acquiredItem = item;
+                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
+                                } else if (item && slotIdx < 0) {
+                                    swapItem = item;
+                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}! (inventory full)`, 'info');
                                 } else {
-                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! (inventory full)`, 'info');
+                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
                                 }
                             } else {
                                 addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
@@ -3684,12 +3794,17 @@
                         } else {
                             addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')})`, 'info');
                         }
-                        // Reflect critical rewards/buffs in UI immediately after confirm.
                         updatePlayersPanel();
                         const proceedAfterCritical = () => {
                             showTargetSelection();
                         };
-                        if (acquiredItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
+                        if (swapItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
+                            showItemSwapModal(currentPlayer, swapItem, d12Roll, () => { updatePlayersPanel(); proceedAfterCritical(); });
+                        } else if (swapItem && (currentPlayer.isBot || state.autoDealDamage)) {
+                            botAutoSwapItem(currentPlayer, swapItem);
+                            updatePlayersPanel();
+                            proceedAfterCritical();
+                        } else if (acquiredItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
                             showCriticalItemModal(d12Roll, acquiredItem, proceedAfterCritical);
                         } else {
                             proceedAfterCritical();
@@ -3735,6 +3850,109 @@
         criticalItemDismissBtn.addEventListener('click', closeCriticalItemModal);
         criticalItemModal.addEventListener('click', (e) => { if (e.target === criticalItemModal) closeCriticalItemModal(); });
 
+        const itemSwapModal = document.getElementById('item-swap-modal');
+        const itemSwapGrid = document.getElementById('item-swap-grid');
+        const itemSwapNewItem = document.getElementById('item-swap-new-item');
+        let itemSwapCallback = null;
+
+        function showItemSwapModal(player, newItem, d12Roll, onComplete) {
+            const inv = player.inventory || [null, null, null];
+            const lock = player.inventoryLocked || [false, false, false];
+
+            itemSwapNewItem.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:4px;">
+                    <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
+                    <div class="item-use-icon-wrap" style="--accent:${newItem.accent}">${newItem.svg}</div>
+                    <div class="critical-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</div>
+                    <div class="critical-item-effect">${newItem.effect}</div>
+                    <div class="critical-item-type">${newItem.type}</div>
+                </div>`;
+
+            const cards = [];
+            for (let i = 0; i < 3; i++) {
+                const itemId = inv[i];
+                const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
+                if (!item) continue;
+                cards.push(`
+                    <button type="button" class="item-swap-card" data-swap-action="drop-slot" data-slot="${i}">
+                        <span class="swap-item-slot-label">Slot ${i + 1}${lock[i] ? ' (locked)' : ''}</span>
+                        <div class="swap-item-icon" style="--accent:${item.accent}">${item.svg}</div>
+                        <span class="swap-item-name" style="color:var(--accent,${item.accent});">${item.name}</span>
+                        <span class="swap-item-effect">${item.effect}</span>
+                    </button>`);
+            }
+            cards.push(`
+                <button type="button" class="item-swap-card swap-new-item" data-swap-action="discard-new">
+                    <span class="swap-item-slot-label">New item</span>
+                    <div class="swap-item-icon" style="--accent:${newItem.accent}">${newItem.svg}</div>
+                    <span class="swap-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</span>
+                    <span class="swap-item-effect">${newItem.effect}</span>
+                </button>`);
+            itemSwapGrid.innerHTML = cards.join('');
+
+            itemSwapCallback = onComplete;
+            itemSwapGrid.querySelectorAll('.item-swap-card').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.swapAction;
+                    if (action === 'discard-new') {
+                        addLogEntry(`${player.name} discarded ${newItem.name} (inventory full).`, 'info');
+                    } else {
+                        const slot = parseInt(btn.dataset.slot, 10);
+                        const droppedId = inv[slot];
+                        const droppedItem = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[droppedId] : null;
+                        player.inventory[slot] = newItem.id;
+                        player.inventoryLocked[slot] = true;
+                        trackItemAcquired(player, newItem.id);
+                        addLogEntry(`${player.name} swapped ${droppedItem ? droppedItem.name : 'an item'} for ${newItem.name}!`, 'info');
+                    }
+                    closeItemSwapModal();
+                });
+            });
+
+            itemSwapModal.classList.add('open');
+        }
+
+        function closeItemSwapModal() {
+            itemSwapModal.classList.remove('open');
+            if (itemSwapCallback) {
+                const cb = itemSwapCallback;
+                itemSwapCallback = null;
+                cb();
+            }
+        }
+
+        function botAutoSwapItem(player, newItem) {
+            const inv = player.inventory || [null, null, null];
+            const lock = player.inventoryLocked || [false, false, false];
+            const ITEM_BY_ID = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID : {};
+            const VALUE_ORDER = ['ticket', 'red-rose', 'medkit', 'feather', 'scroll', 'metal-fragment', 'toy-rocket', 'tigers-eye', 'potion', 'freeze', 'monkey-paw', 'orb'];
+            function itemValue(id) {
+                const idx = VALUE_ORDER.indexOf(id);
+                return idx >= 0 ? idx : 0;
+            }
+            let worstSlot = -1, worstVal = Infinity;
+            for (let i = 0; i < 3; i++) {
+                if (lock[i]) continue;
+                const v = itemValue(inv[i]);
+                if (v < worstVal) { worstVal = v; worstSlot = i; }
+            }
+            if (worstSlot < 0) {
+                for (let i = 0; i < 3; i++) {
+                    const v = itemValue(inv[i]);
+                    if (v < worstVal) { worstVal = v; worstSlot = i; }
+                }
+            }
+            if (worstSlot >= 0 && itemValue(newItem.id) > worstVal) {
+                const droppedItem = ITEM_BY_ID[inv[worstSlot]];
+                player.inventory[worstSlot] = newItem.id;
+                player.inventoryLocked[worstSlot] = true;
+                trackItemAcquired(player, newItem.id);
+                addLogEntry(`${player.name} swapped ${droppedItem ? droppedItem.name : 'an item'} for ${newItem.name}!`, 'info');
+            } else {
+                addLogEntry(`${player.name} discarded ${newItem.name} (inventory full).`, 'info');
+            }
+        }
+
         const damageConfirmModal = document.getElementById('damage-confirm-modal');
         const damageConfirmRolls = document.getElementById('damage-confirm-rolls');
         const damageConfirmDetail = document.getElementById('damage-confirm-detail');
@@ -3766,6 +3984,50 @@
         });
         damageConfirmEditBtn.addEventListener('click', closeDamageConfirmModal);
         damageConfirmModal.addEventListener('click', (e) => { if (e.target === damageConfirmModal) closeDamageConfirmModal(); });
+
+        const attackConfirmModal = document.getElementById('attack-confirm-modal');
+        const attackConfirmTitle = document.getElementById('attack-confirm-title');
+        const attackConfirmDetail = document.getElementById('attack-confirm-detail');
+        const attackConfirmYesBtn = document.getElementById('attack-confirm-yes-btn');
+        const attackConfirmCancelBtn = document.getElementById('attack-confirm-cancel-btn');
+        let attackConfirmCallback = null;
+
+        function showAttackConfirmModal(hitValue, targetName, effectiveDamage, modLabel, onConfirm) {
+            attackConfirmTitle.innerHTML = `Deal <span style="font-size:1.4rem;">${hitValue}</span> to ${targetName}?`;
+            if (effectiveDamage !== hitValue && modLabel) {
+                const cleanLabel = modLabel.replace(/^, /, '');
+                attackConfirmDetail.innerHTML = `
+                    <div style="background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); border-radius: 10px; padding: 10px 14px; margin: 10px 0 4px; text-align: center;">
+                        <span style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; opacity: 0.7;">${cleanLabel} active</span>
+                        <div style="font-size: 1.3rem; font-weight: bold; color: #ff6b6b; margin-top: 2px;">Actual Damage: ${effectiveDamage}</div>
+                    </div>`;
+            } else {
+                attackConfirmDetail.innerHTML = '';
+            }
+            attackConfirmCallback = onConfirm;
+            attackConfirmModal.classList.add('open');
+        }
+
+        function closeAttackConfirmModal() {
+            attackConfirmModal.classList.remove('open');
+            attackConfirmCallback = null;
+        }
+
+        attackConfirmYesBtn.addEventListener('click', () => {
+            const cb = attackConfirmCallback;
+            closeAttackConfirmModal();
+            if (cb) cb();
+        });
+        attackConfirmCancelBtn.addEventListener('click', () => {
+            closeAttackConfirmModal();
+            enableTargetSelection();
+        });
+        attackConfirmModal.addEventListener('click', (e) => {
+            if (e.target === attackConfirmModal) {
+                closeAttackConfirmModal();
+                enableTargetSelection();
+            }
+        });
 
         function showItemUsePhase() {
             state.itemUsePhase = true;
@@ -3802,6 +4064,8 @@
                 damage = 0;
                 modNote = ' (shield: blocked!)';
                 modLabel = ', shield';
+                targetPlayer.shieldActive = false;
+                targetPlayer.shieldTurns = 0;
             } else if (state.modBuffOnCritical && targetPlayer.buffActive) {
                 damage = Math.ceil(roll / 2);
                 modNote = ' (buff: half)';
@@ -3833,6 +4097,7 @@
                 const targetPlayer = aliveOpponents[Math.floor(Math.random() * aliveOpponents.length)];
                 const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
                 state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
+                const targetHpBefore = targetPlayer.hp;
                 targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
                 state.hasScoreBeenEntered = true;
                 currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
@@ -3844,6 +4109,11 @@
                     const rect = card ? card.getBoundingClientRect() : null;
                     targetPlayer.eliminated = true;
                     addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
+                    if (state.modVampire && targetHpBefore > 0) {
+                        const vampireHeal = targetHpBefore;
+                        currentPlayer.hp = Math.min(currentPlayer.maxHp, currentPlayer.hp + vampireHeal);
+                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage');
+                    }
                     updatePlayersPanel();
                     spawnDeathGhost(rect);
                 } else {
@@ -3947,43 +4217,52 @@
             const card = e.currentTarget;
             const playerId = parseInt(card.dataset.player);
             const targetPlayer = state.players.find(p => p.id === playerId);
+            if (!targetPlayer || targetPlayer.eliminated) return;
             const currentPlayer = getCurrentPlayer();
             const selectedHitIdx = state.selectedHitIdx;
             if (selectedHitIdx === null || !state.remainingHitIndices.includes(selectedHitIdx)) return;
             const currentHit = state.hits[selectedHitIdx];
             const currentHitValue = getHitEffectiveRoll(currentHit);
-            state.damageDealtThisTurn = true;
             const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
 
             disableTargetSelection();
 
-            state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
-            targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
-            state.hasScoreBeenEntered = true;
-            currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
-            addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
-            state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
-            if (damage > 0) showDamageImpact(targetPlayer.id, damage, currentPlayer.name, currentPlayer.color.hex);
+            showAttackConfirmModal(currentHitValue, targetPlayer.name, damage, modLabel, () => {
+                state.damageDealtThisTurn = true;
+                state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
+                const targetHpBefore = targetPlayer.hp;
+                targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
+                state.hasScoreBeenEntered = true;
+                currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
+                addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
+                state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
+                if (damage > 0) showDamageImpact(targetPlayer.id, damage, currentPlayer.name, currentPlayer.color.hex);
 
-            if (targetPlayer.hp <= 0) {
-                const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
-                const rect = card ? card.getBoundingClientRect() : null;
-                targetPlayer.eliminated = true;
-                addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
-                updatePlayersPanel();
-                spawnDeathGhost(rect);
-            } else {
-                updatePlayersPanel();
-            }
-            checkWinCondition();
+                if (targetPlayer.hp <= 0) {
+                    const card = document.querySelector(`.player-card[data-player="${targetPlayer.id}"]`);
+                    const rect = card ? card.getBoundingClientRect() : null;
+                    targetPlayer.eliminated = true;
+                    addLogEntry(`${targetPlayer.name} has been eliminated!`, 'info');
+                    if (state.modVampire && targetHpBefore > 0) {
+                        const vampireHeal = targetHpBefore;
+                        currentPlayer.hp = Math.min(currentPlayer.maxHp, currentPlayer.hp + vampireHeal);
+                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage');
+                    }
+                    updatePlayersPanel();
+                    spawnDeathGhost(rect);
+                } else {
+                    updatePlayersPanel();
+                }
+                checkWinCondition();
 
-            state.remainingHitIndices = state.remainingHitIndices.filter(idx => idx !== selectedHitIdx);
-            state.selectedHitIdx = state.remainingHitIndices.length > 0 ? state.remainingHitIndices[0] : null;
-            state.currentHitIndex = state.hits.length - state.remainingHitIndices.length;
+                state.remainingHitIndices = state.remainingHitIndices.filter(idx => idx !== selectedHitIdx);
+                state.selectedHitIdx = state.remainingHitIndices.length > 0 ? state.remainingHitIndices[0] : null;
+                state.currentHitIndex = state.hits.length - state.remainingHitIndices.length;
 
-            if (state.phase === 'playing') {
-                showNextHitToAssign();
-            }
+                if (state.phase === 'playing') {
+                    showNextHitToAssign();
+                }
+            });
         }
 
         function showTurnSummaryModal(titleHtml, bodyHtml, onDismiss) {
@@ -4055,7 +4334,6 @@
                 current.freeDropsCount = Math.max(0, (current.freeDropsCount || 0) - 1);
                 if (current.freeDropsCount === 0) current.freeDropsActive = false;
             }
-            state.hasScoreBeenEntered = true;
             state.dropsThisTurn++;
             state.droppedDiceIndices.push(dieIdx);
             addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
@@ -4086,16 +4364,17 @@
             }
         }
 
-        function undoLastDrop() {
+        function undoDropAtPosition(pos) {
             const current = getCurrentPlayer();
             if (!current) return false;
             if (state.damageDealtThisTurn || state.dropsThisTurnLogIndices.length === 0) return false;
-            const logIndex = state.dropsThisTurnLogIndices.pop();
+            if (pos < 0 || pos >= state.dropsThisTurnLogIndices.length) return false;
+            const logIndex = state.dropsThisTurnLogIndices[pos];
             const logEntry = state.gameLog[logIndex];
             if (!logEntry || logEntry.type !== 'damage' || !logEntry.message.includes('dropped a knife') || !logEntry.message.includes(current.name)) {
-                state.dropsThisTurnLogIndices.push(logIndex);
                 return false;
             }
+            state.dropsThisTurnLogIndices.splice(pos, 1);
             const domIndex = state.gameLog.length - 1 - logIndex;
             if (gameLogEntries.children[domIndex]) gameLogEntries.children[domIndex].remove();
             state.gameLog.splice(logIndex, 1);
@@ -4111,7 +4390,7 @@
                 current.freeDropsActive = true;
             }
             state.dropsThisTurn = Math.max(0, state.dropsThisTurn - 1);
-            state.droppedDiceIndices.pop();
+            state.droppedDiceIndices.splice(pos, 1);
             state.lastDroppedKnifeLogIndex = state.dropsThisTurnLogIndices.length > 0 ? state.dropsThisTurnLogIndices[state.dropsThisTurnLogIndices.length - 1] : undefined;
             updatePlayersPanel();
             syncHitRecorderUI();
@@ -4120,8 +4399,9 @@
         }
 
         function undoDropForDie(dieIdx) {
-            if (!state.droppedDiceIndices.includes(dieIdx)) return false;
-            return undoLastDrop();
+            const pos = state.droppedDiceIndices.indexOf(dieIdx);
+            if (pos === -1) return false;
+            return undoDropAtPosition(pos);
         }
 
         const playerStatsModal = document.getElementById('player-stats-modal');
@@ -4316,15 +4596,32 @@
                 target.hp = Math.min(target.maxHp, target.hp + immediateRegen);
                 target.regenRemaining = 10;
                 target.regenTurns = 2;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — +${immediateRegen} HP now, Regen +10 HP over 2 turns!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Regen +15 HP (+${immediateRegen} now, +5/turn for 2 turns)!`, 'info');
             } else if (item.id === 'orb') {
                 target.eliminated = false;
-                target.hp = 20;
-                addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with 20 HP!`, 'info');
+                const reviveHp = Math.ceil(target.maxHp * 0.4);
+                target.hp = reviveHp;
+                target.buffActive = false;
+                target.nerfActive = false;
+                target.shieldActive = false;
+                target.shieldTurns = 0;
+                target.focusActive = false;
+                target.focusBonus = 0;
+                target.freezeActive = false;
+                target.freeDropsActive = false;
+                target.freeDropsCount = 0;
+                target.aimActive = false;
+                target.aimCalledZone = null;
+                target.aimBonus = 0;
+                target.regenRemaining = 0;
+                target.regenTurns = 0;
+                target.poisonRemaining = 0;
+                target.poisonTurns = 0;
+                addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with ${reviveHp} HP (status cleared)!`, 'info');
             } else if (item.id === 'metal-fragment') {
                 target.shieldActive = true;
                 target.shieldTurns = 1;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Shield (immune for 1 full turn cycle)!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Shield (immune to next attack)!`, 'info');
             } else if (item.id === 'tigers-eye') {
                 target.focusActive = true;
                 target.focusBonus = 5;
@@ -4593,7 +4890,7 @@
             if (playerStatsModalPlayerId === null) return;
             const current = getCurrentPlayer();
             if (current.id !== playerStatsModalPlayerId) return;
-            if (undoLastDrop()) {
+            if (state.droppedDiceIndices.length > 0 && undoDropAtPosition(state.droppedDiceIndices.length - 1)) {
                 openPlayerStatsModal(playerStatsModalPlayerId);
             }
         });
@@ -4658,10 +4955,6 @@
             if (nextPlayer) {
                 nextPlayer.buffActive = false;
                 nextPlayer.nerfActive = false;
-                if ((nextPlayer.shieldTurns || 0) > 0) {
-                    nextPlayer.shieldTurns--;
-                    if (nextPlayer.shieldTurns <= 0) nextPlayer.shieldActive = false;
-                }
                 if (nextPlayer.regenRemaining > 0 && nextPlayer.regenTurns > 0) {
                     const heal = Math.min(5, nextPlayer.regenRemaining);
                     nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + heal);
@@ -4710,9 +5003,11 @@
             const alivePlayers = getAlivePlayers();
             if (alivePlayers.length === 1) {
                 state.phase = 'finished';
+                clearSavedGameState();
                 showWinner(alivePlayers[0]);
             } else if (alivePlayers.length === 0) {
                 state.phase = 'finished';
+                clearSavedGameState();
                 showWinner(null);
             }
         }
@@ -4998,9 +5293,22 @@ ${itemRows}
         }
 
                 function playAgain() {
+            clearSavedGameState();
             if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
             if (turnSummaryModalTimerId) { clearTimeout(turnSummaryModalTimerId); turnSummaryModalTimerId = null; }
             document.getElementById('turn-summary-modal')?.classList.remove('open');
+            document.getElementById('settings-modal')?.classList.remove('open');
+            document.getElementById('player-stats-modal')?.classList.remove('open');
+            document.getElementById('item-use-modal')?.classList.remove('open');
+            document.getElementById('damage-confirm-modal')?.classList.remove('open');
+            document.getElementById('critical-item-modal')?.classList.remove('open');
+            document.getElementById('item-swap-modal')?.classList.remove('open');
+            document.getElementById('game-ledger-modal')?.classList.remove('open');
+            criticalItemProceedCallback = null;
+            itemSwapCallback = null;
+            damageConfirmCallback = null;
+            itemUseContext = null;
+            playerStatsModalPlayerId = null;
             applySettingsForNewGame();
             const defaultHp = getDefaultHp(state.players.length);
             state.players.forEach(p => {
@@ -5017,6 +5325,17 @@ ${itemRows}
                 p.aimActive = false;
                 p.aimCalledZone = null;
                 p.aimBonus = 0;
+                p.shieldActive = false;
+                p.shieldTurns = 0;
+                p.focusActive = false;
+                p.focusBonus = 0;
+                p.freezeActive = false;
+                p.regenRemaining = 0;
+                p.regenTurns = 0;
+                p.poisonRemaining = 0;
+                p.poisonTurns = 0;
+                p.freeDropsActive = false;
+                p.freeDropsCount = 0;
                 p.inventory = [null, null, null];
                 p.inventoryLocked = [false, false, false];
                 p.itemStats = { acquired: 0, used: 0, acquiredById: {}, usedById: {} };
@@ -5032,10 +5351,12 @@ ${itemRows}
             state.hasRolled = false;
             state.hasAttacked = false;
             state.damageClaimedPhase = false;
+            state.itemUsePhase = false;
             state.currentHitIndex = 0;
             state.remainingHitIndices = [];
             state.selectedHitIdx = null;
             state.attackLog = [];
+            state.attackAssignments = [];
             state.gameLog = [];
             state.hasScoreBeenEntered = false;
             state.itemUsesThisTurn = 0;
@@ -5073,12 +5394,60 @@ ${itemRows}
             ledgerBadge.textContent = '';
         }
 
+        function flushSettingsIfNotPersistent() {
+            if (!isPersistentSettings()) {
+                [
+                    'daggerdie_autoRollTurnOrder',
+                    'daggerdie_autoBeginGame',
+                    'daggerdie_autoRollDice',
+                    'daggerdie_autoDealDamage',
+                    'daggerdie_autoAdvanceAfterDamage',
+                    USE_CUSTOM_HP_KEY,
+                    CUSTOM_HP_KEY,
+                    MOD_BUFF_ON_CRITICAL_KEY,
+                    MOD_NERF_ON_MISS_KEY,
+                    MOD_VAMPIRE_KEY,
+                    ITEMS_ENABLED_KEY,
+                    ITEMS_START_WITH_RANDOM_KEY,
+                    'daggerdie_botsEnabled'
+                ].forEach(k => localStorage.removeItem(k));
+            }
+        }
+
         document.getElementById('play-again-btn').addEventListener('click', playAgain);
-        document.getElementById('finished-btn').addEventListener('click', () => { window.location.href = 'startgame.html'; });
+        document.getElementById('finished-btn').addEventListener('click', () => {
+            clearSavedGameState();
+            flushSettingsIfNotPersistent();
+            window.location.href = 'startgame.html';
+        });
+
+        const homeLink = document.querySelector('a.back-link[href="startgame.html"]');
+        if (homeLink) {
+            homeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                clearSavedGameState();
+                flushSettingsIfNotPersistent();
+                window.location.href = 'startgame.html';
+            });
+        }
 
         function resetGame() {
+            clearSavedGameState();
             window.location.href = 'charselect.html';
         }
+
+        window.addEventListener('beforeunload', function(e) {
+            if (projectorChannel) projectorChannel.close();
+            if (state.phase === 'playing' || state.phase === 'turnOrder') {
+                saveGameState();
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) saveGameState();
+        });
     </script>
     <script src="m3-readme-modal.js"></script>
 </body>
