@@ -437,6 +437,11 @@
             <label for="auto-advance-after-damage">Automatically advance to next player after damage</label>
           </div>
           <p id="auto-advance-after-damage-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When enabled, the turn summary appears briefly then the next player's turn starts automatically. No need to click End Turn.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="skip-damage-confirm" aria-describedby="skip-damage-confirm-desc">
+            <label for="skip-damage-confirm">Skip damage confirmations</label>
+          </div>
+          <p id="skip-damage-confirm-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Skip the confirmation prompts when claiming and assigning damage. Useful for faster play.</p>
         </div>
         <div class="options-group">
           <h4>Mods</h4>
@@ -610,6 +615,7 @@
     const AUTO_ROLL_DICE_KEY = 'daggerdie_autoRollDice';
     const AUTO_DEAL_DAMAGE_KEY = 'daggerdie_autoDealDamage';
     const AUTO_ADVANCE_AFTER_DAMAGE_KEY = 'daggerdie_autoAdvanceAfterDamage';
+    const SKIP_DAMAGE_CONFIRM_KEY = 'daggerdie_skipDamageConfirm';
     const USE_CUSTOM_HP_KEY = 'daggerdie_useCustomHp';
     const CUSTOM_HP_KEY = 'daggerdie_customHp';
     const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
@@ -631,7 +637,7 @@
     const isPersistent = () => localStorage.getItem(PERSISTENT_SETTINGS_KEY) === 'true';
     const ALL_SETTING_KEYS = [
       AUTO_ROLL_TURN_ORDER_KEY, AUTO_BEGIN_GAME_KEY, AUTO_ROLL_DICE_KEY,
-      AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY,
+      AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
       MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY,
       ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTS_ENABLED_KEY
@@ -659,6 +665,10 @@
     const autoAdvanceAfterDamageCheckbox = document.getElementById('auto-advance-after-damage');
     autoAdvanceAfterDamageCheckbox.checked = localStorage.getItem(AUTO_ADVANCE_AFTER_DAMAGE_KEY) === 'true';
     autoAdvanceAfterDamageCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_ADVANCE_AFTER_DAMAGE_KEY, autoAdvanceAfterDamageCheckbox.checked));
+
+    const skipDamageConfirmCheckbox = document.getElementById('skip-damage-confirm');
+    skipDamageConfirmCheckbox.checked = localStorage.getItem(SKIP_DAMAGE_CONFIRM_KEY) === 'true';
+    skipDamageConfirmCheckbox.addEventListener('change', () => localStorage.setItem(SKIP_DAMAGE_CONFIRM_KEY, skipDamageConfirmCheckbox.checked));
 
     const useCustomHpCb = document.getElementById('use-custom-hp-cb');
     const customHpInput = document.getElementById('custom-hp-input');
