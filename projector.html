@@ -91,13 +91,13 @@
             fill: #22d3ee;
             stroke: #0e7490;
             stroke-width: 2.2;
-            filter: url(#glow-green);
+            filter: url(#glow-cyan);
             stroke-dasharray: 10 6;
         }
         .highlight-zone.aimed.claimed .face-shape {
             fill: #e879f9;
             stroke: #a21caf;
-            filter: url(#glow-green);
+            filter: url(#glow-purple);
             stroke-dasharray: 10 6;
         }
 
@@ -155,8 +155,8 @@
             filter: drop-shadow(0 0 10px #ffd700) drop-shadow(0 0 20px #ffd700);
         }
         @keyframes logoBounce {
-            0%   { transform: scale(1.1); }
-            100% { transform: scale(1.35); }
+            0%   { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1.35); }
         }
 
         /* Spotlight overlay */
@@ -506,6 +506,18 @@
                 <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="4" result="blur"/>
                     <feFlood flood-color="#ef4444" flood-opacity="0.6" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#22d3ee" flood-opacity="0.5" result="color"/>
+                    <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+                    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-purple" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feFlood flood-color="#e879f9" flood-opacity="0.5" result="color"/>
                     <feComposite in="color" in2="blur" operator="in" result="shadow"/>
                     <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
@@ -878,6 +890,8 @@
             if (bgBtnBlack)    bgBtnBlack.classList.toggle('active',    mode === 'black' || !mode);
             if (bgBtnWhite)    bgBtnWhite.classList.toggle('active',    mode === 'white');
             if (bgBtnAnimated) bgBtnAnimated.classList.toggle('active', mode === 'animated');
+            if (mode === 'animated') { if (window.projectorCanvasStart) window.projectorCanvasStart(); }
+            else { if (window.projectorCanvasStop) window.projectorCanvasStop(); }
         }
 
         function setBgMode(mode) {
@@ -977,35 +991,43 @@
         })();
 
         // ── BroadcastChannel listener ──
-        var channel = new BroadcastChannel('daggerdie-projector');
+        var channel = (typeof BroadcastChannel !== 'undefined')
+            ? new BroadcastChannel('daggerdie-projector')
+            : null;
 
-        channel.onmessage = function(event) {
-            var msg = event.data;
-            statusDot.classList.add('connected');
+        if (channel) {
+            channel.onmessage = function(event) {
+                var msg = event.data;
+                statusDot.classList.add('connected');
 
-            if (msg.type === 'clear') {
-                clearAll();
-                statusDot.classList.remove('active');
-                return;
-            }
+                if (msg.type === 'clear') {
+                    clearAll();
+                    statusDot.classList.remove('active');
+                    return;
+                }
 
-            if (msg.type === 'roll') {
-                clearAll();
-                highlightRolls(msg.rolls || []);
-                highlightAim(msg.aim);
-                statusDot.classList.add('active');
-                return;
-            }
+                if (msg.type === 'roll') {
+                    clearAll();
+                    highlightRolls(msg.rolls || []);
+                    highlightAim(msg.aim);
+                    statusDot.classList.add('active');
+                    return;
+                }
 
-            if (msg.type === 'update') {
-                clearAll();
-                highlightRolls(msg.rolls || []);
-                highlightClaimed(msg.claimed || []);
-                highlightAim(msg.aim);
-                statusDot.classList.add('active');
-                return;
-            }
-        };
+                if (msg.type === 'update') {
+                    clearAll();
+                    highlightRolls(msg.rolls || []);
+                    highlightClaimed(msg.claimed || []);
+                    highlightAim(msg.aim);
+                    statusDot.classList.add('active');
+                    return;
+                }
+            };
+        }
+
+        window.addEventListener('beforeunload', function() {
+            if (channel) channel.close();
+        });
     })();
     </script>
     <script>
@@ -1038,9 +1060,13 @@
         update() { this.x += this.speedX; this.y += this.speedY; this.pulse += this.pulseSpeed; if (this.x < -10 || this.x > w+10 || this.y < -10 || this.y > h+10) this.reset(); }
         draw() {
             const o = this.opacity * (0.5 + 0.5 * Math.sin(this.pulse));
-            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${this.r|0},${this.g|0},${this.b|0},${o})`;
-            ctx.shadowColor = `rgba(${this.r|0},${this.g|0},${this.b|0},${o*0.9})`; ctx.shadowBlur = this.size * 8; ctx.fill(); ctx.shadowBlur = 0;
+            const gr = this.size * 5;
+            const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, gr);
+            grd.addColorStop(0, `rgba(${this.r|0},${this.g|0},${this.b|0},${o})`);
+            grd.addColorStop(0.3, `rgba(${this.r|0},${this.g|0},${this.b|0},${o * 0.5})`);
+            grd.addColorStop(1, `rgba(${this.r|0},${this.g|0},${this.b|0},0)`);
+            ctx.beginPath(); ctx.arc(this.x, this.y, gr, 0, Math.PI * 2);
+            ctx.fillStyle = grd; ctx.fill();
         }
     }
     const motes = Array.from({ length: 80 }, () => new Mote());
@@ -1058,7 +1084,8 @@
             this.scale = Math.random() * 0.5 + 0.6;
             this.opacity = 0;
             this.maxOpacity = Math.random() * 0.5 + 0.35;
-            this.trail = [];
+            if (!this._trailBuf) this._trailBuf = Array.from({length: 18}, () => ({x: 0, y: 0, opacity: 0}));
+            this._trailLen = 0; this._trailIdx = 0;
             this.wobbleAmp = Math.random() * 0.5;
             this.wobbleFreq = Math.random() * 0.02 + 0.01;
             this.wobblePhase = Math.random() * Math.PI * 2;
@@ -1080,13 +1107,13 @@
                 else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.002);
                 if (this.x < -100) this.reset();
             }
-            this.trail.push({ x: this.x, y: this.y, opacity: this.opacity * 0.6 });
-            if (this.trail.length > 18) this.trail.shift();
+            const _t = this._trailBuf[this._trailIdx]; _t.x = this.x; _t.y = this.y; _t.opacity = this.opacity * 0.6;
+            this._trailIdx = (this._trailIdx + 1) % 18; if (this._trailLen < 18) this._trailLen++;
         }
         draw() {
-            for (let i = 0; i < this.trail.length; i++) {
-                const t = this.trail[i];
-                const a = (i / this.trail.length) * t.opacity * 0.7;
+            for (let i = 0; i < this._trailLen; i++) {
+                const t = this._trailBuf[(this._trailIdx - this._trailLen + i + 18) % 18];
+                const a = (i / this._trailLen) * t.opacity * 0.7;
                 ctx.beginPath(); ctx.arc(t.x, t.y, 2 * this.scale, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(220,190,80,${a})`; ctx.fill();
             }
@@ -1130,12 +1157,13 @@
             this.maxOpacity = Math.random() * 0.4 + 0.35;
             this.faceValue = Math.floor(Math.random() * 20) + 1;
             this.faceTimer = 0;
+            this.faceThreshold = 50 + Math.random() * 40;
             const tints = [GOLD, SILVER, BLUE, PURPLE];
             this.tint = tints[Math.floor(Math.random() * tints.length)];
         }
         update() {
             this.x += this.speedX; this.y += this.speedY; this.rotation += this.rotSpeed; this.faceTimer++;
-            if (this.faceTimer > 50 + Math.random() * 40) { this.faceValue = Math.floor(Math.random() * 20) + 1; this.faceTimer = 0; }
+            if (this.faceTimer > this.faceThreshold) { this.faceValue = Math.floor(Math.random() * 20) + 1; this.faceTimer = 0; this.faceThreshold = 50 + Math.random() * 40; }
             const margin = 200;
             if (this.fromLeft) {
                 if (this.x < margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.003);
@@ -1414,6 +1442,9 @@
         ctx.restore();
     }
 
+    let animFrameId = 0;
+    let animRunning = false;
+
     function animate() {
         time++;
         ctx.clearRect(0, 0, w, h);
@@ -1425,9 +1456,33 @@
         for(const k of knives){k.update();k.draw();}
         for(const d of dice){d.update();d.draw();}
         for(const sb of sparkBursts){sb.update();sb.draw();}
-        requestAnimationFrame(animate);
+        animFrameId = requestAnimationFrame(animate);
     }
-    animate();
+
+    function startAnim() {
+        if (animRunning) return;
+        animRunning = true;
+        animFrameId = requestAnimationFrame(animate);
+    }
+
+    function stopAnim() {
+        if (!animRunning) return;
+        animRunning = false;
+        cancelAnimationFrame(animFrameId);
+        animFrameId = 0;
+    }
+
+    window.projectorCanvasStart = startAnim;
+    window.projectorCanvasStop = stopAnim;
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) { stopAnim(); }
+        else if (document.body.classList.contains('projector-animated-bg')) { startAnim(); }
+    });
+
+    if (document.body.classList.contains('projector-animated-bg') && !document.hidden) {
+        startAnim();
+    }
 })();
     </script>
 </body>
