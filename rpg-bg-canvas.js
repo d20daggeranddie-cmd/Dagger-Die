@@ -10,7 +10,8 @@
     let w, h, time = 0;
     function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
     resize();
-    window.addEventListener('resize', resize);
+    var resizeTimer;
+    window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 120); });
     const GOLD = { r: 180, g: 140, b: 50 }, SILVER = { r: 160, g: 170, b: 190 }, BLUE = { r: 100, g: 130, b: 200 }, PURPLE = { r: 140, g: 90, b: 180 };
 
     class Mote {
@@ -27,9 +28,13 @@
         update() { this.x += this.speedX; this.y += this.speedY; this.pulse += this.pulseSpeed; if (this.x < -10 || this.x > w+10 || this.y < -10 || this.y > h+10) this.reset(); }
         draw() {
             const o = this.opacity * (0.5 + 0.5 * Math.sin(this.pulse));
-            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${this.r|0},${this.g|0},${this.b|0},${o})`;
-            ctx.shadowColor = `rgba(${this.r|0},${this.g|0},${this.b|0},${o*0.5})`; ctx.shadowBlur = this.size * 4; ctx.fill(); ctx.shadowBlur = 0;
+            const gr = this.size * 3;
+            const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, gr);
+            grd.addColorStop(0, `rgba(${this.r|0},${this.g|0},${this.b|0},${o})`);
+            grd.addColorStop(0.4, `rgba(${this.r|0},${this.g|0},${this.b|0},${o * 0.3})`);
+            grd.addColorStop(1, `rgba(${this.r|0},${this.g|0},${this.b|0},0)`);
+            ctx.beginPath(); ctx.arc(this.x, this.y, gr, 0, Math.PI * 2);
+            ctx.fillStyle = grd; ctx.fill();
         }
     }
     const motes = Array.from({ length: 60 }, () => new Mote());
@@ -47,7 +52,8 @@
             this.scale = Math.random() * 0.5 + 0.6;
             this.opacity = 0;
             this.maxOpacity = Math.random() * 0.18 + 0.08;
-            this.trail = [];
+            if (!this._trailBuf) this._trailBuf = Array.from({length: 15}, () => ({x: 0, y: 0, opacity: 0}));
+            this._trailLen = 0; this._trailIdx = 0;
             this.wobbleAmp = Math.random() * 0.5;
             this.wobbleFreq = Math.random() * 0.02 + 0.01;
             this.wobblePhase = Math.random() * Math.PI * 2;
@@ -69,13 +75,13 @@
                 else this.opacity = Math.min(this.maxOpacity, this.opacity + 0.001);
                 if (this.x < -100) this.reset();
             }
-            this.trail.push({ x: this.x, y: this.y, opacity: this.opacity * 0.3 });
-            if (this.trail.length > 15) this.trail.shift();
+            const _t = this._trailBuf[this._trailIdx]; _t.x = this.x; _t.y = this.y; _t.opacity = this.opacity * 0.3;
+            this._trailIdx = (this._trailIdx + 1) % 15; if (this._trailLen < 15) this._trailLen++;
         }
         draw() {
-            for (let i = 0; i < this.trail.length; i++) {
-                const t = this.trail[i];
-                const a = (i / this.trail.length) * t.opacity * 0.4;
+            for (let i = 0; i < this._trailLen; i++) {
+                const t = this._trailBuf[(this._trailIdx - this._trailLen + i + 15) % 15];
+                const a = (i / this._trailLen) * t.opacity * 0.4;
                 ctx.beginPath(); ctx.arc(t.x, t.y, 1.5 * this.scale, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(180,160,80,${a})`; ctx.fill();
             }
@@ -185,6 +191,7 @@
             this.maxOpacity = Math.random() * 0.14 + 0.06;
             this.faceValue = Math.floor(Math.random() * 20) + 1;
             this.faceTimer = 0;
+            this.faceThreshold = 50 + Math.random() * 40;
             const tints = [GOLD, SILVER, BLUE, PURPLE];
             this.tint = tints[Math.floor(Math.random() * tints.length)];
         }
@@ -193,7 +200,7 @@
             this.y += this.speedY;
             this.rotation += this.rotSpeed;
             this.faceTimer++;
-            if (this.faceTimer > 50 + Math.random() * 40) { this.faceValue = Math.floor(Math.random() * 20) + 1; this.faceTimer = 0; }
+            if (this.faceTimer > this.faceThreshold) { this.faceValue = Math.floor(Math.random() * 20) + 1; this.faceTimer = 0; this.faceThreshold = 50 + Math.random() * 40; }
             const margin = 200;
             if (this.fromLeft) {
                 if (this.x < margin) this.opacity = Math.min(this.maxOpacity, this.opacity + 0.0015);
@@ -570,6 +577,9 @@
         ctx.restore();
     }
 
+    let animFrameId = 0;
+    let animRunning = false;
+
     function animate() {
         time++;
         ctx.clearRect(0, 0, w, h);
@@ -581,7 +591,26 @@
         for (const k of knives) { k.update(); k.draw(); }
         for (const d of dice) { d.update(); d.draw(); }
         for (const sb of sparkBursts) { sb.update(); sb.draw(); }
-        requestAnimationFrame(animate);
+        animFrameId = requestAnimationFrame(animate);
     }
-    animate();
+
+    function startAnim() {
+        if (animRunning) return;
+        animRunning = true;
+        animFrameId = requestAnimationFrame(animate);
+    }
+
+    function stopAnim() {
+        if (!animRunning) return;
+        animRunning = false;
+        cancelAnimationFrame(animFrameId);
+        animFrameId = 0;
+    }
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) { stopAnim(); }
+        else { startAnim(); }
+    });
+
+    if (!document.hidden) { startAnim(); }
 })();

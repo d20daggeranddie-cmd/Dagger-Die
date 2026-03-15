@@ -7,7 +7,8 @@
         if (!svgString || !prefix) return svgString;
         return svgString
             .replace(/\bid="([^"]+)"/g, 'id="' + prefix + '-$1"')
-            .replace(/url\(#([^)]+)\)/g, 'url(#' + prefix + '-$1)');
+            .replace(/url\(#([^)]+)\)/g, 'url(#' + prefix + '-$1)')
+            .replace(/href="#([^"]+)"/g, 'href="#' + prefix + '-$1"');
     }
     const CHARACTERS = [
         { id: "knight", name: "Knight", color: "#8b7355", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
