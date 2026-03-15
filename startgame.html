@@ -204,8 +204,11 @@
   .option-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #48dbfb; }
   .option-row label { cursor: pointer; color: rgba(255,255,255,0.9); font-size: 0.95rem; }
   .options-group .custom-hp-row { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .options-group .custom-hp-row input[type="number"] { max-width: 120px; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem; }
+  .options-group .custom-hp-row input[type="number"] { max-width: 120px; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
   .options-group .custom-hp-row input[type="number"]:disabled { opacity: 0.6; cursor: not-allowed; }
+  .options-group .custom-hp-row input[type="number"].hp-valid:not(:disabled) { border-color: #2ecc71; box-shadow: 0 0 0 2px rgba(46,204,113,0.25); }
+  .options-group .custom-hp-row input[type="number"].hp-invalid:not(:disabled) { border-color: #e74c3c; box-shadow: 0 0 0 2px rgba(231,76,60,0.25); }
+  .custom-hp-error { color: #e74c3c; font-size: 0.85rem; min-height: 1.2em; margin-top: 2px; transition: opacity 0.2s; }
 
   .info-section { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; }
   .info-section h3 { font-size: 1.4rem; margin-bottom: 15px; color: #feca57; }
@@ -220,7 +223,7 @@
 
   .m3-logo {
     position: fixed; bottom: 10px; right: 10px; z-index: 50;
-    width: 36px; height: auto; pointer-events: none;
+    width: 36px; height: auto; pointer-events: auto; cursor: pointer;
   }
   .m3-logo.highlighted {
     filter: drop-shadow(0 0 8px rgba(254,202,87,0.9)) drop-shadow(0 0 20px rgba(254,202,87,0.5));
@@ -444,6 +447,7 @@
           <div class="custom-hp-row">
             <label for="custom-hp-input">Default HP per player (20–999)</label>
             <input type="number" id="custom-hp-input" min="20" max="999" placeholder="e.g. 50" disabled>
+            <span id="custom-hp-error" class="custom-hp-error" aria-live="polite"></span>
           </div>
           <p id="custom-hp-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked, automatic values are used (2 players: 40, 3–4: 50, 5–6: 60).</p>
           <div class="option-row" style="margin-top: 16px;">
@@ -456,6 +460,11 @@
             <label for="mod-nerf-on-miss-cb">Nerf on Miss</label>
           </div>
           <p id="mod-nerf-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Take 125% damage for 1 turn after missing all throws.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-vampire-cb" aria-describedby="mod-vampire-hint">
+            <label for="mod-vampire-cb">Vampire</label>
+          </div>
+          <p id="mod-vampire-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Gain HP equal to the target's remaining HP when you deliver a killing blow.</p>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-desc">
             <label for="items-enabled-cb">Items</label>
@@ -491,35 +500,9 @@
     </div>
   </main>
 
-  <script>
-    // RPG background: CSS ember particles & runes
-    (function() {
-      const container = document.getElementById('idxCssParticles');
-      const colors = ['rgba(200, 140, 50, 0.6)', 'rgba(180, 120, 60, 0.4)', 'rgba(160, 130, 80, 0.3)', 'rgba(140, 160, 200, 0.2)', 'rgba(200, 180, 100, 0.5)'];
-      if (container) {
-        for (let i = 0; i < 30; i++) {
-          const p = document.createElement('div');
-          p.className = 'idx-bg-particle';
-          const size = Math.random() * 3 + 1;
-          const color = colors[Math.floor(Math.random() * colors.length)];
-          p.style.cssText = `width: ${size}px; height: ${size}px; background: ${color}; box-shadow: 0 0 ${size * 2}px ${color}; left: ${Math.random() * 100}%; bottom: ${Math.random() * 20 - 10}%; animation-duration: ${Math.random() * 15 + 10}s; animation-delay: ${Math.random() * 15}s;`;
-          container.appendChild(p);
-        }
-      }
-      const runeContainer = document.getElementById('idxRuneContainer');
-      const glyphs = ['\u16A0','\u16A2','\u16A6','\u16A8','\u16B1','\u16B7','\u16B9','\u16BE','\u16C1','\u16C3','\u16C7','\u16C8','\u16CA','\u16CF','\u16D2','\u16D6','\u16DA','\u16DE','\u16DF','\u16E0'];
-      const runeColors = ['#b48c3c', '#8a7a5a', '#6a7aa0', '#9a8a6a', '#7a6a9a'];
-      if (runeContainer) {
-        for (let i = 0; i < 12; i++) {
-          const r = document.createElement('div');
-          r.className = 'idx-bg-rune';
-          r.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-          r.style.cssText = `left: ${Math.random() * 90 + 5}%; top: ${Math.random() * 80 + 10}%; font-size: ${Math.random() * 18 + 14}px; color: ${runeColors[Math.floor(Math.random() * runeColors.length)]}; animation-duration: ${Math.random() * 8 + 8}s; animation-delay: ${Math.random() * 10}s;`;
-          runeContainer.appendChild(r);
-        }
-      }
-    })();
-  </script>
+  <script src="rpg-bg-particles.js"
+    data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
+    data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
   <script src="rpg-bg-canvas.js"></script>
   <script>
     // Resources modal (star button)
@@ -632,6 +615,7 @@
     const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
     const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
     const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
+    const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
@@ -643,6 +627,18 @@
       menu.classList.toggle('open');
       toggle.setAttribute('aria-expanded', menu.classList.contains('open'));
     });
+
+    const isPersistent = () => localStorage.getItem(PERSISTENT_SETTINGS_KEY) === 'true';
+    const ALL_SETTING_KEYS = [
+      AUTO_ROLL_TURN_ORDER_KEY, AUTO_BEGIN_GAME_KEY, AUTO_ROLL_DICE_KEY,
+      AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY,
+      USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
+      MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY,
+      ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTS_ENABLED_KEY
+    ];
+    if (!isPersistent()) {
+      ALL_SETTING_KEYS.forEach(k => localStorage.removeItem(k));
+    }
 
     const autoRollTurnOrderCheckbox = document.getElementById('auto-roll-turn-order');
     autoRollTurnOrderCheckbox.checked = localStorage.getItem(AUTO_ROLL_TURN_ORDER_KEY) === 'true';
@@ -669,8 +665,8 @@
     const persistentSettingsCb = document.getElementById('persistent-settings-cb');
     const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
     const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
+    const modVampireCb = document.getElementById('mod-vampire-cb');
 
-    const isPersistent = () => localStorage.getItem(PERSISTENT_SETTINGS_KEY) === 'true';
     useCustomHpCb.checked = localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
     const savedHp = localStorage.getItem(CUSTOM_HP_KEY);
     customHpInput.value = (savedHp !== null && savedHp !== '') ? savedHp : '';
@@ -678,6 +674,7 @@
     persistentSettingsCb.checked = isPersistent();
     modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
     modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
+    modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
     const itemsEnabledCb = document.getElementById('items-enabled-cb');
     itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
     const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
@@ -685,28 +682,35 @@
       itemsStartWithRandomCb.checked = itemsEnabledCb.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
     }
 
+    const customHpError = document.getElementById('custom-hp-error');
+    function validateAndPersistHp() {
+      const val = customHpInput.value.trim();
+      customHpInput.classList.remove('hp-valid', 'hp-invalid');
+      customHpError.textContent = '';
+      if (!useCustomHpCb.checked || val === '') {
+        if (!useCustomHpCb.checked) localStorage.removeItem(CUSTOM_HP_KEY);
+        return;
+      }
+      const n = parseInt(val, 10);
+      if (isNaN(n) || n < 20 || n > 999) {
+        customHpInput.classList.add('hp-invalid');
+        customHpError.textContent = isNaN(n) ? 'Enter a number between 20 and 999.' :
+          n < 20 ? 'Minimum HP is 20.' : 'Maximum HP is 999.';
+        localStorage.removeItem(CUSTOM_HP_KEY);
+        return;
+      }
+      customHpInput.classList.add('hp-valid');
+      localStorage.setItem(CUSTOM_HP_KEY, String(n));
+    }
+
     useCustomHpCb.addEventListener('change', () => {
       customHpInput.disabled = !useCustomHpCb.checked;
       localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
-      if (useCustomHpCb.checked) {
-        const n = parseInt(customHpInput.value.trim(), 10);
-        if (!isNaN(n) && n >= 20 && n <= 999) localStorage.setItem(CUSTOM_HP_KEY, String(n));
-      } else localStorage.removeItem(CUSTOM_HP_KEY);
+      validateAndPersistHp();
     });
-
-    customHpInput.addEventListener('change', () => {
-      const val = customHpInput.value.trim();
-      const n = val === '' ? NaN : parseInt(val, 10);
-      if (!isNaN(n) && n >= 20 && n <= 999 && useCustomHpCb.checked) {
-        localStorage.setItem(CUSTOM_HP_KEY, String(n));
-        localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
-      }
-    });
-    customHpInput.addEventListener('blur', () => {
-      const val = customHpInput.value.trim();
-      const n = val === '' ? NaN : parseInt(val, 10);
-      if (!isNaN(n) && n >= 20 && n <= 999 && useCustomHpCb.checked) localStorage.setItem(CUSTOM_HP_KEY, String(n));
-    });
+    customHpInput.addEventListener('input', validateAndPersistHp);
+    customHpInput.addEventListener('blur', validateAndPersistHp);
+    if (useCustomHpCb.checked) validateAndPersistHp();
 
     persistentSettingsCb.addEventListener('change', () => {
       localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
@@ -714,6 +718,7 @@
 
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
+    modVampireCb.addEventListener('change', () => localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked)));
     itemsEnabledCb.addEventListener('change', () => {
       localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
       if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
@@ -730,7 +735,7 @@
     });
 
     const botsEnabledCb = document.getElementById('bots-enabled-cb');
-    botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
+    botsEnabledCb.checked = localStorage.getItem(BOTS_ENABLED_KEY) === 'true';
     botsEnabledCb.addEventListener('change', () => localStorage.setItem(BOTS_ENABLED_KEY, String(botsEnabledCb.checked)));
 
   </script>
