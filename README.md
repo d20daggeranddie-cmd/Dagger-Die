@@ -61,7 +61,7 @@ Mods are optional gameplay modifiers found in the Options menu. All are off by d
 - **Use custom HP** — Override the default HP per player (20–999) instead of using automatic values by player count
 - **Buff on Critical** — Take half damage for 1 turn after scoring a critical (all 3 dice hit)
 - **Nerf on Miss** — Take 125% damage for 1 turn after missing all throws
-- **Vampire** — Gain HP equal to the target's remaining HP when you deliver a killing blow
+- **Vampire** — Gain HP equal to all damage dealt to a target this turn when you deliver a killing blow
 - **Items** — Enables the item inventory system (see Items below)
 - **Start with random item** — Each player begins the game with one randomly generated item (requires Items)
 - **Enable bots** — Allows marking players as bots with selectable difficulty on the character select screen
