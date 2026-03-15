@@ -459,7 +459,7 @@
 
         .m3-logo {
             position: fixed; bottom: 10px; right: 10px; z-index: 50;
-            width: 36px; height: auto; pointer-events: none;
+            width: 36px; height: auto; pointer-events: auto; cursor: pointer;
         }
         @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
     </style>
@@ -562,41 +562,25 @@
         </div>
     </div>
 
-    <script>
-        // RPG background: CSS ember particles & runes
-        (function() {
-            const container = document.getElementById('gameCssParticles');
-            const colors = ['rgba(200, 140, 50, 0.6)', 'rgba(180, 120, 60, 0.4)', 'rgba(160, 130, 80, 0.3)', 'rgba(140, 160, 200, 0.2)', 'rgba(200, 180, 100, 0.5)'];
-            if (container) {
-                for (let i = 0; i < 30; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'game-bg-particle';
-                    const size = Math.random() * 3 + 1;
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    p.style.cssText = `width: ${size}px; height: ${size}px; background: ${color}; box-shadow: 0 0 ${size * 2}px ${color}; left: ${Math.random() * 100}%; bottom: ${Math.random() * 20 - 10}%; animation-duration: ${Math.random() * 15 + 10}s; animation-delay: ${Math.random() * 15}s;`;
-                    container.appendChild(p);
-                }
-            }
-            const runeContainer = document.getElementById('gameRuneContainer');
-            const glyphs = ['\u16A0','\u16A2','\u16A6','\u16A8','\u16B1','\u16B7','\u16B9','\u16BE','\u16C1','\u16C3','\u16C7','\u16C8','\u16CA','\u16CF','\u16D2','\u16D6','\u16DA','\u16DE','\u16DF','\u16E0'];
-            const runeColors = ['#b48c3c', '#8a7a5a', '#6a7aa0', '#9a8a6a', '#7a6a9a'];
-            if (runeContainer) {
-                for (let i = 0; i < 12; i++) {
-                    const r = document.createElement('div');
-                    r.className = 'game-bg-rune';
-                    r.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-                    r.style.cssText = `left: ${Math.random() * 90 + 5}%; top: ${Math.random() * 80 + 10}%; font-size: ${Math.random() * 18 + 14}px; color: ${runeColors[Math.floor(Math.random() * runeColors.length)]}; animation-duration: ${Math.random() * 8 + 8}s; animation-delay: ${Math.random() * 10}s;`;
-                    runeContainer.appendChild(r);
-                }
-            }
-        })();
-    </script>
+    <script src="rpg-bg-particles.js"
+        data-particle-container="gameCssParticles" data-particle-class="game-bg-particle"
+        data-rune-container="gameRuneContainer" data-rune-class="game-bg-rune"></script>
     <script src="rpg-bg-canvas.js"></script>
     <script src="characters.js"></script>
     <script>
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
         const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
         const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
+        const FALLBACK_CHAR = { id: 'unknown', name: 'Unknown', color: '#8b7355', svg: '<svg viewBox="0 0 48 48"><text x="24" y="32" text-anchor="middle" font-size="24" fill="#888">?</text></svg>' };
+
+        if (!CHARACTERS.length) {
+            const errEl = document.getElementById('setup-error');
+            if (errEl) {
+                errEl.textContent = 'Character data failed to load. Please refresh the page or check your connection.';
+                errEl.classList.remove('hidden');
+            }
+            document.querySelector('.player-count-selector')?.classList.add('hidden');
+        }
 
         const BOT_SKILLS = [
             { id: 'newb',   label: 'Newb' },
@@ -701,10 +685,22 @@
         });
 
         function botsEnabled() {
-            return localStorage.getItem(BOTS_ENABLED_KEY) !== 'false';
+            return localStorage.getItem(BOTS_ENABLED_KEY) === 'true';
         }
 
         function setupPlayerInputs(count) {
+            const existingRows = playerSetup.querySelectorAll('.player-input');
+            const savedData = [];
+            existingRows.forEach(row => {
+                const input = row.querySelector('input[type="text"]');
+                savedData.push({
+                    name: input ? input.value : '',
+                    characterId: row.dataset.characterId || '',
+                    isBot: row.dataset.isBot || 'false',
+                    botSkill: row.dataset.botSkill || ''
+                });
+            });
+
             playerSetup.innerHTML = '';
             playerSetup.classList.add('visible');
             const setupError = document.getElementById('setup-error');
@@ -714,13 +710,17 @@
             }
             const showBots = botsEnabled();
             for (let i = 0; i < count; i++) {
-                const defaultChar = CHARACTERS[i % CHARACTERS.length];
-                const defaultBotSkill = BOT_SKILLS[1].id; // Novice
+                const prev = savedData[i];
+                const fallbackChar = CHARACTERS.length ? CHARACTERS[i % CHARACTERS.length] : FALLBACK_CHAR;
+                const charId = (prev && prev.characterId) || fallbackChar.id;
+                const selectedChar = CHARACTERS.find(c => c.id === charId) || fallbackChar;
+                const defaultBotSkill = (prev && prev.botSkill) || BOT_SKILLS[1].id;
+                const isBot = prev ? prev.isBot : 'false';
                 const div = document.createElement('div');
                 div.className = 'player-input';
                 div.dataset.player = String(i);
-                div.dataset.characterId = defaultChar.id;
-                div.dataset.isBot = 'false';
+                div.dataset.characterId = selectedChar.id;
+                div.dataset.isBot = isBot;
                 div.dataset.botSkill = defaultBotSkill;
                 const botButtonHtml = showBots ? `
                         <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
@@ -731,10 +731,13 @@
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
-                        <button type="button" class="character-avatar-btn" title="${defaultChar.name} – click to change">${prefixSvgIds(defaultChar.svg, 'cs-p' + i + '-' + defaultChar.id)}</button>
+                        <button type="button" class="character-avatar-btn" title="${selectedChar.name} – click to change">${prefixSvgIds(selectedChar.svg, 'cs-p' + i + '-' + selectedChar.id)}</button>
                         ${botButtonHtml}
                     </div>
                 `;
+                if (prev && prev.name) {
+                    div.querySelector('input[type="text"]').value = prev.name;
+                }
                 playerSetup.appendChild(div);
                 const avatarBtn = div.querySelector('.character-avatar-btn');
                 avatarBtn.addEventListener('click', () => {
@@ -858,8 +861,9 @@
             playerSetup.querySelectorAll('.player-input').forEach((row, idx) => {
                 const input = row.querySelector('input[type="text"]');
                 const name = input && input.value.trim() ? input.value.trim() : `Player ${idx + 1}`;
-                const characterId = row.dataset.characterId || CHARACTERS[idx % CHARACTERS.length].id;
-                const char = CHARACTERS.find(c => c.id === characterId);
+                const fbc = CHARACTERS.length ? CHARACTERS[idx % CHARACTERS.length] : FALLBACK_CHAR;
+                const characterId = row.dataset.characterId || fbc.id;
+                const char = CHARACTERS.find(c => c.id === characterId) || fbc;
                 const isBot = allowBots && (row.dataset.isBot === 'true');
                 const botSkill = (row.dataset.botSkill || 'novice');
                 payload.push({
@@ -882,6 +886,31 @@
 
         document.querySelector('.player-count-btn[data-count="2"]')?.classList.add('selected');
         setupPlayerInputs(2);
+
+        const homeLink = document.querySelector('a.back-link[href="startgame.html"]');
+        if (homeLink) {
+            homeLink.addEventListener('click', (e) => {
+                if (localStorage.getItem('daggerdie_persistentSettings') !== 'true') {
+                    e.preventDefault();
+                    [
+                        'daggerdie_autoRollTurnOrder',
+                        'daggerdie_autoBeginGame',
+                        'daggerdie_autoRollDice',
+                        'daggerdie_autoDealDamage',
+                        'daggerdie_autoAdvanceAfterDamage',
+                        'daggerdie_useCustomHp',
+                        'daggerdie_customHp',
+                        'daggerdie_modBuffOnCritical',
+                        'daggerdie_modNerfOnMiss',
+                        'daggerdie_itemsEnabled',
+                        'daggerdie_itemsStartWithRandom',
+                        'daggerdie_botsEnabled',
+                        'daggerdie_modVampire'
+                    ].forEach(k => localStorage.removeItem(k));
+                    window.location.href = 'startgame.html';
+                }
+            });
+        }
     </script>
     <script src="m3-readme-modal.js"></script>
 </body>
