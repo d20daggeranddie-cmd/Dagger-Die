@@ -45,12 +45,16 @@ A web-based game tracker for the physical knife-throwing dice game. *Throw knive
 - Game log to track all actions
 - Endgame report with per-player stats (including Efficiency shown as hits/throws)
 - Projector mode to display target face on a second screen (scales smoothly to any window size)
-- Download target stencil (SVG) for painting your own boards
+- Download target stencil (Print PDF or Cut SVG) for painting your own boards
 - Responsive design - works on desktop and mobile (tap highlighted areas to claim hits)
 
 ## Options
 
-The landing page includes an Options menu with gameplay preferences (saved in browser):
+The landing page includes an Options menu with gameplay preferences:
+
+- **Persistent settings** - When enabled, your option and mod selections are kept across games. When disabled (default), settings reset to defaults each new game.
+
+### Auto-Advance
 
 - **Automatically roll dice for turn order** - Dice roll automatically when the turn order screen appears
 - **Automatically begin game after turn order** - Game starts immediately after turn order is determined
@@ -65,6 +69,7 @@ Mods are optional gameplay modifiers found in the Options menu. All are off by d
 - **Use custom HP** - Override the default HP per player (20-999) instead of using automatic values by player count
 - **Buff on Critical** - Take half damage for 1 turn after scoring a critical (all 3 dice hit)
 - **Nerf on Miss** - Take 125% damage for 1 turn after missing all throws
+- **Vampire** - Gain HP equal to the target's remaining HP when you deliver a killing blow
 - **Items** - Enables the item inventory system (see Items below)
 - **Start with random item** - Each player begins the game with one randomly generated item (requires Items)
 - **Enable bots** - Allows marking players as bots with selectable difficulty on the character select screen
@@ -78,6 +83,7 @@ Items are earned by landing a critical (all 3 hits in a single turn). A D12 is r
 - 3 slots per player, fills left to right
 - When an item is used, remaining items shift left to fill the gap
 - New items are added to the next open slot at the end
+- **Full inventory**: If all 3 slots are occupied when you earn a new item, a swap screen appears letting you choose which of the four items (3 existing + 1 new) to drop. Bots auto-swap the lowest-value item when the new one is better, otherwise discard the new item.
 
 ### Item List
 
@@ -86,22 +92,24 @@ Items are earned by landing a critical (all 3 hits in a single turn). A D12 is r
 | 1 | Scroll | HEALING | Self | Heal +15 HP |
 | 2 | Feather | REGEN | Self | Regen +15 HP (5/turn over 3 turns) |
 | 3 | Glowing Orb | RESURRECT | Eliminated | Resurrect 1 eliminated player with 20 HP |
-| 4 | Metal Fragment | DEFENSE | Self | Shield - immune to next attack |
+| 4 | Metal Fragment | DEFENSE | Self | Shield - block the next incoming hit (damage becomes 0, then shield is consumed) |
 | 5 | Tiger's Eye | BUFF | Self | Focus +5 DP to next attack |
 | 6 | Toy Rocket | UTILITY | Self | Aim - call a rolled zone; if hit, +3 DP |
 | 7 | Monkey Paw | LETHAL | Opponent | Cursed - halve target's current HP |
-| 8 | Flame | BUFF | Self | Rage +5 DP to highest hit for 1 turn |
+| 8 | Freeze | DEBUFF | Opponent | Freeze - target skips next turn |
 | 9 | Potion | DEBUFF | Opponent | Poison -15 HP (5/turn over 3 turns) |
-| 10 | Ticket | UTILITY | Self | Free drops for 1 turn (no HP penalty for dropped knives) |
+| 10 | Ticket | UTILITY | Self | Next 3 knife drops this turn cost no HP |
 | 11 | Red Rose | HEALING | Self | Recover all HP lost to drops |
 | 12 | Medkit | CLEANSE | Self | Clear Status - remove all status effects |
 
 ## Resources
 
-From the Resources dropdown on the landing page:
+From the Resources star button on the landing page:
 
-- **Download target stencil (SVG)** - SVG file for painting D20 targets onto log rounds
-- **Open target face (projector)** - Opens a separate window to display the D20 target on a projector or second screen. Also available in-game via the gear menu (Dynamic Target). Syncs with the game via BroadcastChannel - highlights rolled zones (gold) and claimed hits (green). Scales smoothly to any window size.
+- **Download target stencil** - Choose a format:
+  - **Print** - PDF for printing on paper
+  - **Cut** - SVG for cutting machines
+- **Dynamic Target (Projector)** - Opens a separate window to display the D20 target on a projector or second screen. Also available in-game via the gear menu. Syncs with the game via BroadcastChannel - highlights rolled zones (gold) and claimed hits (green). Scales smoothly to any window size.
 
 The original game uses two log rounds painted with D20 patterns:
 - One log has all odd numbers (center is 1)
@@ -112,7 +120,7 @@ Single log round option is to use the stencil to transfer the icosahedron outlin
 Players throw knives at the targets based on what they roll on the dice!`;
 
   const css = `
-    .m3-logo{pointer-events:auto !important;cursor:pointer !important}
+    .m3-logo{pointer-events:auto;cursor:pointer}
     .readme-modal-overlay{
       position:fixed;inset:0;z-index:1200;background:rgba(4,6,16,.78);backdrop-filter:blur(5px);
       display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;
@@ -405,8 +413,11 @@ Players throw knives at the targets based on what they roll on the dice!`;
       return;
     }
     if (overlay.classList.contains('open') && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault();
-      event.stopPropagation();
+      const modal = overlay.querySelector('.readme-modal');
+      if (!modal || !modal.contains(event.target)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
     }
   }, true);
 })();
