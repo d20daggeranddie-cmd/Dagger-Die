@@ -4227,7 +4227,7 @@
 
             disableTargetSelection();
 
-            showAttackConfirmModal(currentHitValue, targetPlayer.name, damage, modLabel, () => {
+            const applyAttack = () => {
                 state.damageDealtThisTurn = true;
                 state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
                 const targetHpBefore = targetPlayer.hp;
@@ -4262,7 +4262,14 @@
                 if (state.phase === 'playing') {
                     showNextHitToAssign();
                 }
-            });
+            };
+
+            const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
+            if (aliveOpponents.length === 1) {
+                applyAttack();
+            } else {
+                showAttackConfirmModal(currentHitValue, targetPlayer.name, damage, modLabel, applyAttack);
+            }
         }
 
         function showTurnSummaryModal(titleHtml, bodyHtml, onDismiss) {
