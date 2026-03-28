@@ -1819,10 +1819,48 @@
             padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
         .log-entry:last-child {
             border-bottom: none;
+        }
+
+        .log-player-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .log-msg {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .log-hp-tag {
+            font-size: 0.73rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            border-left: 2px solid transparent;
+            white-space: nowrap;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .log-turn-start {
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding-top: 10px;
+            margin-top: 4px;
+        }
+
+        .log-turn-start .log-msg {
+            color: #feca57;
+            font-weight: 600;
         }
 
         .log-damage {
@@ -2849,8 +2887,10 @@
             }
             state.gameLog.forEach(entry => {
                 const el = document.createElement('div');
-                el.className = `log-entry log-${entry.type || 'info'}`;
-                el.textContent = entry.message;
+                const type = entry.type || 'info';
+                const typeClass = type === 'turn-start' ? 'log-turn-start log-info' : `log-${type}`;
+                el.className = `log-entry ${typeClass}`;
+                el.innerHTML = buildLogEntryHtml(entry);
                 gameLogEntries.insertBefore(el, gameLogEntries.firstChild);
             });
             ledgerUnread = 0;
@@ -3287,7 +3327,7 @@
                             if (current.freeDropsCount === 0) current.freeDropsActive = false;
                         }
                         state.dropsThisTurn++;
-                        addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
+                        addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage', { hpSnapshots: [{ id: current.id, hp: current.hp, maxHp: current.maxHp }] });
                         if (current.hp <= 0) {
                             botEliminated = true;
                             break;
@@ -4122,7 +4162,7 @@
                 targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
                 state.hasScoreBeenEntered = true;
                 currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
-                addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
+                addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage', { hpSnapshots: [{ id: targetPlayer.id, hp: targetPlayer.hp, maxHp: targetPlayer.maxHp }] });
                 state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
                 if (damage > 0) showDamageImpact(targetPlayer.id, damage, currentPlayer.name, currentPlayer.color.hex);
                 if (targetPlayer.hp <= 0) {
@@ -4137,7 +4177,7 @@
                             .reduce((sum, a) => sum + a.damage, 0);
                         const vampireHeal = targetHpBefore + priorDamageToTarget;
                         currentPlayer.hp = Math.min(currentPlayer.maxHp, currentPlayer.hp + vampireHeal);
-                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage');
+                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage', { hpSnapshots: [{ id: currentPlayer.id, hp: currentPlayer.hp, maxHp: currentPlayer.maxHp }] });
                     }
                     updatePlayersPanel();
                     spawnDeathGhost(rect);
@@ -4259,7 +4299,7 @@
                 targetPlayer.hp = Math.max(0, targetPlayer.hp - damage);
                 state.hasScoreBeenEntered = true;
                 currentPlayer.totalClaimed = (currentPlayer.totalClaimed || 0) + currentHitValue;
-                addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage');
+                addLogEntry(`${currentPlayer.name} dealt ${damage} damage to ${targetPlayer.name}!${modNote}`, 'damage', { hpSnapshots: [{ id: targetPlayer.id, hp: targetPlayer.hp, maxHp: targetPlayer.maxHp }] });
                 state.attackLog.push(damage !== currentHitValue ? `${currentHitValue} → ${targetPlayer.name} (${damage}${modLabel})` : `${currentHitValue} → ${targetPlayer.name}`);
                 if (damage > 0) showDamageImpact(targetPlayer.id, damage, currentPlayer.name, currentPlayer.color.hex);
 
@@ -4275,7 +4315,7 @@
                             .reduce((sum, a) => sum + a.damage, 0);
                         const vampireHeal = targetHpBefore + priorDamageToTarget;
                         currentPlayer.hp = Math.min(currentPlayer.maxHp, currentPlayer.hp + vampireHeal);
-                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage');
+                        addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage', { hpSnapshots: [{ id: currentPlayer.id, hp: currentPlayer.hp, maxHp: currentPlayer.maxHp }] });
                     }
                     updatePlayersPanel();
                     spawnDeathGhost(rect);
@@ -4372,7 +4412,7 @@
             }
             state.dropsThisTurn++;
             state.droppedDiceIndices.push(dieIdx);
-            addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage');
+            addLogEntry(`${current.name} dropped a knife!` + (freeDrop ? ' (free)' : ' (-1 HP)'), 'damage', { hpSnapshots: [{ id: current.id, hp: current.hp, maxHp: current.maxHp }] });
             state.lastDroppedKnifeLogIndex = state.gameLog.length - 1;
             if (!state.damageDealtThisTurn) state.dropsThisTurnLogIndices.push(state.gameLog.length - 1);
             updatePlayersPanel();
@@ -4626,13 +4666,13 @@
 
             if (item.id === 'scroll') {
                 target.hp = Math.min(target.maxHp, target.hp + 15);
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Healed +15 HP!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Healed +15 HP!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'feather') {
                 const immediateRegen = Math.min(5, Math.max(0, target.maxHp - target.hp));
                 target.hp = Math.min(target.maxHp, target.hp + immediateRegen);
                 target.regenRemaining = 10;
                 target.regenTurns = 2;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Regen +15 HP (+${immediateRegen} now, +5/turn for 2 turns)!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Regen +15 HP (+${immediateRegen} now, +5/turn for 2 turns)!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'orb') {
                 target.eliminated = false;
                 const reviveHp = Math.ceil(target.maxHp * 0.4);
@@ -4653,7 +4693,7 @@
                 target.regenTurns = 0;
                 target.poisonRemaining = 0;
                 target.poisonTurns = 0;
-                addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with ${reviveHp} HP (status cleared)!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with ${reviveHp} HP (status cleared)!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'metal-fragment') {
                 target.shieldActive = true;
                 target.shieldTurns = 1;
@@ -4676,7 +4716,7 @@
                 const halfHp = Math.ceil(target.hp / 2);
                 target.hp = Math.max(0, target.hp - halfHp);
                 if (target.hp <= 0) target.eliminated = true;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Cursed! Lost ${halfHp} HP (half current HP)!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Cursed! Lost ${halfHp} HP (half current HP)!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'freeze') {
                 target.freezeActive = true;
                 addLogEntry(`${user.name} used ${item.name} on ${target.name} — Frozen! Skips next turn!`, 'info');
@@ -4686,7 +4726,7 @@
                 target.poisonRemaining = 10;
                 target.poisonTurns = 2;
                 if (target.hp <= 0) target.eliminated = true;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — -${immediatePoison} HP now, Poison -10 HP over 2 turns!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — -${immediatePoison} HP now, Poison -10 HP over 2 turns!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'ticket') {
                 target.freeDropsActive = true;
                 target.freeDropsCount = 3;
@@ -4694,7 +4734,7 @@
             } else if (item.id === 'red-rose') {
                 const dropCount = countDropDamageForPlayer(target.name);
                 target.hp = Math.min(target.maxHp, target.hp + dropCount);
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Recovered ${dropCount} HP from drops!`, 'info');
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — Recovered ${dropCount} HP from drops!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'medkit') {
                 target.buffActive = false;
                 target.nerfActive = false;
@@ -4996,14 +5036,14 @@
                     nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + heal);
                     nextPlayer.regenRemaining -= heal;
                     nextPlayer.regenTurns--;
-                    if (heal > 0) addLogEntry(`${nextPlayer.name} regens +${heal} HP!`, 'info');
+                    if (heal > 0) addLogEntry(`${nextPlayer.name} regens +${heal} HP!`, 'info', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
                 }
                 if (nextPlayer.poisonRemaining > 0 && nextPlayer.poisonTurns > 0) {
                     const dmg = Math.min(5, nextPlayer.poisonRemaining);
                     nextPlayer.hp = Math.max(0, nextPlayer.hp - dmg);
                     nextPlayer.poisonRemaining -= dmg;
                     nextPlayer.poisonTurns--;
-                    addLogEntry(`${nextPlayer.name} takes ${dmg} poison damage!`, 'damage');
+                    addLogEntry(`${nextPlayer.name} takes ${dmg} poison damage!`, 'damage', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
                     if (dmg > 0) showDamageImpact(nextPlayer.id, dmg, 'Poison', '#c084fc');
                     if (nextPlayer.hp <= 0) {
                         nextPlayer.eliminated = true;
@@ -5031,7 +5071,7 @@
                 return;
             }
 
-            addLogEntry(`${getCurrentPlayer().name}'s turn begins.`, 'info');
+            addLogEntry(`${getCurrentPlayer().name}'s turn begins.`, 'turn-start');
             updateGameUI();
         }
 
@@ -5131,8 +5171,19 @@ ${itemRows}
             }).join('');
 
             const logEntries = state.gameLog.map((e, i) => {
-                const cls = e.type === 'damage' ? 'report-log-damage' : e.type === 'heal' ? 'report-log-heal' : 'report-log-info';
-                return `<li class="report-log-entry ${cls}"><span class="report-log-num">${i + 1}.</span> ${escapeHtml(e.message)}</li>`;
+                const typeCls = e.type === 'damage' ? 'report-log-damage' : e.type === 'heal' ? 'report-log-heal' : e.type === 'turn-start' ? 'report-log-turn-start report-log-info' : 'report-log-info';
+                const color = getLogPlayerColor(e.message);
+                const dot = color ? `<span class="report-log-dot" style="background:${color}"></span>` : '';
+                let hpTags = '';
+                if (e.hpSnapshots && e.hpSnapshots.length) {
+                    hpTags = e.hpSnapshots.map(s => {
+                        const p = state.players.find(pl => pl.id === s.id);
+                        const c = p ? p.color.hex : '#888';
+                        const name = p ? p.name : '?';
+                        return `<span class="report-log-hp" style="border-left-color:${c}">${escapeHtml(name)} ${s.hp}/${s.maxHp} HP</span>`;
+                    }).join(' ');
+                }
+                return `<li class="report-log-entry ${typeCls}"><span class="report-log-num">${i + 1}.</span>${dot}<span class="report-log-msg">${escapeHtml(e.message)}</span>${hpTags ? ' ' + hpTags : ''}</li>`;
             }).join('');
             const totalActions = state.gameLog.length;
 
@@ -5202,12 +5253,17 @@ ${itemRows}
         .report-status-survived { background: rgba(72, 219, 251, 0.2); color: #48dbfb; }
         .report-turn-order { color: rgba(255,255,255,0.85); font-size: 0.95rem; }
         .report-log { list-style: none; }
-        .report-log-entry { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; display: flex; gap: 8px; }
+        .report-log-entry { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
         .report-log-entry:last-child { border-bottom: none; }
-        .report-log-num { color: rgba(255,255,255,0.4); min-width: 28px; }
+        .report-log-num { color: rgba(255,255,255,0.4); min-width: 28px; flex-shrink: 0; margin-top: 1px; }
+        .report-log-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+        .report-log-msg { flex: 1; min-width: 0; }
+        .report-log-hp { font-size: 0.78rem; padding: 2px 7px; border-radius: 4px; background: rgba(255,255,255,0.06); border-left: 2px solid transparent; white-space: nowrap; color: rgba(255,255,255,0.55); margin-left: 4px; }
         .report-log-damage { color: #ff6b6b; }
         .report-log-heal { color: #2ecc71; }
         .report-log-info { color: #48dbfb; }
+        .report-log-turn-start { color: #feca57 !important; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 4px; font-weight: 600; }
+        .report-log-turn-start .report-log-msg { color: inherit; }
         .report-player-card {
             background: rgba(255,255,255,0.04);
             border-radius: 10px;
@@ -5286,13 +5342,44 @@ ${itemRows}
             });
         }
 
-        function addLogEntry(message, type = 'info') {
-            state.gameLog.push({ message, type });
+        function getLogPlayerColor(message) {
+            if (!state.players || !state.players.length) return null;
+            for (const p of state.players) {
+                if (message.startsWith(p.name + ' ') || message.startsWith(p.name + '\u2019s ') || message.startsWith(p.name + "'s ")) {
+                    return p.color.hex;
+                }
+            }
+            return null;
+        }
+
+        function buildLogEntryHtml(entry) {
+            let html = '';
+            const color = getLogPlayerColor(entry.message);
+            if (color) {
+                html += `<span class="log-player-dot" style="background:${color}"></span>`;
+            }
+            html += `<span class="log-msg">${escapeHtml(entry.message)}</span>`;
+            if (entry.hpSnapshots && entry.hpSnapshots.length) {
+                entry.hpSnapshots.forEach(s => {
+                    const p = state.players.find(pl => pl.id === s.id);
+                    const c = p ? p.color.hex : '#888';
+                    const name = p ? p.name : '?';
+                    html += ` <span class="log-hp-tag" style="border-left-color:${c}">${escapeHtml(name)} ${s.hp}/${s.maxHp} HP</span>`;
+                });
+            }
+            return html;
+        }
+
+        function addLogEntry(message, type = 'info', opts = {}) {
+            const logEntry = { message, type };
+            if (opts.hpSnapshots) logEntry.hpSnapshots = opts.hpSnapshots;
+            state.gameLog.push(logEntry);
             const empty = gameLogEntries.querySelector('.ledger-empty');
             if (empty) empty.remove();
             const entry = document.createElement('div');
-            entry.className = `log-entry log-${type}`;
-            entry.textContent = message;
+            const typeClass = type === 'turn-start' ? 'log-turn-start log-info' : `log-${type}`;
+            entry.className = `log-entry ${typeClass}`;
+            entry.innerHTML = buildLogEntryHtml(logEntry);
             gameLogEntries.insertBefore(entry, gameLogEntries.firstChild);
             if (!gameLedgerModal.classList.contains('open')) {
                 ledgerUnread++;
