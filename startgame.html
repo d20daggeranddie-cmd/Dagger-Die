@@ -471,6 +471,11 @@
           </div>
           <p id="mod-vampire-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Gain HP equal to the target's remaining HP when you deliver a killing blow.</p>
           <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-party-cb" aria-describedby="mod-party-hint">
+            <label for="mod-party-cb">Party</label>
+          </div>
+          <p id="mod-party-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Players choose teams on the character select screen. Last team standing wins.</p>
+          <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-desc">
             <label for="items-enabled-cb">Items</label>
           </div>
@@ -622,6 +627,7 @@
     const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
     const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
     const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
+    const MOD_PARTY_KEY = 'daggerdie_modParty';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
@@ -639,7 +645,7 @@
       AUTO_ROLL_TURN_ORDER_KEY, AUTO_BEGIN_GAME_KEY, AUTO_ROLL_DICE_KEY,
       AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
-      MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY,
+      MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY, MOD_PARTY_KEY,
       ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTS_ENABLED_KEY
     ];
     if (!isPersistent()) {
@@ -676,6 +682,7 @@
     const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
     const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
     const modVampireCb = document.getElementById('mod-vampire-cb');
+    const modPartyCb = document.getElementById('mod-party-cb');
 
     useCustomHpCb.checked = localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
     const savedHp = localStorage.getItem(CUSTOM_HP_KEY);
@@ -685,6 +692,7 @@
     modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
     modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
     modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
+    modPartyCb.checked = localStorage.getItem(MOD_PARTY_KEY) === 'true';
     const itemsEnabledCb = document.getElementById('items-enabled-cb');
     itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
     const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
@@ -729,6 +737,7 @@
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
     modVampireCb.addEventListener('change', () => localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked)));
+    modPartyCb.addEventListener('change', () => localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked)));
     itemsEnabledCb.addEventListener('change', () => {
       localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
       if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
