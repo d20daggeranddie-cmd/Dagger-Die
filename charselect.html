@@ -455,6 +455,101 @@
             margin: 0 auto;
         }
 
+        .team-avatar-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            cursor: pointer;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+        .team-avatar-btn:hover {
+            transform: scale(1.08);
+            border-color: #48dbfb;
+            box-shadow: 0 0 12px rgba(72, 219, 251, 0.4);
+        }
+        .team-avatar-btn svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .team-picker-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .team-picker-modal-overlay.open {
+            display: flex;
+        }
+        .team-picker-modal {
+            background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: calc(100vw - 40px);
+            max-height: 90vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .team-picker-modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+        }
+        .team-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 420px) {
+            .team-picker-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .team-picker-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+        }
+        .team-picker-option:hover {
+            border-color: #48dbfb;
+            background: rgba(72, 219, 251, 0.15);
+            transform: scale(1.02);
+        }
+        .team-picker-option .team-emblem {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .team-picker-option .team-emblem svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .team-picker-option .team-name {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+        }
+
         .hidden { display: none !important; }
 
         .m3-logo {
@@ -562,15 +657,26 @@
         </div>
     </div>
 
+    <div class="team-picker-modal-overlay" id="team-picker-modal" role="dialog" aria-label="Pick team">
+        <div class="team-picker-modal">
+            <h3>Pick your team</h3>
+            <div class="team-picker-grid" id="team-picker-grid"></div>
+        </div>
+    </div>
+
     <script src="rpg-bg-particles.js"
         data-particle-container="gameCssParticles" data-particle-class="game-bg-particle"
         data-rune-container="gameRuneContainer" data-rune-class="game-bg-rune"></script>
     <script src="rpg-bg-canvas.js"></script>
     <script src="characters.js"></script>
+    <script src="teams.js"></script>
     <script>
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
         const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
+        const MOD_PARTY_KEY = 'daggerdie_modParty';
         const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
+        const TEAMS = window.DAGGERDIE_TEAMS || [];
+        const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
         const FALLBACK_CHAR = { id: 'unknown', name: 'Unknown', color: '#8b7355', svg: '<svg viewBox="0 0 48 48"><text x="24" y="32" text-anchor="middle" font-size="24" fill="#888">?</text></svg>' };
 
         if (!CHARACTERS.length) {
@@ -596,9 +702,12 @@
         const characterPickerGrid = document.getElementById('character-picker-grid');
         const botDifficultyModal = document.getElementById('bot-difficulty-modal');
         const botDifficultyOptions = document.getElementById('bot-difficulty-options');
+        const teamPickerModal = document.getElementById('team-picker-modal');
+        const teamPickerGrid = document.getElementById('team-picker-grid');
 
         let currentPickingPlayerIndex = 0;
         let currentBotPlayerIndex = 0;
+        let currentTeamPlayerIndex = 0;
 
         const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
 
@@ -675,6 +784,44 @@
             if (e.target === botDifficultyModal) botDifficultyModal.classList.remove('open');
         });
 
+        const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+
+        function partyEnabled() {
+            return localStorage.getItem(MOD_PARTY_KEY) === 'true';
+        }
+
+        function buildTeamPickerGrid() {
+            teamPickerGrid.innerHTML = TEAMS.map((t, idx) => `
+                <button type="button" class="team-picker-option" data-team-id="${t.id}" title="${t.name}">
+                    <div class="team-emblem">${prefixTeamSvgIds(t.svg, 'cs-tgrid-' + idx)}</div>
+                    <span class="team-name">${t.name}</span>
+                </button>
+            `).join('');
+            teamPickerGrid.querySelectorAll('.team-picker-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const row = playerSetup.querySelector(`.player-input[data-player="${currentTeamPlayerIndex}"]`);
+                    if (row) {
+                        const teamId = btn.dataset.teamId;
+                        const team = TEAM_BY_ID[teamId];
+                        if (team) {
+                            row.dataset.teamId = teamId;
+                            const teamBtn = row.querySelector('.team-avatar-btn');
+                            if (teamBtn) {
+                                teamBtn.innerHTML = prefixTeamSvgIds(team.svg, 'cs-tp' + currentTeamPlayerIndex);
+                                teamBtn.title = team.name + ' – click to change';
+                            }
+                        }
+                    }
+                    teamPickerModal.classList.remove('open');
+                });
+            });
+        }
+        if (TEAMS.length) buildTeamPickerGrid();
+
+        teamPickerModal.addEventListener('click', (e) => {
+            if (e.target === teamPickerModal) teamPickerModal.classList.remove('open');
+        });
+
         document.querySelectorAll('.player-count-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('selected'));
@@ -697,7 +844,8 @@
                     name: input ? input.value : '',
                     characterId: row.dataset.characterId || '',
                     isBot: row.dataset.isBot || 'false',
-                    botSkill: row.dataset.botSkill || ''
+                    botSkill: row.dataset.botSkill || '',
+                    teamId: row.dataset.teamId || ''
                 });
             });
 
@@ -709,6 +857,7 @@
                 setupError.textContent = '';
             }
             const showBots = botsEnabled();
+            const showTeams = partyEnabled() && TEAMS.length > 0;
             for (let i = 0; i < count; i++) {
                 const prev = savedData[i];
                 const fallbackChar = CHARACTERS.length ? CHARACTERS[i % CHARACTERS.length] : FALLBACK_CHAR;
@@ -716,22 +865,29 @@
                 const selectedChar = CHARACTERS.find(c => c.id === charId) || fallbackChar;
                 const defaultBotSkill = (prev && prev.botSkill) || BOT_SKILLS[1].id;
                 const isBot = prev ? prev.isBot : 'false';
+                const teamId = (prev && prev.teamId) || (showTeams ? TEAMS[i % TEAMS.length].id : '');
+                const selectedTeam = teamId ? (TEAM_BY_ID[teamId] || null) : null;
                 const div = document.createElement('div');
                 div.className = 'player-input';
                 div.dataset.player = String(i);
                 div.dataset.characterId = selectedChar.id;
                 div.dataset.isBot = isBot;
                 div.dataset.botSkill = defaultBotSkill;
+                div.dataset.teamId = teamId;
                 const botButtonHtml = showBots ? `
                         <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M12 10V6"/><path d="M8 6h8"/></svg>
                         </button>
+                ` : '';
+                const teamButtonHtml = showTeams ? `
+                        <button type="button" class="team-avatar-btn" data-player="${i}" title="${selectedTeam ? selectedTeam.name + ' – click to change' : 'Pick team'}">${selectedTeam ? prefixTeamSvgIds(selectedTeam.svg, 'cs-tp' + i) : ''}</button>
                 ` : '';
                 div.innerHTML = `
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
                         <button type="button" class="character-avatar-btn" title="${selectedChar.name} – click to change">${prefixSvgIds(selectedChar.svg, 'cs-p' + i + '-' + selectedChar.id)}</button>
+                        ${teamButtonHtml}
                         ${botButtonHtml}
                     </div>
                 `;
@@ -744,6 +900,13 @@
                     currentPickingPlayerIndex = i;
                     characterPickerModal.classList.add('open');
                 });
+                if (showTeams) {
+                    const teamBtn = div.querySelector('.team-avatar-btn');
+                    teamBtn.addEventListener('click', () => {
+                        currentTeamPlayerIndex = i;
+                        teamPickerModal.classList.add('open');
+                    });
+                }
                 if (showBots) {
                     const botBtn = div.querySelector('.bot-toggle-btn');
                     botBtn.addEventListener('click', () => {
@@ -866,12 +1029,14 @@
                 const char = CHARACTERS.find(c => c.id === characterId) || fbc;
                 const isBot = allowBots && (row.dataset.isBot === 'true');
                 const botSkill = (row.dataset.botSkill || 'novice');
+                const teamId = row.dataset.teamId || undefined;
                 payload.push({
                     name,
                     characterId,
                     color: char ? char.color : '#8b7355',
                     isBot: isBot,
-                    botSkill: isBot ? botSkill : undefined
+                    botSkill: isBot ? botSkill : undefined,
+                    teamId: teamId
                 });
             });
 
@@ -905,7 +1070,8 @@
                         'daggerdie_itemsEnabled',
                         'daggerdie_itemsStartWithRandom',
                         'daggerdie_botsEnabled',
-                        'daggerdie_modVampire'
+                        'daggerdie_modVampire',
+                        'daggerdie_modParty'
                     ].forEach(k => localStorage.removeItem(k));
                     window.location.href = 'startgame.html';
                 }
