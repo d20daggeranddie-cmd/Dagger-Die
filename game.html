@@ -1294,6 +1294,39 @@
             gap: 6px;
             flex-wrap: wrap;
         }
+        .player-card-team-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 4px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .player-card-team-badge .team-badge-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .player-card-team-badge .team-badge-icon svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .turn-order-team-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .turn-order-team-badge svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
         /* Game Area */
         .game-area {
@@ -2319,6 +2352,11 @@
             </div>
             <p id="mod-vampire-hint" class="setting-hint">Gain HP equal to all damage dealt to a target this turn when you deliver a killing blow.</p>
             <div class="option-row">
+                <input type="checkbox" id="mod-party-cb" aria-describedby="mod-party-hint">
+                <label for="mod-party-cb">Party</label>
+            </div>
+            <p id="mod-party-hint" class="setting-hint">Players choose teams on the character select screen. Last team standing wins.</p>
+            <div class="option-row">
                 <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
                 <label for="items-enabled-cb">Items</label>
             </div>
@@ -2481,6 +2519,7 @@
     </script>
     <script src="rpg-bg-canvas.js"></script>
     <script src="characters.js"></script>
+    <script src="teams.js"></script>
     <script src="items.js"></script>
     <script>
         // Game State
@@ -2512,6 +2551,7 @@
             modBuffOnCritical: false,
             modNerfOnMiss: false,
             modVampire: false,
+            modParty: false,
             itemsEnabled: false,
             itemsStartWithRandom: false,
             itemUsePhase: false
@@ -2562,6 +2602,7 @@
         const modBuffOnCriticalCb = document.getElementById('mod-buff-on-critical-cb');
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
         const modVampireCb = document.getElementById('mod-vampire-cb');
+        const modPartyCb = document.getElementById('mod-party-cb');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
         const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
         const autoRollDiceCb = document.getElementById('auto-roll-dice-cb');
@@ -2580,6 +2621,7 @@
         modBuffOnCriticalCb.addEventListener('change', applySettingsFromModal);
         modNerfOnMissCb.addEventListener('change', applySettingsFromModal);
         modVampireCb.addEventListener('change', applySettingsFromModal);
+        modPartyCb.addEventListener('change', applySettingsFromModal);
         if (autoRollDiceCb) autoRollDiceCb.addEventListener('change', applySettingsFromModal);
         if (autoDealDamageCb) autoDealDamageCb.addEventListener('change', applySettingsFromModal);
         if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.addEventListener('change', applySettingsFromModal);
@@ -2614,6 +2656,7 @@
             modBuffOnCriticalCb.checked = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
             modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
             modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
+            modPartyCb.checked = localStorage.getItem(MOD_PARTY_KEY) === 'true';
             if (itemsEnabledCb) itemsEnabledCb.checked = readOnly ? state.itemsEnabled : (localStorage.getItem(ITEMS_ENABLED_KEY) === 'true');
             if (itemsStartWithRandomCb) {
                 const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
@@ -2626,6 +2669,7 @@
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
             modVampireCb.disabled = readOnly;
+            modPartyCb.disabled = readOnly;
             if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
             if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
             if (autoRollDiceCb) autoRollDiceCb.disabled = false;
@@ -2643,6 +2687,7 @@
             localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
             localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
             localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked));
+            localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked));
             localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
             if (useCustomHpCb.checked) {
                 const val = customHpInput.value.trim();
@@ -2714,11 +2759,13 @@
             state.modBuffOnCritical = modBuffOnCriticalCb.checked;
             state.modNerfOnMiss = modNerfOnMissCb.checked;
             state.modVampire = modVampireCb.checked;
+            state.modParty = modPartyCb.checked;
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(state.modNerfOnMiss));
                 localStorage.setItem(MOD_VAMPIRE_KEY, String(state.modVampire));
+                localStorage.setItem(MOD_PARTY_KEY, String(state.modParty));
                 if (useCustomHpCb.checked) {
                     localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
                     localStorage.setItem(CUSTOM_HP_KEY, String(customHpInput.value.trim()));
@@ -2729,6 +2776,7 @@
                 localStorage.removeItem(MOD_BUFF_ON_CRITICAL_KEY);
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
                 localStorage.removeItem(MOD_VAMPIRE_KEY);
+                localStorage.removeItem(MOD_PARTY_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -2823,6 +2871,7 @@
         const MOD_BUFF_ON_CRITICAL_KEY = 'daggerdie_modBuffOnCritical';
         const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
         const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
+        const MOD_PARTY_KEY = 'daggerdie_modParty';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
         const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
@@ -2835,6 +2884,7 @@
             state.modBuffOnCritical = localStorage.getItem(MOD_BUFF_ON_CRITICAL_KEY) === 'true';
             state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
             state.modVampire = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
+            state.modParty = localStorage.getItem(MOD_PARTY_KEY) === 'true';
             state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
@@ -2910,6 +2960,15 @@
             return 60;
         }
 
+        function getTeamBadgeInlineHtml(p) {
+            if (!p.teamId) return '';
+            const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
+            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+            const team = TEAM_BY_ID[p.teamId];
+            if (!team) return '';
+            return `<div class="turn-order-team-badge" title="${team.name}">${prefixTeamSvgIds(team.svg, 'game-to-tb' + p.id)}</div>`;
+        }
+
         function showTurnOrderScreen() {
             turnOrderScreen.style.display = 'block';
 
@@ -2919,15 +2978,18 @@
             }
 
             const rollsDiv = document.getElementById('turn-order-rolls');
-            rollsDiv.innerHTML = state.players.map(p => `
+            rollsDiv.innerHTML = state.players.map(p => {
+                const teamBadge = (state.modParty && p.teamId) ? getTeamBadgeInlineHtml(p) : '';
+                return `
                 <div class="turn-order-player" data-player="${p.id}">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
+                        ${teamBadge}
                         <span>${p.name}</span>
                     </div>
                     <span class="roll-value">-</span>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         document.getElementById('roll-turn-order-btn').addEventListener('click', async () => {
@@ -2961,16 +3023,19 @@
             tieMessage.style.display = 'none';
 
             function updateTurnOrderDisplay() {
-                rollsDiv.innerHTML = state.players.map((p, idx) => `
+                rollsDiv.innerHTML = state.players.map((p, idx) => {
+                    const teamBadge = (state.modParty && p.teamId) ? getTeamBadgeInlineHtml(p) : '';
+                    return `
                     <div class="turn-order-player" data-player="${p.id}">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-weight: bold; width: 25px;">#${idx + 1}</span>
                             ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
+                            ${teamBadge}
                             <span>${p.name}</span>
                         </div>
                         <span class="roll-value">${p.turnOrderRoll}</span>
                     </div>
-                `).join('');
+                `}).join('');
             }
 
             // Find tie groups (consecutive players with same roll) - each resolves independently
@@ -3121,6 +3186,7 @@
                     aimBonus: 0,
                     isBot: !!p.isBot,
                     botSkill: p.botSkill && BOT_SKILLS[p.botSkill] ? p.botSkill : 'novice',
+                    teamId: p.teamId || null,
                     inventory: [null, null, null],
                     inventoryLocked: [false, false, false],
                     itemStats: { acquired: 0, used: 0, acquiredById: {}, usedById: {} }
@@ -3165,6 +3231,16 @@
                 return `<div class="${baseClass} player-avatar-char" style="width:${size}px;height:${size}px;flex-shrink:0;overflow:hidden;border-radius:50%;">${svg}</div>`;
             }
             return `<div class="${baseClass}" style="width:${size}px;height:${size}px;background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
+        }
+
+        function getTeamBadgeHtml(p, cssClass) {
+            if (!state.modParty || !p.teamId) return '';
+            const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
+            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+            const team = TEAM_BY_ID[p.teamId];
+            if (!team) return '';
+            const cls = cssClass || 'player-card-team-badge';
+            return `<div class="${cls}"><div class="team-badge-icon">${prefixTeamSvgIds(team.svg, 'game-tb' + p.id)}</div><span>${team.name}</span></div>`;
         }
 
         function ensurePlayerItemStats(player) {
@@ -3515,6 +3591,7 @@
                     </div>
                     <div class="player-turn-order">Turn Order: #${state.players.indexOf(p) + 1}</div>
                     ${p.isBot ? '<div class="player-card-bot-skill" data-player="'+p.id+'">Bot: ' + capitalizeBotSkill(p.botSkill) + '</div>' : ''}
+                    ${getTeamBadgeHtml(p)}
                     ${getPlayerStatusEffectsForItemModal(p).map(s => '<div class="player-card-status ' + s.kind + '">' + s.label + '</div>').join('')}
                     ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '">' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
                 </div>
@@ -4155,7 +4232,11 @@
                 if (aliveOpponents.length === 0) break;
                 const currentHit = state.hits[i];
                 const currentHitValue = getHitEffectiveRoll(currentHit);
-                const targetPlayer = aliveOpponents[Math.floor(Math.random() * aliveOpponents.length)];
+                const enemies = (state.modParty && currentPlayer.teamId)
+                    ? aliveOpponents.filter(p => p.teamId !== currentPlayer.teamId)
+                    : aliveOpponents;
+                const targetPool = enemies.length > 0 ? enemies : aliveOpponents;
+                const targetPlayer = targetPool[Math.floor(Math.random() * targetPool.length)];
                 const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
                 state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
                 const targetHpBefore = targetPlayer.hp;
@@ -4786,29 +4867,55 @@
             const eliminated = state.players.filter(p => p.eliminated);
             const byLowestHp = (arr) => arr.slice().sort((a, b) => a.hp - b.hp)[0] || null;
             const byHighestHp = (arr) => arr.slice().sort((a, b) => b.hp - a.hp)[0] || null;
+            const isTeamMode = state.modParty && user.teamId;
+            const enemies = isTeamMode ? opponents.filter(p => p.teamId !== user.teamId) : opponents;
+            const hostileTargets = enemies.length > 0 ? enemies : opponents;
+            const eliminatedAllies = isTeamMode ? eliminated.filter(p => p.teamId === user.teamId) : [];
+            const aliveAllies = isTeamMode ? alive.filter(p => p.id !== user.id && p.teamId === user.teamId) : [];
 
-            // Free-for-all bots avoid resurrecting opponents.
-            if (item.id === 'orb') return null;
-            if (item.id === 'monkey-paw') return byHighestHp(opponents);
-            if (item.id === 'potion') return byHighestHp(opponents.filter(p => (p.poisonTurns || 0) === 0)) || byHighestHp(opponents);
+            if (item.id === 'orb') {
+                if (isTeamMode && eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
+                return null;
+            }
+            if (item.id === 'monkey-paw') return byHighestHp(hostileTargets);
+            if (item.id === 'potion') return byHighestHp(hostileTargets.filter(p => (p.poisonTurns || 0) === 0)) || byHighestHp(hostileTargets);
 
             if (item.id === 'metal-fragment') return (user.shieldActive || (user.shieldTurns || 0) > 0) ? null : user;
             if (item.id === 'tigers-eye') return user.focusActive ? null : user;
-            if (item.id === 'freeze') return byHighestHp(opponents.filter(p => !p.freezeActive)) || null;
+            if (item.id === 'freeze') return byHighestHp(hostileTargets.filter(p => !p.freezeActive)) || null;
             if (item.id === 'ticket') return (user.freeDropsActive || (user.freeDropsCount || 0) > 0) ? null : user;
             if (item.id === 'toy-rocket') return (state.hasRolled && !user.aimActive && state.hits && state.hits.length > 0) ? user : null;
 
-            if (item.id === 'scroll') return user.hp < user.maxHp ? user : null;
-            if (item.id === 'feather') return (user.hp < user.maxHp && (user.regenTurns || 0) === 0) ? user : null;
+            if (item.id === 'scroll') {
+                if (isTeamMode) {
+                    const hurtAlly = byLowestHp([user, ...aliveAllies].filter(p => p.hp < p.maxHp));
+                    return hurtAlly || null;
+                }
+                return user.hp < user.maxHp ? user : null;
+            }
+            if (item.id === 'feather') {
+                if (isTeamMode) {
+                    const hurtAlly = byLowestHp([user, ...aliveAllies].filter(p => p.hp < p.maxHp && (p.regenTurns || 0) === 0));
+                    return hurtAlly || null;
+                }
+                return (user.hp < user.maxHp && (user.regenTurns || 0) === 0) ? user : null;
+            }
             if (item.id === 'red-rose') {
                 return countDropDamageForPlayer(user.name) > 0 ? user : null;
             }
             if (item.id === 'medkit') {
+                if (isTeamMode) {
+                    const debuffedAlly = [user, ...aliveAllies].find(p => p.nerfActive || (p.poisonRemaining || 0) > 0);
+                    return debuffedAlly || null;
+                }
                 return (user.nerfActive || (user.poisonRemaining || 0) > 0) ? user : null;
             }
 
-            if (item.targetType === 'opponent') return byLowestHp(opponents);
-            if (item.targetType === 'eliminated') return byHighestHp(eliminated);
+            if (item.targetType === 'opponent') return byLowestHp(hostileTargets);
+            if (item.targetType === 'eliminated') {
+                if (isTeamMode && eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
+                return byHighestHp(eliminated);
+            }
             if (profile && profile.smartChoiceChance < 0.7) {
                 const valid = getValidTargetsForItem(user, item);
                 if (valid.length > 0 && Math.random() < 0.35) {
@@ -5075,17 +5182,57 @@
             updateGameUI();
         }
 
+        function getAliveTeams() {
+            const alivePlayers = getAlivePlayers();
+            const teamIds = new Set();
+            alivePlayers.forEach(p => { if (p.teamId) teamIds.add(p.teamId); });
+            return [...teamIds];
+        }
+
         function checkWinCondition() {
             const alivePlayers = getAlivePlayers();
-            if (alivePlayers.length === 1) {
-                state.phase = 'finished';
-                clearSavedGameState();
-                showWinner(alivePlayers[0]);
-            } else if (alivePlayers.length === 0) {
-                state.phase = 'finished';
-                clearSavedGameState();
-                showWinner(null);
+            if (state.modParty) {
+                const aliveTeams = getAliveTeams();
+                if (aliveTeams.length === 1) {
+                    state.phase = 'finished';
+                    clearSavedGameState();
+                    showTeamWinner(aliveTeams[0]);
+                } else if (aliveTeams.length === 0 || alivePlayers.length === 0) {
+                    state.phase = 'finished';
+                    clearSavedGameState();
+                    showWinner(null);
+                }
+            } else {
+                if (alivePlayers.length === 1) {
+                    state.phase = 'finished';
+                    clearSavedGameState();
+                    showWinner(alivePlayers[0]);
+                } else if (alivePlayers.length === 0) {
+                    state.phase = 'finished';
+                    clearSavedGameState();
+                    showWinner(null);
+                }
             }
+        }
+
+        function showTeamWinner(teamId) {
+            state.players.forEach(p => { p.inventory = [null, null, null]; });
+            gameScreen.style.display = 'none';
+            winnerScreen.style.display = 'block';
+
+            const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
+            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+            const team = TEAM_BY_ID[teamId];
+            const survivors = state.players.filter(p => !p.eliminated && p.teamId === teamId);
+            const survivorNames = survivors.map(p => `<span style="color:${p.color.hex};">${p.name}</span>`).join(', ');
+            const teamSvg = team ? prefixTeamSvgIds(team.svg, 'game-win-team') : '';
+            const teamName = team ? team.name : teamId;
+
+            document.getElementById('winner-name').innerHTML = `
+                ${teamSvg ? `<div style="margin: 0 auto 16px; width: 80px; height: 80px;">${teamSvg}</div>` : ''}
+                <div>Team <span style="color: #48dbfb;">${teamName}</span> Wins!</div>
+                <div style="font-size: 0.9rem; margin-top: 12px; opacity: 0.85;">Survivors: ${survivorNames}</div>
+            `;
         }
 
         function showWinner(winner) {
@@ -5116,15 +5263,17 @@
             }).join(', ');
         }
 
-        function generateGameReportHTML(winner) {
+        function generateGameReportHTML(winner, winningTeamId) {
             const now = new Date();
             const dateStr = now.toLocaleDateString(undefined, { dateStyle: 'long' });
             const timeStr = now.toLocaleTimeString(undefined, { timeStyle: 'short' });
-            const winnerText = winner ? winner.name : "Draw (no winner)";
+            const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
+            const winningTeam = winningTeamId ? TEAM_BY_ID[winningTeamId] : null;
+            const winnerText = winningTeam ? 'Team ' + winningTeam.name : (winner ? winner.name : "Draw (no winner)");
             const turnOrderList = state.players.map((p, i) => `${i + 1}. ${p.name}`).join(', ');
 
             const playerRows = state.players.map(p => {
-                let status = p.eliminated ? 'Eliminated' : (winner && p.id === winner.id ? 'Winner' : 'Survived');
+                let status = p.eliminated ? 'Eliminated' : (winningTeam && p.teamId === winningTeamId ? 'Winner' : (winner && p.id === winner.id ? 'Winner' : 'Survived'));
                 return `
                 <tr>
                     <td><span class="report-color-dot" style="background:${p.color.hex}"></span> ${escapeHtml(p.name)}</td>
@@ -5135,7 +5284,7 @@
 
             // Per-player stats for breakdown
             const playerStatsBreakdown = state.players.map(p => {
-                const status = p.eliminated ? 'Eliminated' : (winner && p.id === winner.id ? 'Winner' : 'Survived');
+                const status = p.eliminated ? 'Eliminated' : (winningTeam && p.teamId === winningTeamId ? 'Winner' : (winner && p.id === winner.id ? 'Winner' : 'Survived'));
                 const hitCount = state.gameLog.filter(e =>
                     e.type === 'damage' &&
                     e.message.startsWith(`${p.name} dealt `) &&
@@ -5320,8 +5469,16 @@ ${itemRows}
         }
 
         function exportGameReport() {
-            const winner = getAlivePlayers().length === 1 ? getAlivePlayers()[0] : null;
-            const html = generateGameReportHTML(winner);
+            let winner = null;
+            let winningTeamId = null;
+            if (state.modParty) {
+                const aliveTeams = getAliveTeams();
+                if (aliveTeams.length === 1) winningTeamId = aliveTeams[0];
+            } else {
+                const alive = getAlivePlayers();
+                if (alive.length === 1) winner = alive[0];
+            }
+            const html = generateGameReportHTML(winner, winningTeamId);
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             window.open(url, '_blank', 'noopener');
