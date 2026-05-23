@@ -2366,6 +2366,11 @@
                 <label for="items-start-with-random-cb">Start with random item</label>
             </div>
             <p id="items-start-with-random-hint" class="setting-hint" style="margin-left: 20px;">Each player begins the game with one randomly generated item.</p>
+            <div class="option-row" style="margin-left: 20px;">
+                <input type="checkbox" id="bottomless-backpack-cb" aria-describedby="bottomless-backpack-hint">
+                <label for="bottomless-backpack-cb">Bottomless Backpack</label>
+            </div>
+            <p id="bottomless-backpack-hint" class="setting-hint" style="margin-left: 20px;">All players start with a full inventory and items regenerate after use.</p>
         </div>
     </div>
 
@@ -2554,6 +2559,7 @@
             modParty: false,
             itemsEnabled: false,
             itemsStartWithRandom: false,
+            bottomlessBackpack: false,
             itemUsePhase: false
         };
         let previousHpByPlayerId = {};
@@ -2605,6 +2611,7 @@
         const modPartyCb = document.getElementById('mod-party-cb');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
         const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
+        const bottomlessBackpackCb = document.getElementById('bottomless-backpack-cb');
         const autoRollDiceCb = document.getElementById('auto-roll-dice-cb');
         const autoDealDamageCb = document.getElementById('auto-deal-damage-cb');
         const autoAdvanceAfterDamageCb = document.getElementById('auto-advance-after-damage-cb');
@@ -2628,13 +2635,20 @@
         if (skipDamageConfirmCb) skipDamageConfirmCb.addEventListener('change', applySettingsFromModal);
 
         if (itemsEnabledCb) itemsEnabledCb.addEventListener('change', () => {
-            if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
-                itemsStartWithRandomCb.checked = false;
+            if (!itemsEnabledCb.checked) {
+                if (itemsStartWithRandomCb) itemsStartWithRandomCb.checked = false;
+                if (bottomlessBackpackCb) bottomlessBackpackCb.checked = false;
             }
             applySettingsFromModal();
         });
         if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => {
             if (itemsStartWithRandomCb.checked && itemsEnabledCb) {
+                itemsEnabledCb.checked = true;
+            }
+            applySettingsFromModal();
+        });
+        if (bottomlessBackpackCb) bottomlessBackpackCb.addEventListener('change', () => {
+            if (bottomlessBackpackCb.checked && itemsEnabledCb) {
                 itemsEnabledCb.checked = true;
             }
             applySettingsFromModal();
@@ -2662,6 +2676,10 @@
                 const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
                 itemsStartWithRandomCb.checked = !!startVal;
             }
+            if (bottomlessBackpackCb) {
+                const bbVal = readOnly ? state.bottomlessBackpack : (itemsEnabledCb?.checked && localStorage.getItem(BOTTOMLESS_BACKPACK_KEY) === 'true');
+                bottomlessBackpackCb.checked = !!bbVal;
+            }
             if (autoRollDiceCb) autoRollDiceCb.checked = localStorage.getItem('daggerdie_autoRollDice') === 'true';
             if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
@@ -2672,6 +2690,7 @@
             modPartyCb.disabled = readOnly;
             if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
             if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
+            if (bottomlessBackpackCb) bottomlessBackpackCb.disabled = readOnly;
             if (autoRollDiceCb) autoRollDiceCb.disabled = false;
             if (autoDealDamageCb) autoDealDamageCb.disabled = false;
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.disabled = false;
@@ -2684,6 +2703,7 @@
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (itemsEnabledCb) localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
             if (itemsStartWithRandomCb) localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
+            if (bottomlessBackpackCb) localStorage.setItem(BOTTOMLESS_BACKPACK_KEY, String(bottomlessBackpackCb.checked));
             localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked));
             localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
             localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked));
@@ -2722,6 +2742,13 @@
                 if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             } else if (!wasStartWithRandom && state.itemsStartWithRandom && state.itemsEnabled && state.players.length > 0) {
                 state.players.forEach(givePlayerRandomStartItem);
+                updatePlayersPanel();
+                if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
+            }
+            const wasBottomless = state.bottomlessBackpack;
+            state.bottomlessBackpack = bottomlessBackpackCb ? bottomlessBackpackCb.checked : false;
+            if (!wasBottomless && state.bottomlessBackpack && state.itemsEnabled && state.players.length > 0) {
+                state.players.forEach(p => fillInventoryBottomlessBackpack(p));
                 updatePlayersPanel();
                 if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             }
@@ -2874,6 +2901,7 @@
         const MOD_PARTY_KEY = 'daggerdie_modParty';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
+        const BOTTOMLESS_BACKPACK_KEY = 'daggerdie_bottomlessBackpack';
         const PERSISTENT_SETTINGS_KEY = 'daggerdie_persistentSettings';
 
         function isPersistentSettings() {
@@ -2887,6 +2915,7 @@
             state.modParty = localStorage.getItem(MOD_PARTY_KEY) === 'true';
             state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
+            state.bottomlessBackpack = localStorage.getItem(BOTTOMLESS_BACKPACK_KEY) === 'true';
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             state.autoAdvanceAfterDamage = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             state.skipDamageConfirm = localStorage.getItem('daggerdie_skipDamageConfirm') === 'true';
@@ -3193,6 +3222,7 @@
                 };
             });
             state.players.forEach(givePlayerRandomStartItem);
+            state.players.forEach(fillInventoryBottomlessBackpack);
             clearHpFeedbackSnapshot();
             state.autoDealDamage = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             state.autoAdvanceAfterDamage = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
@@ -3293,6 +3323,23 @@
             if (player.inventoryLocked) player.inventoryLocked[idx] = false;
             compactInventory(player);
             player.hadStartItem = false;
+        }
+
+        function fillInventoryBottomlessBackpack(player) {
+            if (!state.itemsEnabled || !state.bottomlessBackpack || !player) return;
+            if (typeof DAGGERDIE_GET_ITEM_BY_D12 !== 'function') return;
+            if (!player.inventory) player.inventory = [null, null, null];
+            if (!player.inventoryLocked) player.inventoryLocked = [false, false, false];
+            for (let i = 0; i < 3; i++) {
+                if (player.inventory[i] === null || player.inventory[i] === undefined) {
+                    const d12Roll = Math.floor(Math.random() * 12) + 1;
+                    const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                    if (item) {
+                        player.inventory[i] = item.id;
+                        trackItemAcquired(player, item.id);
+                    }
+                }
+            }
         }
 
         function isItemLocked(player, slotIdx) {
@@ -4842,6 +4889,7 @@
             if (!user.inventoryLocked) user.inventoryLocked = [false, false, false];
             user.inventoryLocked[slotIdx] = false;
             compactInventory(user);
+            fillInventoryBottomlessBackpack(user);
             trackItemUsed(user, item.id);
             state.itemUsesThisTurn++;
             updatePlayersPanel();
@@ -5623,6 +5671,7 @@ ${itemRows}
                 p.rememberedStartItemId = undefined;
             });
             state.players.forEach(givePlayerRandomStartItem);
+            state.players.forEach(fillInventoryBottomlessBackpack);
             state.currentPlayerIndex = 0;
             state.phase = 'turnOrder';
             state.currentRoll = [];
