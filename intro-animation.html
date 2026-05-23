@@ -42,12 +42,12 @@
     function goToStart() {
       try {
         if (window.top !== window.self) {
-          window.top.location.href = 'startgame.html';
+          window.top.location.href = 'gametype.html';
         } else {
-          window.location.href = 'startgame.html';
+          window.location.href = 'gametype.html';
         }
       } catch (e) {
-        window.location.href = 'startgame.html';
+        window.location.href = 'gametype.html';
       }
     }
     document.body.addEventListener('click', goToStart);
