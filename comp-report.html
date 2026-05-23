@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagger & Die - Competition Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0c18;
+    min-height: 100vh;
+    color: #fff;
+    line-height: 1.6;
+  }
+
+  /* Simplified RPG background */
+  .bg-base { position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 120% 80% at 50% 110%, #1a1040 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 20% 80%, #0d1a3a 0%, transparent 50%),
+      radial-gradient(ellipse 80% 60% at 80% 80%, #1a0d2e 0%, transparent 50%),
+      linear-gradient(180deg, #080b16 0%, #0e1225 40%, #141833 70%, #1a1040 100%);
+  }
+  .bg-vignette { position: fixed; inset: 0; z-index: 1;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(5,5,15,0.7) 100%);
+    pointer-events: none;
+  }
+
+  .main-content { position: relative; z-index: 10; min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+  header { text-align: center; margin-bottom: 32px; }
+  h1 {
+    font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+    font-size: 2.8rem; font-weight: 700; margin-bottom: 8px; color: #d4a84b;
+    text-shadow: 2px 2px 0 #5c3d1e, 4px 4px 0 rgba(0,0,0,0.3), 0 0 20px rgba(212, 168, 75, 0.3);
+    letter-spacing: 3px;
+  }
+  .report-subtitle {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.2rem; color: #feca57; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .report-date { font-size: 0.9rem; color: rgba(255,255,255,0.5); }
+
+  .panel {
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 24px;
+    margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .panel-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.1rem; color: #feca57; font-weight: 600;
+    margin-bottom: 16px; text-align: center;
+  }
+
+  /* Targets dice display */
+  .targets-row {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .die-badge {
+    width: 52px; height: 52px;
+    background: linear-gradient(145deg, #2d3436, #1e272e);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: bold;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+  }
+  .die-badge.odd { color: #ff6b6b; border-color: #ff6b6b; }
+  .die-badge.even { color: #48dbfb; border-color: #48dbfb; }
+
+  /* Leaderboard */
+  .leaderboard { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .leaderboard th, .leaderboard td {
+    padding: 12px 16px; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .leaderboard th {
+    font-family: 'Cinzel', Georgia, serif;
+    color: #feca57; font-size: 0.85rem; font-weight: 600;
+    border-bottom: 2px solid rgba(254, 202, 87, 0.3);
+  }
+  .leaderboard td { color: rgba(255,255,255,0.9); }
+  .leaderboard .rank-1 td { color: #feca57; font-weight: bold; }
+  .leaderboard .rank-2 td { color: #c0c0c0; }
+  .leaderboard .rank-3 td { color: #cd7f32; }
+  .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 50px; text-align: center; }
+  .leaderboard .score-cell { font-weight: bold; font-size: 1.1rem; }
+
+  /* Scorecard recap */
+  .recap-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .recap-table th, .recap-table td {
+    padding: 8px 6px; text-align: center; font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .recap-table th {
+    font-family: 'Cinzel', Georgia, serif;
+    color: #feca57; font-size: 0.8rem; font-weight: 600;
+    border-bottom: 2px solid rgba(254, 202, 87, 0.3);
+  }
+  .recap-table th:first-child, .recap-table td:first-child { text-align: left; }
+  .recap-table .hit-mark { color: #2ecc71; font-weight: bold; }
+  .recap-table .miss-mark { color: #e74c3c; font-weight: bold; }
+  .recap-table .unscored { color: rgba(255,255,255,0.2); }
+  .recap-table .total-col { font-weight: bold; color: #feca57; }
+
+  /* Stats summary */
+  .stats-grid {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  }
+  .stat-item {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 14px 20px; text-align: center; min-width: 120px;
+  }
+  .stat-item .label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .stat-item .value { font-size: 1.3rem; font-weight: bold; color: #feca57; }
+
+  /* Print button */
+  .print-wrap { text-align: center; margin-top: 32px; }
+  .btn-print {
+    display: inline-block; padding: 12px 36px; border: none; border-radius: 10px;
+    font-size: 1rem; font-weight: bold; cursor: pointer;
+    background: linear-gradient(45deg, #feca57, #d4a84b); color: #1a1040;
+    transition: all 0.3s;
+  }
+  .btn-print:hover { box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4); transform: translateY(-2px); }
+
+  .no-data { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); }
+  .no-data a { color: #feca57; }
+
+  footer { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+  @media print {
+    .bg-base, .bg-vignette { display: none; }
+    body { background: #fff; color: #000; }
+    .main-content { z-index: auto; }
+    .panel { background: none; border: 1px solid #ccc; }
+    .panel-title, .report-subtitle, h1 { color: #333; text-shadow: none; }
+    .leaderboard th, .recap-table th, .stat-item .value { color: #333; }
+    .leaderboard td, .recap-table td { color: #000; }
+    .die-badge { background: #eee; border-color: #999; }
+    .die-badge.odd { color: #c0392b; border-color: #c0392b; }
+    .die-badge.even { color: #2980b9; border-color: #2980b9; }
+    .recap-table .hit-mark { color: #27ae60; }
+    .recap-table .miss-mark { color: #c0392b; }
+    .recap-table .unscored { color: #ccc; }
+    .recap-table .total-col { color: #333; }
+    .stat-item { background: none; border-color: #ccc; }
+    .stat-item .label { color: #666; }
+    .stat-item .value { color: #333; }
+    .print-wrap { display: none; }
+    .report-date { color: #666; }
+    footer { color: #999; border-color: #ccc; }
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.8rem; }
+    .report-subtitle { font-size: 1rem; }
+    .die-badge { width: 42px; height: 42px; font-size: 1.2rem; }
+    .recap-table th, .recap-table td { padding: 6px 3px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-base"></div>
+  <div class="bg-vignette"></div>
+
+  <main class="main-content">
+    <div class="container" id="report-container">
+      <!-- Populated by JS -->
+    </div>
+  </main>
+
+  <script>
+    const container = document.getElementById('report-container');
+    let data;
+
+    try {
+      const raw = sessionStorage.getItem('daggerdie_compReport');
+      if (raw) data = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+
+    if (!data || !data.targets || !data.players) {
+      container.innerHTML = '<div class="no-data"><h2>No Report Data</h2><p>No competition data found. <a href="compmode.html">Start a competition</a> first.</p></div>';
+    } else {
+      renderReport(data);
+    }
+
+    function renderReport(d) {
+      const ts = new Date(d.timestamp);
+      const dateStr = ts.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = ts.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+      const sorted = d.players.slice().sort((a, b) => b.total - a.total);
+      const maxPossible = d.targets.reduce((a, b) => a + b, 0);
+      const totalHits = d.players.reduce((s, p) => s + p.hits.filter(Boolean).length, 0);
+      const totalPossible = d.players.length * 9;
+      const totals = d.players.map(p => p.total);
+      const avg = d.players.length ? Math.round(totals.reduce((a, b) => a + b, 0) / d.players.length) : 0;
+
+      let html = '';
+
+      // Header
+      html += '<header>';
+      html += '<h1>Dagger & Die</h1>';
+      html += '<p class="report-subtitle">Competition Report</p>';
+      html += '<p class="report-date">' + escHtml(dateStr) + ' at ' + escHtml(timeStr) + '</p>';
+      html += '</header>';
+
+      // Targets
+      html += '<div class="panel">';
+      html += '<h3 class="panel-title">Rolled Targets</h3>';
+      html += '<div class="targets-row">';
+      d.targets.forEach(t => {
+        html += '<div class="die-badge ' + (t % 2 === 0 ? 'even' : 'odd') + '">' + t + '</div>';
+      });
+      html += '</div>';
+      html += '<p style="text-align:center; margin-top:12px; color:rgba(255,255,255,0.5); font-size:0.85rem;">Max possible score: ' + maxPossible + '</p>';
+      html += '</div>';
+
+      // Leaderboard
+      html += '<div class="panel">';
+      html += '<h3 class="panel-title">Leaderboard</h3>';
+      html += '<table class="leaderboard"><thead><tr><th style="text-align:center">#</th><th>Player</th><th>Score</th><th>Hits</th><th>Hit Rate</th></tr></thead><tbody>';
+      let prevScore = -1, rank = 0;
+      sorted.forEach((p, i) => {
+        if (p.total !== prevScore) { rank = i + 1; prevScore = p.total; }
+        const hits = p.hits.filter(Boolean).length;
+        const rateStr = Math.round((hits / 9) * 100) + '%';
+        const rankClass = rank <= 3 ? ' rank-' + rank : '';
+        html += '<tr class="' + rankClass + '">';
+        html += '<td class="rank-cell">' + rank + '</td>';
+        html += '<td>' + escHtml(p.name) + '</td>';
+        html += '<td class="score-cell">' + p.total + '</td>';
+        html += '<td>' + hits + '/9</td>';
+        html += '<td>' + rateStr + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      // Scorecard recap
+      html += '<div class="panel">';
+      html += '<h3 class="panel-title">Full Scorecard</h3>';
+      html += '<div style="overflow-x:auto;">';
+      html += '<table class="recap-table"><thead><tr><th>Player</th>';
+      d.targets.forEach(t => { html += '<th>' + t + '</th>'; });
+      html += '<th>Total</th></tr></thead><tbody>';
+      sorted.forEach(p => {
+        html += '<tr><td>' + escHtml(p.name) + '</td>';
+        p.hits.forEach((hit, i) => {
+          const missed = p.misses && p.misses[i];
+          if (hit) {
+            html += '<td class="hit-mark">' + d.targets[i] + '</td>';
+          } else if (missed) {
+            html += '<td class="miss-mark">\u2715</td>';
+          } else {
+            html += '<td class="unscored">&mdash;</td>';
+          }
+        });
+        html += '<td class="total-col">' + p.total + '</td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+
+      // Stats summary
+      html += '<div class="panel">';
+      html += '<h3 class="panel-title">Statistics</h3>';
+      html += '<div class="stats-grid">';
+      html += '<div class="stat-item"><div class="label">Players</div><div class="value">' + d.players.length + '</div></div>';
+      html += '<div class="stat-item"><div class="label">High Score</div><div class="value">' + (d.players.length ? Math.max(...totals) : 0) + '</div></div>';
+      html += '<div class="stat-item"><div class="label">Low Score</div><div class="value">' + (d.players.length ? Math.min(...totals) : 0) + '</div></div>';
+      html += '<div class="stat-item"><div class="label">Average</div><div class="value">' + avg + '</div></div>';
+      html += '<div class="stat-item"><div class="label">Overall Hit Rate</div><div class="value">' + (totalPossible ? Math.round((totalHits / totalPossible) * 100) : 0) + '%</div></div>';
+      html += '<div class="stat-item"><div class="label">Max Possible</div><div class="value">' + maxPossible + '</div></div>';
+      html += '</div></div>';
+
+      // Print + footer
+      html += '<div class="print-wrap"><button class="btn-print" onclick="window.print()">Print Report</button></div>';
+      html += '<footer><p>Game concept and development by Jeff White</p><p>Webapp by Aaron Shour @ M3</p></footer>';
+
+      container.innerHTML = html;
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
