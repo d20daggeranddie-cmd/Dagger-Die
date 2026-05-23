@@ -64,6 +64,7 @@ Mods are optional gameplay modifiers found in the Options menu. All are off by d
 - **Vampire** — Gain HP equal to all damage dealt to a target this turn when you deliver a killing blow
 - **Items** — Enables the item inventory system (see Items below)
 - **Start with random item** — Each player begins the game with one randomly generated item (requires Items)
+- **Bottomless Backpack** — All players start with a full inventory and items regenerate after use (requires Items)
 - **Enable bots** — Allows marking players as bots with selectable difficulty on the character select screen
 
 ## Items
