@@ -108,6 +108,19 @@
     padding: 40px 20px;
   }
 
+  .back-wrap { position: absolute; top: 20px; left: 20px; }
+  .back-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: rgba(255,255,255,0.6);
+    transition: color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+  .back-btn:hover { color: #feca57; transform: scale(1.15); }
+  .back-btn:focus { outline: 2px solid #feca57; outline-offset: 4px; border-radius: 4px; }
+  .back-btn svg { width: 28px; height: 28px; }
+
   .resources-wrap { position: absolute; top: 20px; right: 20px; }
   .resources-star-btn {
     display: flex; align-items: center; justify-content: center;
@@ -343,6 +356,12 @@
   <!-- Main content: startscreen -->
   <main class="main-content">
     <div class="container">
+      <div class="back-wrap">
+        <a href="gametype.html" class="back-btn" aria-label="Back to game modes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+      </div>
+
       <div class="resources-wrap">
         <button type="button" class="resources-star-btn" id="resources-btn" aria-label="Resources">
           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -485,6 +504,11 @@
             <label for="items-start-with-random-cb">Start with random item</label>
           </div>
           <p id="items-start-with-random-desc" class="option-desc" style="margin-top: 4px; margin-left: 20px; font-size: 0.9rem; opacity: 0.85;">Each player begins the game with one randomly generated item.</p>
+          <div class="option-row" style="margin-top: 12px; margin-left: 20px;">
+            <input type="checkbox" id="bottomless-backpack-cb" aria-describedby="bottomless-backpack-desc">
+            <label for="bottomless-backpack-cb">Bottomless Backpack</label>
+          </div>
+          <p id="bottomless-backpack-desc" class="option-desc" style="margin-top: 4px; margin-left: 20px; font-size: 0.9rem; opacity: 0.85;">All players start with a full inventory and items regenerate after use.</p>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="bots-enabled-cb" aria-describedby="bots-enabled-desc">
             <label for="bots-enabled-cb">Enable bots</label>
@@ -630,6 +654,7 @@
     const MOD_PARTY_KEY = 'daggerdie_modParty';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
+    const BOTTOMLESS_BACKPACK_KEY = 'daggerdie_bottomlessBackpack';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
 
     document.getElementById('options-toggle').addEventListener('click', () => {
@@ -646,7 +671,7 @@
       AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
       MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY, MOD_PARTY_KEY,
-      ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTS_ENABLED_KEY
+      ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTTOMLESS_BACKPACK_KEY, BOTS_ENABLED_KEY
     ];
     if (!isPersistent()) {
       ALL_SETTING_KEYS.forEach(k => localStorage.removeItem(k));
@@ -699,6 +724,10 @@
     if (itemsStartWithRandomCb) {
       itemsStartWithRandomCb.checked = itemsEnabledCb.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
     }
+    const bottomlessBackpackCb = document.getElementById('bottomless-backpack-cb');
+    if (bottomlessBackpackCb) {
+      bottomlessBackpackCb.checked = itemsEnabledCb.checked && localStorage.getItem(BOTTOMLESS_BACKPACK_KEY) === 'true';
+    }
 
     const customHpError = document.getElementById('custom-hp-error');
     function validateAndPersistHp() {
@@ -740,14 +769,27 @@
     modPartyCb.addEventListener('change', () => localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked)));
     itemsEnabledCb.addEventListener('change', () => {
       localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
-      if (!itemsEnabledCb.checked && itemsStartWithRandomCb) {
-        itemsStartWithRandomCb.checked = false;
-        localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, 'false');
+      if (!itemsEnabledCb.checked) {
+        if (itemsStartWithRandomCb) {
+          itemsStartWithRandomCb.checked = false;
+          localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, 'false');
+        }
+        if (bottomlessBackpackCb) {
+          bottomlessBackpackCb.checked = false;
+          localStorage.setItem(BOTTOMLESS_BACKPACK_KEY, 'false');
+        }
       }
     });
     if (itemsStartWithRandomCb) itemsStartWithRandomCb.addEventListener('change', () => {
       localStorage.setItem(ITEMS_START_WITH_RANDOM_KEY, String(itemsStartWithRandomCb.checked));
       if (itemsStartWithRandomCb.checked && itemsEnabledCb) {
+        itemsEnabledCb.checked = true;
+        localStorage.setItem(ITEMS_ENABLED_KEY, 'true');
+      }
+    });
+    if (bottomlessBackpackCb) bottomlessBackpackCb.addEventListener('change', () => {
+      localStorage.setItem(BOTTOMLESS_BACKPACK_KEY, String(bottomlessBackpackCb.checked));
+      if (bottomlessBackpackCb.checked && itemsEnabledCb) {
         itemsEnabledCb.checked = true;
         localStorage.setItem(ITEMS_ENABLED_KEY, 'true');
       }
