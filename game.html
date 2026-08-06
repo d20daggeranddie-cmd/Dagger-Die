@@ -2360,7 +2360,7 @@
                 <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
                 <label for="items-enabled-cb">Items</label>
             </div>
-            <p id="items-enabled-hint" class="setting-hint">3 inventory slots, earn items on critical (all 3 hits). Use items before dealing damage.</p>
+            <p id="items-enabled-hint" class="setting-hint">3 inventory slots, earn items on critical (all 3 hits). Use items before confirming score (works with Auto deal damage).</p>
             <div class="option-row" style="margin-left: 20px;">
                 <input type="checkbox" id="items-start-with-random-cb" aria-describedby="items-start-with-random-hint">
                 <label for="items-start-with-random-cb">Start with random item</label>
@@ -3640,7 +3640,7 @@
                     ${p.isBot ? '<div class="player-card-bot-skill" data-player="'+p.id+'">Bot: ' + capitalizeBotSkill(p.botSkill) + '</div>' : ''}
                     ${getTeamBadgeHtml(p)}
                     ${getPlayerStatusEffectsForItemModal(p).map(s => '<div class="player-card-status ' + s.kind + '">' + s.label + '</div>').join('')}
-                    ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '">' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
+                    ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; const usable = ITEM && !lock[i] && canPlayerUseItemsNow(p.id); return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + (usable ? ' usable-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : (usable ? 'Tap to use: ' : '') + ITEM.name + ': ' + ITEM.effect) : 'Empty') + '"' + (usable ? ' style="cursor:pointer"' : '') + '>' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
                 </div>
             `).join('');
             if (newHtml !== _lastPlayersPanelHtml) {
@@ -3889,6 +3889,11 @@
                 <div style="margin-top: 12px;">
                     <button class="btn btn-primary" id="confirm-hits-btn">Confirm</button>
                 </div>
+                ${state.itemsEnabled && canPlayerUseItemsNow(currentPlayer.id) ? `
+                    <p style="margin: 10px 0 0; font-size: 0.85rem; opacity: 0.85; text-align: center;">
+                        Tap an item on your player card to use it (optional, once per turn) before confirming.
+                    </p>
+                ` : ''}
             `;
 
             document.getElementById('odd-overlay').classList.add('clickable');
@@ -3978,13 +3983,15 @@
                         const proceedAfterCritical = () => {
                             showTargetSelection();
                         };
-                        if (swapItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
+                        // Auto-deal damage still pauses for human item swap / critical reveal;
+                        // only bots auto-resolve inventory when full.
+                        if (swapItem && d12Roll !== null && !currentPlayer.isBot) {
                             showItemSwapModal(currentPlayer, swapItem, d12Roll, () => { updatePlayersPanel(); proceedAfterCritical(); });
-                        } else if (swapItem && (currentPlayer.isBot || state.autoDealDamage)) {
+                        } else if (swapItem && currentPlayer.isBot) {
                             botAutoSwapItem(currentPlayer, swapItem);
                             updatePlayersPanel();
                             proceedAfterCritical();
-                        } else if (acquiredItem && d12Roll !== null && !currentPlayer.isBot && !state.autoDealDamage) {
+                        } else if (acquiredItem && d12Roll !== null && !currentPlayer.isBot) {
                             showCriticalItemModal(d12Roll, acquiredItem, proceedAfterCritical);
                         } else {
                             proceedAfterCritical();
@@ -4708,10 +4715,11 @@
         playerStatsModal.addEventListener('click', (e) => { if (e.target === playerStatsModal) closePlayerStatsModal(); });
 
         function canPlayerUseItemsNow(playerId) {
-            if (!state.itemsEnabled || state.autoDealDamage) return false;
+            if (!state.itemsEnabled) return false;
             const current = getCurrentPlayer();
             if (!current || current.id !== playerId || current.isBot || current.eliminated) return false;
-            // Items are usable only before score confirmation, max 1 use per turn.
+            // Items are usable on your turn before score confirmation (max 1 use),
+            // including when Auto deal damage is on — that setting only auto-assigns hits.
             return !state.damageClaimedPhase && !state.damageDealtThisTurn && state.itemUsesThisTurn < 1;
         }
 
