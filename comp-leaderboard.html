@@ -156,6 +156,19 @@
   .leaderboard .badge-locked {
     background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3);
   }
+  .leaderboard .badge-tiebreaker {
+    background: rgba(254,202,87,0.2); color: #feca57; border: 1px solid rgba(254,202,87,0.45);
+  }
+
+  .tb-live-banner {
+    display: none; text-align: center; padding: 12px; margin-bottom: 20px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, rgba(254,202,87,0.15), rgba(212,168,75,0.15));
+    border: 1px solid rgba(254,202,87,0.3);
+    font-family: 'Cinzel', Georgia, serif; font-size: 1rem; color: #feca57;
+    letter-spacing: 1px;
+  }
+  .tb-live-banner.visible { display: block; }
 
   .no-data {
     text-align: center; padding: 40px 20px;
@@ -266,6 +279,7 @@
       </div>
 
       <div class="finalized-banner" id="finalized-banner">Game Finalized</div>
+      <div class="tb-live-banner" id="tb-live-banner">Tiebreaker in Progress</div>
 
       <div class="panel" id="targets-panel" style="display:none;">
         <div class="panel-title">Targets</div>
@@ -307,9 +321,9 @@
     const leaderboard = document.getElementById('leaderboard');
     const lbBody = document.getElementById('lb-body');
     const finalizedBanner = document.getElementById('finalized-banner');
+    const tbLiveBanner = document.getElementById('tb-live-banner');
 
     const RANK_MEDALS = { 1: '\u{1F947}', 2: '\u{1F948}', 3: '\u{1F949}' };
-
     function escHtml(str) {
       const d = document.createElement('div');
       d.textContent = str;
@@ -334,27 +348,57 @@
       noData.style.display = 'none';
       leaderboard.style.display = '';
 
+      // Players arrive pre-sorted from the game when possible; re-sort by score + TB history
       const sorted = players.map((p, i) => ({ ...p, idx: i }))
-        .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+        .sort((a, b) => {
+          if (b.total !== a.total) return b.total - a.total;
+          const ah = a.tbHistory || [];
+          const bh = b.tbHistory || [];
+          const len = Math.max(ah.length, bh.length);
+          for (let r = 0; r < len; r++) {
+            const av = ah[r];
+            const bv = bh[r];
+            if (av == null && bv == null) continue;
+            if (av == null) return 1;
+            if (bv == null) return -1;
+            if (bv !== av) return bv - av;
+          }
+          return a.name.localeCompare(b.name);
+        });
 
       let rank = 0;
-      let prevScore = -1;
+      let prevKey = '';
       let html = '';
+      const inTb = data.phase === 'tiebreaker';
       sorted.forEach((p, i) => {
-        if (p.total !== prevScore) { rank = i + 1; prevScore = p.total; }
-        const earnedPodium = p.total > 0 && rank <= 3;
-        const rankClass = earnedPodium ? ' rank-' + rank : '';
-        const display = earnedPodium ? RANK_MEDALS[rank] : (i + 1);
-        const STATUS_LABELS = { registered: 'Registered', throwing: 'Throwing', locked: 'Locked' };
+        const key = String(p.total) + '|' + (p.tbHistory || []).join(',');
+        if (key !== prevKey) { rank = i + 1; prevKey = key; }
+        // After ties are broken (finalized), use unique places
+        const displayRank = data.finalized ? (i + 1) : rank;
+        const earnedPodium = p.total > 0 && displayRank <= 3;
+        const rankClass = earnedPodium ? ' rank-' + displayRank : '';
+        const display = earnedPodium ? RANK_MEDALS[displayRank] : (data.finalized ? displayRank : (i + 1));
+        const STATUS_LABELS = {
+          registered: 'Registered',
+          throwing: 'Throwing',
+          locked: 'Locked',
+          tiebreaker: 'Tiebreaker'
+        };
         const st = p.status || 'registered';
-        const statusBadge = '<span class="status-badge badge-' + st + '">' + STATUS_LABELS[st] + '</span>';
+        const statusBadge = '<span class="status-badge badge-' + st + '">' + (STATUS_LABELS[st] || st) + '</span>';
+        const scoreLabel = (inTb && p.tbTotal != null)
+          ? (p.total + ' <span style="color:rgba(255,255,255,0.45);font-weight:normal;font-size:0.8rem;">(TB ' + p.tbTotal + ')</span>')
+          : String(p.total);
+        const hitsLabel = inTb && st === 'tiebreaker'
+          ? (p.hits + '/9 TB')
+          : (p.hits + '/9');
 
         html += '<tr class="' + rankClass + '">';
         html += '<td class="rank-cell">' + display + '</td>';
         html += '<td class="name-cell">' + escHtml(p.name) + '</td>';
-        html += '<td class="hits-cell">' + p.hits + '/9</td>';
+        html += '<td class="hits-cell">' + hitsLabel + '</td>';
         html += '<td class="status-cell">' + statusBadge + '</td>';
-        html += '<td class="score-cell">' + p.total + '</td>';
+        html += '<td class="score-cell">' + scoreLabel + '</td>';
         html += '</tr>';
       });
       lbBody.innerHTML = html;
@@ -372,9 +416,16 @@
 
           if (msg.finalized) {
             finalizedBanner.classList.add('visible');
+            tbLiveBanner.classList.remove('visible');
             statusText.textContent = 'Game finalized';
+          } else if (msg.phase === 'tiebreaker') {
+            finalizedBanner.classList.remove('visible');
+            tbLiveBanner.textContent = 'Tiebreaker Round ' + (msg.tbRound || 1) + ' — same targets';
+            tbLiveBanner.classList.add('visible');
+            statusText.textContent = 'Tiebreaker in progress';
           } else {
             finalizedBanner.classList.remove('visible');
+            tbLiveBanner.classList.remove('visible');
           }
         }
       };
