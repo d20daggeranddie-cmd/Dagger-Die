@@ -87,6 +87,21 @@
   .leaderboard .rank-3 td { color: #cd7f32; }
   .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 50px; text-align: center; }
   .leaderboard .score-cell { font-weight: bold; font-size: 1.1rem; }
+  .leaderboard .tb-note { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: normal; }
+
+  .tb-rounds-list {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .tb-round-row {
+    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .tb-round-label {
+    font-family: 'Cinzel', Georgia, serif; color: #feca57; font-size: 0.85rem; min-width: 90px;
+  }
+  .tb-player-score { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+  .tb-player-score strong { color: #fff; }
 
   /* Scorecard recap */
   .recap-table { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -192,12 +207,27 @@
       const dateStr = ts.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const timeStr = ts.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
-      const sorted = d.players.slice().sort((a, b) => b.total - a.total);
+      const sorted = d.players.slice().sort((a, b) => {
+        if (b.total !== a.total) return b.total - a.total;
+        const ah = a.tbHistory || [];
+        const bh = b.tbHistory || [];
+        const len = Math.max(ah.length, bh.length);
+        for (let i = 0; i < len; i++) {
+          const av = ah[i];
+          const bv = bh[i];
+          if (av == null && bv == null) continue;
+          if (av == null) return 1;
+          if (bv == null) return -1;
+          if (bv !== av) return bv - av;
+        }
+        return String(a.name).localeCompare(String(b.name));
+      });
       const maxPossible = d.targets.reduce((a, b) => a + b, 0);
       const totalHits = d.players.reduce((s, p) => s + p.hits.filter(Boolean).length, 0);
       const totalPossible = d.players.length * 9;
       const totals = d.players.map(p => p.total);
       const avg = d.players.length ? Math.round(totals.reduce((a, b) => a + b, 0) / d.players.length) : 0;
+      const hadTiebreakers = sorted.some(p => (p.tbHistory || []).length > 0);
 
       let html = '';
 
@@ -223,21 +253,43 @@
       html += '<div class="panel">';
       html += '<h3 class="panel-title">Leaderboard</h3>';
       html += '<table class="leaderboard"><thead><tr><th style="text-align:center">#</th><th>Player</th><th>Score</th><th>Hits</th><th>Hit Rate</th></tr></thead><tbody>';
-      let prevScore = -1, rank = 0;
       sorted.forEach((p, i) => {
-        if (p.total !== prevScore) { rank = i + 1; prevScore = p.total; }
+        const rank = i + 1;
         const hits = p.hits.filter(Boolean).length;
         const rateStr = Math.round((hits / 9) * 100) + '%';
         const rankClass = rank <= 3 ? ' rank-' + rank : '';
+        const tb = p.tbHistory || [];
+        const tbNote = tb.length
+          ? '<div class="tb-note">TB: ' + tb.join(' → ') + '</div>'
+          : '';
         html += '<tr class="' + rankClass + '">';
         html += '<td class="rank-cell">' + rank + '</td>';
-        html += '<td>' + escHtml(p.name) + '</td>';
+        html += '<td>' + escHtml(p.name) + tbNote + '</td>';
         html += '<td class="score-cell">' + p.total + '</td>';
         html += '<td>' + hits + '/9</td>';
         html += '<td>' + rateStr + '</td>';
         html += '</tr>';
       });
       html += '</tbody></table></div>';
+
+      // Tiebreaker recap
+      if (hadTiebreakers) {
+        const maxRounds = Math.max(...sorted.map(p => (p.tbHistory || []).length));
+        html += '<div class="panel">';
+        html += '<h3 class="panel-title">Tiebreakers</h3>';
+        html += '<p style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:14px;">Same targets, re-thrown until places were decided</p>';
+        html += '<div class="tb-rounds-list">';
+        for (let r = 0; r < maxRounds; r++) {
+          const entrants = sorted.filter(p => p.tbHistory && p.tbHistory[r] != null);
+          html += '<div class="tb-round-row">';
+          html += '<span class="tb-round-label">Round ' + (r + 1) + '</span>';
+          entrants.forEach(p => {
+            html += '<span class="tb-player-score"><strong>' + escHtml(p.name) + '</strong>: ' + p.tbHistory[r] + '</span>';
+          });
+          html += '</div>';
+        }
+        html += '</div></div>';
+      }
 
       // Scorecard recap
       html += '<div class="panel">';
@@ -272,6 +324,9 @@
       html += '<div class="stat-item"><div class="label">Average</div><div class="value">' + avg + '</div></div>';
       html += '<div class="stat-item"><div class="label">Overall Hit Rate</div><div class="value">' + (totalPossible ? Math.round((totalHits / totalPossible) * 100) : 0) + '%</div></div>';
       html += '<div class="stat-item"><div class="label">Max Possible</div><div class="value">' + maxPossible + '</div></div>';
+      if (hadTiebreakers) {
+        html += '<div class="stat-item"><div class="label">TB Rounds</div><div class="value">' + (d.tbRounds || maxRounds) + '</div></div>';
+      }
       html += '</div></div>';
 
       // Print + footer
