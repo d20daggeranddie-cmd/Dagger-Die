@@ -383,10 +383,30 @@
   .scorecard-table .hits-cell {
     font-size: 0.9rem; color: rgba(255,255,255,0.7); white-space: nowrap;
   }
+  .scorecard-table .main-score-cell {
+    font-size: 0.85rem; color: rgba(255,255,255,0.55); white-space: nowrap;
+  }
+  .scorecard-table tr.row-tb td:first-child { color: #feca57; }
+  .scorecard-table tr.row-tb-done td:first-child { color: rgba(255,255,255,0.7); }
+
+  .tb-banner {
+    display: none; text-align: center; padding: 14px 16px; margin-bottom: 16px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, rgba(254,202,87,0.12), rgba(212,168,75,0.12));
+    border: 1px solid rgba(254,202,87,0.35);
+    font-size: 0.95rem; color: rgba(255,255,255,0.9); line-height: 1.5;
+  }
+  .tb-banner.visible { display: block; }
+  .tb-banner strong { color: #feca57; }
+  .tb-banner .tb-hint {
+    display: block; margin-top: 4px;
+    font-size: 0.8rem; color: rgba(255,255,255,0.55);
+  }
 
   /* ─── Finalize ─── */
   .finalize-wrap { text-align: center; margin-bottom: 40px; display: none; }
   .finalize-wrap.visible { display: block; }
+  .btn-finalize:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
   footer { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
 
@@ -655,7 +675,8 @@
 
       <!-- Scorecard -->
       <div class="scorecard-panel" id="scorecard-panel">
-        <h3 class="section-title">Scorecard</h3>
+        <h3 class="section-title" id="scorecard-title">Scorecard</h3>
+        <div class="tb-banner" id="tb-banner"></div>
         <table class="scorecard-table" id="scorecard-table">
           <thead id="scorecard-head"></thead>
           <tbody id="scorecard-body"></tbody>
@@ -684,7 +705,9 @@
     const compState = {
       targets: [],
       players: [],
-      finalized: false
+      finalized: false,
+      phase: 'main', // 'main' | 'tiebreaker'
+      tbRound: 0
     };
 
     const rollBtn = document.getElementById('roll-btn');
@@ -693,9 +716,11 @@
     const joinBtn = document.getElementById('join-btn');
     const regError = document.getElementById('reg-error');
     const scorecardPanel = document.getElementById('scorecard-panel');
+    const scorecardTitle = document.getElementById('scorecard-title');
     const scorecardHead = document.getElementById('scorecard-head');
     const scorecardBody = document.getElementById('scorecard-body');
     const noPlayers = document.getElementById('no-players');
+    const tbBanner = document.getElementById('tb-banner');
     const finalizeWrap = document.getElementById('finalize-wrap');
     const finalizeBtn = document.getElementById('finalize-btn');
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
@@ -727,16 +752,27 @@
           type: 'leaderboard',
           targets: compState.targets,
           finalized: compState.finalized,
-          players: compState.players.map(p => {
-            const hitCount = p.hits.filter(h => h === true).length;
-            const scored = p.hits.some(h => h !== null);
+          phase: compState.phase,
+          tbRound: compState.tbRound,
+          players: getSortedPlayers().map(p => {
+            const activeHits = getActiveHits(p);
+            const hitCount = activeHits.filter(h => h === true).length;
+            const scored = activeHits.some(h => h !== null);
             let status = 'registered';
-            if (p.locked || compState.finalized) status = 'locked';
-            else if (scored) status = 'throwing';
+            if (compState.finalized) status = 'locked';
+            else if (compState.phase === 'tiebreaker' && p.tbActive) {
+              status = p.tbLocked ? 'locked' : (scored ? 'tiebreaker' : 'tiebreaker');
+            } else if (p.locked || (compState.phase === 'tiebreaker' && !p.tbActive)) {
+              status = 'locked';
+            } else if (scored) {
+              status = 'throwing';
+            }
             return {
               name: p.name,
               hits: hitCount,
-              total: p.hits.reduce((sum, h, i) => sum + (h === true ? compState.targets[i] : 0), 0),
+              total: getTotal(p),
+              tbTotal: p.tbActive ? getHitsTotal(p.tbHits) : null,
+              tbHistory: (p.tbHistory || []).slice(),
               status: status
             };
           })
@@ -854,7 +890,11 @@
     function buildScorecardHeader() {
       let html = '<tr><th>Player</th>';
       compState.targets.forEach(t => { html += '<th>' + t + '</th>'; });
-      html += '<th>Hits</th><th>Total</th></tr>';
+      if (compState.phase === 'tiebreaker') {
+        html += '<th>Hits</th><th>Main</th><th>TB</th></tr>';
+      } else {
+        html += '<th>Hits</th><th>Total</th></tr>';
+      }
       scorecardHead.innerHTML = html;
     }
 
@@ -862,6 +902,7 @@
     regInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
 
     function addPlayer() {
+      if (compState.phase !== 'main' || compState.finalized) return;
       regError.textContent = '';
       const name = regInput.value.trim();
       if (!name) { regError.textContent = 'Please enter a name.'; return; }
@@ -872,11 +913,100 @@
         return;
       }
 
-      compState.players.push({ name, hits: new Array(9).fill(null), locked: false });
+      compState.players.push({
+        name,
+        hits: new Array(9).fill(null),
+        locked: false,
+        tbActive: false,
+        tbHits: null,
+        tbLocked: false,
+        tbHistory: []
+      });
       regInput.value = '';
       regInput.focus();
       renderScorecard();
       broadcastLeaderboardState();
+    }
+
+    function getHitsTotal(hits) {
+      if (!hits) return 0;
+      return hits.reduce((sum, hit, i) => sum + (hit === true ? compState.targets[i] : 0), 0);
+    }
+
+    function getTotal(player) {
+      return getHitsTotal(player.hits);
+    }
+
+    function getActiveHits(player) {
+      if (compState.phase === 'tiebreaker' && player.tbActive) return player.tbHits;
+      return player.hits;
+    }
+
+    function rankingKey(player) {
+      return [getTotal(player)].concat(player.tbHistory || []);
+    }
+
+    function compareRankingKeys(aKey, bKey) {
+      const len = Math.max(aKey.length, bKey.length);
+      for (let i = 0; i < len; i++) {
+        const av = aKey[i];
+        const bv = bKey[i];
+        if (av == null && bv == null) continue;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        if (bv !== av) return bv - av;
+      }
+      return 0;
+    }
+
+    function playersTied(a, b) {
+      return compareRankingKeys(rankingKey(a), rankingKey(b)) === 0;
+    }
+
+    function getSortedPlayers() {
+      return compState.players.slice().sort((a, b) => {
+        const cmp = compareRankingKeys(rankingKey(a), rankingKey(b));
+        if (cmp !== 0) return cmp;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    function findTieGroups() {
+      const sorted = getSortedPlayers();
+      const groups = [];
+      let i = 0;
+      while (i < sorted.length) {
+        let j = i + 1;
+        while (j < sorted.length && playersTied(sorted[i], sorted[j])) j++;
+        if (j - i > 1) groups.push(sorted.slice(i, j));
+        i = j;
+      }
+      return groups;
+    }
+
+    function updateScorecardChrome() {
+      if (compState.phase === 'tiebreaker') {
+        scorecardTitle.textContent = 'Tiebreaker Round ' + compState.tbRound;
+        const groups = findTieGroups().filter(g => g.some(p => p.tbActive));
+        const parts = groups.map(g => {
+          const names = g.map(p => p.name).join(' & ');
+          return '<strong>' + escHtml(names) + '</strong> tied at ' + getTotal(g[0]);
+        });
+        tbBanner.innerHTML = parts.join('<br>') +
+          '<span class="tb-hint">Throw the same targets again. Higher score wins the place.</span>';
+        tbBanner.classList.add('visible');
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Tiebreaker in Progress…';
+      } else {
+        scorecardTitle.textContent = 'Scorecard';
+        tbBanner.classList.remove('visible');
+        tbBanner.innerHTML = '';
+        if (!compState.finalized) {
+          finalizeBtn.disabled = false;
+          finalizeBtn.textContent = 'Finalize Game';
+        }
+      }
+      buildScorecardHeader();
     }
 
     function renderScorecard() {
@@ -887,15 +1017,30 @@
       noPlayers.style.display = 'none';
 
       const maxScore = Math.max(...compState.players.map(p => getTotal(p)));
+      const showTb = compState.phase === 'tiebreaker';
+      // Keep registration order; only filter to active throwers during tiebreakers
+      const displayPlayers = showTb
+        ? compState.players.filter(p => p.tbActive)
+        : compState.players;
 
       let html = '';
-      compState.players.forEach((player, pIdx) => {
+      displayPlayers.forEach(player => {
+        const pIdx = compState.players.indexOf(player);
         const total = getTotal(player);
         const isLeader = total > 0 && total === maxScore;
-        const isLocked = player.locked || compState.finalized;
-        html += '<tr' + (isLocked ? ' class="row-locked"' : '') + '>';
+        const inTb = showTb && player.tbActive;
+        const hits = inTb ? player.tbHits : player.hits;
+        const isLocked = compState.finalized ||
+          (inTb ? player.tbLocked : (player.locked || (showTb && !player.tbActive)));
+
+        let rowClass = '';
+        if (inTb && !player.tbLocked) rowClass = 'row-tb';
+        else if (isLocked) rowClass = 'row-locked';
+        if (inTb && player.tbLocked) rowClass = (rowClass + ' row-tb-done').trim();
+
+        html += '<tr' + (rowClass ? ' class="' + rowClass + '"' : '') + '>';
         html += '<td>' + escHtml(player.name) + '</td>';
-        player.hits.forEach((hit, hIdx) => {
+        hits.forEach((hit, hIdx) => {
           const lockedClass = isLocked ? ' locked' : '';
           let stateClass = '';
           let val = '';
@@ -909,11 +1054,20 @@
             stateClass = ' pending';
             val = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>';
           }
-          html += '<td class="hit-cell' + stateClass + lockedClass + '" data-player="' + pIdx + '" data-hit="' + hIdx + '">' + val + '</td>';
+          const clickable = inTb || (!showTb && !compState.finalized);
+          html += '<td class="hit-cell' + stateClass + lockedClass + '"' +
+            (clickable ? ' data-player="' + pIdx + '" data-hit="' + hIdx + '"' : '') +
+            '>' + val + '</td>';
         });
-        const hitCount = player.hits.filter(h => h === true).length;
+        const hitCount = hits.filter(h => h === true).length;
         html += '<td class="hits-cell">' + hitCount + '/9</td>';
-        html += '<td class="total-cell' + (isLeader ? ' leader' : '') + '">' + total + '</td>';
+        if (showTb) {
+          html += '<td class="main-score-cell">' + total + '</td>';
+          html += '<td class="total-cell' + (inTb && getHitsTotal(player.tbHits) > 0 ? ' leader' : '') + '">' +
+            (inTb ? getHitsTotal(player.tbHits) : '—') + '</td>';
+        } else {
+          html += '<td class="total-cell' + (isLeader ? ' leader' : '') + '">' + total + '</td>';
+        }
         html += '</tr>';
       });
       scorecardBody.innerHTML = html;
@@ -924,9 +1078,28 @@
       if (!cell || compState.finalized) return;
       const pIdx = parseInt(cell.dataset.player);
       const hIdx = parseInt(cell.dataset.hit);
+      if (Number.isNaN(pIdx) || Number.isNaN(hIdx)) return;
       const player = compState.players[pIdx];
-      if (!player || player.locked) return;
+      if (!player) return;
 
+      if (compState.phase === 'tiebreaker') {
+        if (!player.tbActive || player.tbLocked) return;
+        if (player.tbHits[hIdx] !== null) {
+          player.tbHits[hIdx] = null;
+          renderScorecard();
+          broadcastLeaderboardState();
+          return;
+        }
+        showHitMissPrompt(compState.targets[hIdx], result => {
+          player.tbHits[hIdx] = result;
+          renderScorecard();
+          broadcastLeaderboardState();
+          checkAllScored(pIdx);
+        });
+        return;
+      }
+
+      if (player.locked) return;
       if (player.hits[hIdx] !== null) {
         player.hits[hIdx] = null;
         renderScorecard();
@@ -946,9 +1119,24 @@
 
     function checkAllScored(pIdx) {
       const player = compState.players[pIdx];
-      if (!player || player.locked) return;
+      if (!player) return;
+
+      if (compState.phase === 'tiebreaker') {
+        if (!player.tbActive || player.tbLocked) return;
+        if (player.tbHits.every(h => h !== null)) {
+          showLockConfirm(player, getHitsTotal(player.tbHits), player.tbHits.filter(h => h === true).length, () => {
+            player.tbLocked = true;
+            renderScorecard();
+            broadcastLeaderboardState();
+            checkTiebreakerRoundComplete();
+          });
+        }
+        return;
+      }
+
+      if (player.locked) return;
       if (player.hits.every(h => h !== null)) {
-        showLockConfirm(player, () => {
+        showLockConfirm(player, getTotal(player), player.hits.filter(h => h === true).length, () => {
           player.locked = true;
           renderScorecard();
           broadcastLeaderboardState();
@@ -956,14 +1144,56 @@
       }
     }
 
-    function showLockConfirm(player, onConfirm) {
-      const total = getTotal(player);
-      const hitCount = player.hits.filter(h => h === true).length;
+    function checkTiebreakerRoundComplete() {
+      const active = compState.players.filter(p => p.tbActive);
+      if (!active.length || !active.every(p => p.tbLocked)) return;
+
+      active.forEach(p => {
+        p.tbHistory.push(getHitsTotal(p.tbHits));
+        p.tbActive = false;
+        p.tbHits = null;
+        p.tbLocked = false;
+      });
+
+      const remaining = findTieGroups();
+      if (remaining.length) {
+        startTiebreakerRound(remaining);
+      } else {
+        finishGame();
+      }
+    }
+
+    function startTiebreakerRound(groups) {
+      compState.phase = 'tiebreaker';
+      compState.tbRound += 1;
+      const tied = new Set();
+      groups.forEach(g => g.forEach(p => tied.add(p)));
+
+      compState.players.forEach(p => {
+        if (tied.has(p)) {
+          p.tbActive = true;
+          p.tbHits = new Array(9).fill(null);
+          p.tbLocked = false;
+        } else {
+          p.tbActive = false;
+          p.tbHits = null;
+          p.tbLocked = false;
+        }
+      });
+
+      regPanel.classList.remove('visible');
+      updateScorecardChrome();
+      renderScorecard();
+      broadcastLeaderboardState();
+    }
+
+    function showLockConfirm(player, total, hitCount, onConfirm) {
       const overlay = document.createElement('div');
       overlay.className = 'hm-overlay';
+      const title = compState.phase === 'tiebreaker' ? 'Lock Tiebreaker?' : 'Lock Scores?';
       overlay.innerHTML =
         '<div class="hm-dialog">' +
-          '<div class="hm-title">Lock Scores?</div>' +
+          '<div class="hm-title">' + title + '</div>' +
           '<div class="hm-summary">' +
             '<strong>' + escHtml(player.name) + '</strong><br>' +
             'Hits: ' + hitCount + '/9<br>' +
@@ -1016,33 +1246,26 @@
       document.body.appendChild(overlay);
     }
 
-    function getTotal(player) {
-      return player.hits.reduce((sum, hit, i) => sum + (hit ? compState.targets[i] : 0), 0);
-    }
-
-
-    finalizeBtn.addEventListener('click', () => {
-      if (compState.players.length === 0) {
-        alert('No players have joined yet.');
-        return;
-      }
-      if (!confirm('Finalize the game? Scores will be locked and the report will open.')) return;
-
+    function finishGame() {
       compState.finalized = true;
+      compState.phase = 'main';
       finalizeBtn.disabled = true;
       finalizeBtn.textContent = 'Game Finalized';
       regPanel.classList.remove('visible');
+      updateScorecardChrome();
       renderScorecard();
       broadcastLeaderboardState();
 
       const reportData = {
         targets: compState.targets,
-        players: compState.players.map(p => ({
+        players: getSortedPlayers().map(p => ({
           name: p.name,
           hits: p.hits.map(h => h === true),
           misses: p.hits.map(h => h === false),
-          total: getTotal(p)
+          total: getTotal(p),
+          tbHistory: (p.tbHistory || []).slice()
         })),
+        tbRounds: compState.tbRound,
         timestamp: new Date().toISOString()
       };
 
@@ -1053,6 +1276,29 @@
         return;
       }
       window.open('comp-report.html', '_blank');
+    }
+
+    finalizeBtn.addEventListener('click', () => {
+      if (compState.finalized || compState.phase === 'tiebreaker') return;
+      if (compState.players.length === 0) {
+        alert('No players have joined yet.');
+        return;
+      }
+
+      const ties = findTieGroups();
+      const msg = ties.length
+        ? 'Lock scores and start tiebreakers? Tied players will throw the same targets again.'
+        : 'Finalize the game? Scores will be locked and the report will open.';
+      if (!confirm(msg)) return;
+
+      compState.players.forEach(p => { p.locked = true; });
+      regPanel.classList.remove('visible');
+
+      if (ties.length) {
+        startTiebreakerRound(ties);
+      } else {
+        finishGame();
+      }
     });
 
     function escHtml(str) {
