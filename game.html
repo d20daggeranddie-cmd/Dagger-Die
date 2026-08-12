@@ -455,6 +455,7 @@
         #damage-confirm-modal-content,
         #attack-confirm-modal-content,
         #critical-item-modal-content,
+        #throw-result-modal-content,
         #turn-summary-modal.open {
             animation: summary-overlay-in 0.25s ease-out;
         }
@@ -1153,47 +1154,80 @@
         .dice-slot .hit-toggle {
             width: 100%;
             min-width: 70px;
-            min-height: 44px;
+            min-height: 52px;
             font-size: 1.3rem;
-            transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.15s;
+            background: rgba(255,255,255,0.92);
+            color: #1a1a2e;
+            border: 2px solid rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.15s, color 0.15s;
+        }
+        .dice-slot .hit-toggle:hover {
+            transform: scale(1.05);
+        }
+        .dice-slot .hit-toggle.hit {
+            background: #2ecc71 !important;
+            border-color: #27ae60;
+            color: #fff;
+        }
+        .dice-slot .hit-toggle.missed {
+            background: rgba(127, 140, 141, 0.4) !important;
+            border: 2px solid rgba(189, 195, 199, 0.55);
+            color: #d5dbdb;
         }
         .dice-slot .hit-toggle.dropped {
-            background: rgba(231, 76, 60, 0.25) !important;
-            border: 2px solid rgba(231, 76, 60, 0.6);
-            color: #ff8f8f;
-            font-size: 0.95rem;
-            letter-spacing: 0.03em;
-            cursor: pointer;
-            animation: dropChipIn 0.2s ease-out;
+            background: #e74c3c !important;
+            border-color: #c0392b;
+            color: #fff;
         }
-        .dice-slot .hit-toggle.dropped:hover {
-            background: rgba(231, 76, 60, 0.45) !important;
-            border-color: #e74c3c;
+        .dice-slot .hit-toggle.hit:hover,
+        .dice-slot .hit-toggle.dropped:hover,
+        .dice-slot .hit-toggle.missed:hover {
             transform: scale(1.05);
         }
-        .drop-toggle {
-            background: rgba(231, 76, 60, 0.12);
-            border: 1.5px solid rgba(231, 76, 60, 0.55);
-            color: #e74c3c;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            padding: 4px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
-            width: 100%;
+        .dice-slot .hit-toggle.result-pop {
+            animation: resultChipIn 0.22s ease-out;
         }
-        .drop-toggle:hover {
-            background: rgba(231, 76, 60, 0.28);
-            color: #ff6b6b;
-            border-color: #e74c3c;
-            transform: scale(1.05);
-        }
-        @keyframes dropChipIn {
+        @keyframes resultChipIn {
             0% { opacity: 0; transform: scale(0.7); }
             100% { opacity: 1; transform: scale(1); }
+        }
+        .throw-result-roll {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            color: #feca57;
+            margin: 0 0 18px;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(254, 202, 87, 0.35);
+        }
+        .throw-result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 0 0 12px;
+        }
+        .throw-result-actions .btn {
+            width: 100%;
+            margin-top: 0;
+        }
+        .throw-result-hit {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: #fff;
+        }
+        .throw-result-miss {
+            background: linear-gradient(45deg, #5d6d7e, #7f8c8d);
+            color: #fff;
+        }
+        .throw-result-drop {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            color: #fff;
+        }
+        .throw-result-actions .btn.selected {
+            box-shadow: 0 0 0 3px rgba(254, 202, 87, 0.75);
+        }
+        #throw-result-cancel-btn {
+            margin-top: 0;
         }
 
         /* Miss onscreen reaction */
@@ -2413,6 +2447,21 @@
         </div>
     </div>
 
+    <!-- Throw result modal (Hit / Miss / Drop) -->
+    <div class="player-stats-modal-overlay" id="throw-result-modal" role="dialog" aria-label="Throw result">
+        <div class="player-stats-modal" id="throw-result-modal-content">
+            <div class="modal-eyebrow">Throw Result</div>
+            <h3 style="margin-bottom: 8px;">What happened?</h3>
+            <div id="throw-result-roll" class="throw-result-roll"></div>
+            <div class="throw-result-actions">
+                <button type="button" class="btn throw-result-hit" id="throw-result-hit-btn">Hit</button>
+                <button type="button" class="btn throw-result-miss" id="throw-result-miss-btn">Miss</button>
+                <button type="button" class="btn throw-result-drop" id="throw-result-drop-btn">Drop</button>
+            </div>
+            <button type="button" class="btn btn-secondary" id="throw-result-cancel-btn">Cancel</button>
+        </div>
+    </div>
+
     <!-- Damage confirmation modal -->
     <div class="player-stats-modal-overlay" id="damage-confirm-modal" role="dialog" aria-label="Confirm hits">
         <div class="player-stats-modal" id="damage-confirm-modal-content">
@@ -2552,6 +2601,7 @@
             dropsThisTurn: 0,
             dropsThisTurnLogIndices: [],
             droppedDiceIndices: [],
+            missedDiceIndices: [],
             damageDealtThisTurn: false,
             modBuffOnCritical: false,
             modNerfOnMiss: false,
@@ -2936,6 +2986,7 @@
 
         function restoreGameState(snapshot) {
             Object.assign(state, snapshot);
+            if (!Array.isArray(state.missedDiceIndices)) state.missedDiceIndices = [];
             applySettingsForNewGame();
             clearHpFeedbackSnapshot();
 
@@ -3156,6 +3207,7 @@
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
             state.droppedDiceIndices = [];
+            state.missedDiceIndices = [];
             state.damageDealtThisTurn = false;
             updateGameUI();
         });
@@ -3405,6 +3457,7 @@
             state.hasAttacked = false;
             state.damageClaimedPhase = false;
             state.hits = [];
+            state.missedDiceIndices = [];
             state.totalDamage = 0;
             state.currentHitIndex = 0;
             state.remainingHitIndices = [];
@@ -3690,6 +3743,7 @@
 
             state.currentRoll = [rollD20(), rollD20(), rollD20()];
             state.hits = [];
+            state.missedDiceIndices = [];
             state.totalDamage = 0;
             state.damageClaimedPhase = false;
 
@@ -3781,6 +3835,7 @@
                     const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
                     if (state.hits.length >= slotsLeft) break;
                     state.hits.push({ roll: number, idx: firstUnclaimed });
+                    state.missedDiceIndices = (state.missedDiceIndices || []).filter(i => i !== firstUnclaimed);
                     claimed = true;
                     break;
                 }
@@ -3812,30 +3867,32 @@
         function syncHitRecorderUI() {
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
             const droppedSet = new Set(state.droppedDiceIndices);
+            const missedSet = new Set(state.missedDiceIndices || []);
 
             hitInfo.querySelectorAll('.dice-slot').forEach(slot => {
                 const idx = parseInt(slot.dataset.idx);
                 const btn = slot.querySelector('.hit-toggle');
-                const dropBtn = slot.querySelector('.drop-toggle');
                 if (!btn) return;
                 const roll = btn.dataset.roll;
 
-                btn.classList.remove('hit', 'dropped');
-                btn.style.background = '';
+                let nextState = '';
+                if (droppedSet.has(idx)) nextState = 'dropped';
+                else if (hitIdxSet.has(idx)) nextState = 'hit';
+                else if (missedSet.has(idx)) nextState = 'missed';
 
-                if (droppedSet.has(idx)) {
-                    btn.classList.add('dropped');
-                    btn.textContent = 'DROP \u2715';
-                    if (dropBtn) dropBtn.style.visibility = 'hidden';
-                } else if (hitIdxSet.has(idx)) {
-                    btn.classList.add('hit');
-                    btn.style.background = '#2ecc71';
-                    btn.textContent = roll;
-                    if (dropBtn) dropBtn.style.visibility = '';
-                } else {
-                    btn.textContent = roll;
-                    if (dropBtn) dropBtn.style.visibility = '';
+                const prevState = btn.dataset.resultState || '';
+                btn.classList.remove('hit', 'dropped', 'missed', 'result-pop');
+                btn.style.background = '';
+                btn.textContent = roll;
+
+                if (nextState) {
+                    btn.classList.add(nextState);
+                    if (prevState !== nextState) {
+                        void btn.offsetWidth;
+                        btn.classList.add('result-pop');
+                    }
                 }
+                btn.dataset.resultState = nextState;
             });
 
             const totalDamageEl = document.getElementById('total-damage-display');
@@ -3870,6 +3927,7 @@
 
             const hitIdxSet = new Set(state.hits.map(h => h.idx));
             const droppedSet = new Set(state.droppedDiceIndices);
+            const missedSet = new Set(state.missedDiceIndices || []);
 
             hitInfo.innerHTML = `
                 <div style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px;">
@@ -3879,13 +3937,13 @@
                 <div class="hit-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     ${state.currentRoll.map((roll, idx) => `
                         <div class="dice-slot" data-idx="${idx}">
-                            <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''} ${droppedSet.has(idx) ? 'dropped' : ''}" data-roll="${roll}" data-idx="${idx}" style="${hitIdxSet.has(idx) ? 'background: #2ecc71;' : ''}">
-                                ${droppedSet.has(idx) ? 'DROP \u2715' : roll}
+                            <button class="btn hit-toggle ${hitIdxSet.has(idx) ? 'hit' : ''} ${droppedSet.has(idx) ? 'dropped' : ''} ${missedSet.has(idx) ? 'missed' : ''}" data-roll="${roll}" data-idx="${idx}" aria-label="Record result for ${roll}">
+                                ${roll}
                             </button>
-                            <button class="drop-toggle" data-idx="${idx}" type="button" ${droppedSet.has(idx) ? 'style="visibility:hidden;"' : ''}>drop</button>
                         </div>
                     `).join('')}
                 </div>
+                <p style="margin: 8px 0 0; font-size: 0.82rem; opacity: 0.8; text-align: center;">Tap a die to record Hit, Miss, or Drop</p>
                 <div style="margin-top: 12px;">
                     <button class="btn btn-primary" id="confirm-hits-btn">Confirm</button>
                 </div>
@@ -3903,30 +3961,7 @@
 
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const idx = parseInt(btn.dataset.idx);
-
-                    if (btn.classList.contains('dropped')) {
-                        undoDropForDie(idx);
-                        return;
-                    }
-
-                    const roll = parseInt(btn.dataset.roll);
-                    if (btn.classList.contains('hit')) {
-                        state.hits = state.hits.filter(h => h.idx !== idx);
-                    } else {
-                        if (state.droppedDiceIndices.includes(idx)) return;
-                        const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
-                        if (state.hits.length >= slotsLeft) return;
-                        state.hits.push({ roll, idx });
-                    }
-                    syncHitRecorderUI();
-                });
-            });
-
-            hitInfo.querySelectorAll('.drop-toggle').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = parseInt(btn.dataset.idx);
-                    performDrop(idx);
+                    openThrowResultModal(parseInt(btn.dataset.idx, 10));
                 });
             });
 
@@ -4144,6 +4179,76 @@
                 addLogEntry(`${player.name} discarded ${newItem.name} (inventory full).`, 'info');
             }
         }
+
+        const throwResultModal = document.getElementById('throw-result-modal');
+        const throwResultRollEl = document.getElementById('throw-result-roll');
+        const throwResultHitBtn = document.getElementById('throw-result-hit-btn');
+        const throwResultMissBtn = document.getElementById('throw-result-miss-btn');
+        const throwResultDropBtn = document.getElementById('throw-result-drop-btn');
+        const throwResultCancelBtn = document.getElementById('throw-result-cancel-btn');
+        let throwResultDieIdx = null;
+
+        function getDieResult(idx) {
+            if ((state.droppedDiceIndices || []).includes(idx)) return 'drop';
+            if ((state.hits || []).some(h => h.idx === idx)) return 'hit';
+            if ((state.missedDiceIndices || []).includes(idx)) return 'miss';
+            return null;
+        }
+
+        function applyDieResult(idx, result) {
+            const roll = state.currentRoll[idx];
+            if (roll === undefined) return;
+            const current = getDieResult(idx);
+            if (current === result) return;
+
+            if (current === 'drop') undoDropForDie(idx);
+            if (current === 'hit') state.hits = state.hits.filter(h => h.idx !== idx);
+            state.missedDiceIndices = (state.missedDiceIndices || []).filter(i => i !== idx);
+
+            if (result === 'hit') {
+                const slotsLeft = MAX_SCORES_PER_TURN - state.dropsThisTurn;
+                if (state.hits.length >= slotsLeft) {
+                    syncHitRecorderUI();
+                    return;
+                }
+                state.hits.push({ roll, idx });
+            } else if (result === 'miss') {
+                state.missedDiceIndices.push(idx);
+            } else if (result === 'drop') {
+                performDrop(idx);
+                return;
+            }
+            syncHitRecorderUI();
+        }
+
+        function openThrowResultModal(idx) {
+            if (!state.currentRoll || state.currentRoll[idx] === undefined) return;
+            throwResultDieIdx = idx;
+            if (throwResultRollEl) throwResultRollEl.textContent = state.currentRoll[idx];
+            const current = getDieResult(idx);
+            throwResultHitBtn.classList.toggle('selected', current === 'hit');
+            throwResultMissBtn.classList.toggle('selected', current === 'miss');
+            throwResultDropBtn.classList.toggle('selected', current === 'drop');
+            throwResultModal.classList.add('open');
+        }
+
+        function closeThrowResultModal() {
+            throwResultModal.classList.remove('open');
+            throwResultDieIdx = null;
+        }
+
+        function chooseThrowResult(result) {
+            const idx = throwResultDieIdx;
+            closeThrowResultModal();
+            if (idx === null || isNaN(idx)) return;
+            applyDieResult(idx, result);
+        }
+
+        throwResultHitBtn.addEventListener('click', () => chooseThrowResult('hit'));
+        throwResultMissBtn.addEventListener('click', () => chooseThrowResult('miss'));
+        throwResultDropBtn.addEventListener('click', () => chooseThrowResult('drop'));
+        throwResultCancelBtn.addEventListener('click', closeThrowResultModal);
+        throwResultModal.addEventListener('click', (e) => { if (e.target === throwResultModal) closeThrowResultModal(); });
 
         const damageConfirmModal = document.getElementById('damage-confirm-modal');
         const damageConfirmRolls = document.getElementById('damage-confirm-rolls');
@@ -4537,6 +4642,7 @@
             if (!current) return;
 
             state.hits = state.hits.filter(h => h.idx !== dieIdx);
+            state.missedDiceIndices = (state.missedDiceIndices || []).filter(i => i !== dieIdx);
 
             const freeDrop = state.itemsEnabled && ((current.freeDropsCount || 0) > 0);
             if (!freeDrop) {
@@ -5161,11 +5267,13 @@
             if (botEndTurnTimerId) { clearTimeout(botEndTurnTimerId); botEndTurnTimerId = null; }
             if (turnSummaryModalTimerId) { clearTimeout(turnSummaryModalTimerId); turnSummaryModalTimerId = null; }
             document.getElementById('turn-summary-modal')?.classList.remove('open');
+            document.getElementById('throw-result-modal')?.classList.remove('open');
             disableTargetSelection();
             state.lastDroppedKnifeLogIndex = undefined;
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
             state.droppedDiceIndices = [];
+            state.missedDiceIndices = [];
             state.damageDealtThisTurn = false;
 
             let nextIdx = state.currentPlayerIndex;
@@ -5639,6 +5747,7 @@ ${itemRows}
             document.getElementById('damage-confirm-modal')?.classList.remove('open');
             document.getElementById('critical-item-modal')?.classList.remove('open');
             document.getElementById('item-swap-modal')?.classList.remove('open');
+            document.getElementById('throw-result-modal')?.classList.remove('open');
             document.getElementById('game-ledger-modal')?.classList.remove('open');
             criticalItemProceedCallback = null;
             itemSwapCallback = null;
@@ -5701,6 +5810,7 @@ ${itemRows}
             state.dropsThisTurn = 0;
             state.dropsThisTurnLogIndices = [];
             state.droppedDiceIndices = [];
+            state.missedDiceIndices = [];
             state.damageDealtThisTurn = false;
 
             winnerScreen.style.display = 'none';
