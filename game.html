@@ -547,7 +547,6 @@
         .player-stats-modal .btn {
             width: 100%;
         }
-        #damage-confirm-modal-content,
         #attack-confirm-modal-content,
         #critical-item-modal-content,
         #throw-result-modal-content,
@@ -756,30 +755,6 @@
             height: 1px;
             margin: 0 36px;
             background: linear-gradient(90deg, transparent 0%, rgba(212, 168, 75, 0.3) 50%, transparent 100%);
-        }
-        .confirm-rolls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 6px 0 10px 0;
-        }
-        .confirm-roll-pill {
-            min-width: 44px;
-            padding: 7px 10px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1.05rem;
-            text-align: center;
-            background: rgba(72, 219, 251, 0.16);
-            border: 1px solid rgba(72, 219, 251, 0.35);
-            color: #8feaff;
-        }
-        #damage-confirm-detail {
-            text-align: center;
-            margin: 0 0 16px 0;
-            color: rgba(255,255,255,0.9);
-            font-size: 0.95rem;
         }
         .modal-actions {
             display: flex;
@@ -2592,7 +2567,7 @@
                 <input type="checkbox" id="skip-damage-confirm-cb" aria-describedby="skip-damage-confirm-hint">
                 <label for="skip-damage-confirm-cb">Skip damage confirmations</label>
             </div>
-            <p id="skip-damage-confirm-hint" class="setting-hint">Skip the confirmation prompts when claiming and assigning damage. Useful for faster play.</p>
+            <p id="skip-damage-confirm-hint" class="setting-hint">Hides the Confirm button and advances as soon as every die has Hit, Miss, or Drop. Also skips damage assignment prompts.</p>
             <h4 class="settings-section-title" style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem; color: #48dbfb;">Mods</h4>
             <div class="option-row">
                 <input type="checkbox" id="mod-buff-on-critical-cb" aria-describedby="mod-buff-hint">
@@ -2720,20 +2695,6 @@
         </div>
     </div>
 
-    <!-- Damage confirmation modal -->
-    <div class="player-stats-modal-overlay" id="damage-confirm-modal" role="dialog" aria-label="Confirm hits">
-        <div class="player-stats-modal" id="damage-confirm-modal-content">
-            <div class="modal-eyebrow">Score Confirm</div>
-            <h3 style="color: #feca57;">Lock these hits?</h3>
-            <div id="damage-confirm-rolls" class="confirm-rolls"></div>
-            <p id="damage-confirm-detail" class="setting-hint"></p>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" id="damage-confirm-edit-btn">Edit</button>
-                <button type="button" class="btn btn-primary" id="damage-confirm-yes-btn">Yes</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Attack confirmation modal -->
     <div class="player-stats-modal-overlay" id="attack-confirm-modal" role="dialog" aria-label="Confirm attack">
         <div class="player-stats-modal" id="attack-confirm-modal-content">
@@ -2854,6 +2815,7 @@
             autoDealDamage: false,
             autoAdvanceAfterDamage: false,
             skipDamageConfirm: false,
+            confirmingHits: false,
             hasScoreBeenEntered: false,
             itemUsesThisTurn: 0,
             lastDroppedKnifeLogIndex: undefined,
@@ -3122,6 +3084,7 @@
             if (skipDamageConfirmCb) {
                 localStorage.setItem('daggerdie_skipDamageConfirm', String(skipDamageConfirmCb.checked));
                 state.skipDamageConfirm = skipDamageConfirmCb.checked;
+                if (state.hasRolled && !state.damageClaimedPhase) syncHitRecorderUI();
             }
             if (soundEnabledCb) {
                 localStorage.setItem(DaggerDieAudio.SOUND_ENABLED_KEY, String(soundEnabledCb.checked));
@@ -3847,6 +3810,7 @@
             state.hasRolled = false;
             state.hasAttacked = false;
             state.damageClaimedPhase = false;
+            state.confirmingHits = false;
             state.hits = [];
             state.missedDiceIndices = [];
             state.totalDamage = 0;
@@ -4141,6 +4105,7 @@
             state.missedDiceIndices = [];
             state.totalDamage = 0;
             state.damageClaimedPhase = false;
+            state.confirmingHits = false;
 
             dice.forEach((die, idx) => {
                 die.classList.remove('rolling');
@@ -4307,7 +4272,11 @@
             if (scoreCounter) scoreCounter.textContent = `Scores: ${state.hits.length + state.dropsThisTurn} / ${MAX_SCORES_PER_TURN}`;
 
             const confirmBtn = document.getElementById('confirm-hits-btn');
+            const confirmWrap = hitInfo.querySelector('.confirm-hits-wrap');
             const resolved = allDiceResolved();
+            if (confirmWrap) {
+                confirmWrap.style.display = state.skipDamageConfirm ? 'none' : '';
+            }
             if (confirmBtn) {
                 confirmBtn.disabled = false;
                 confirmBtn.classList.toggle('confirm-incomplete', !resolved);
@@ -4317,9 +4286,15 @@
             const resolveHint = hitInfo.querySelector('.dice-resolve-hint');
             if (resolveHint) {
                 const remaining = (state.currentRoll || []).filter((_, i) => !getDieResult(i)).length;
-                resolveHint.textContent = remaining > 0
-                    ? `Tap each die to record Hit, Miss, or Drop (${remaining} left)`
-                    : 'All dice recorded — ready to confirm';
+                if (state.skipDamageConfirm) {
+                    resolveHint.textContent = remaining > 0
+                        ? `Tap each die to record Hit, Miss, or Drop (${remaining} left) — advances automatically`
+                        : 'All dice recorded — advancing…';
+                } else {
+                    resolveHint.textContent = remaining > 0
+                        ? `Tap each die to record Hit, Miss, or Drop (${remaining} left)`
+                        : 'All dice recorded — ready to confirm';
+                }
             }
 
             document.querySelectorAll('.highlight-zone').forEach(zone => {
@@ -4338,6 +4313,107 @@
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll), aim: aimZone });
             } catch (e) {}
+
+            if (state.skipDamageConfirm && resolved) {
+                tryAutoConfirmHits();
+            }
+        }
+
+        function tryAutoConfirmHits() {
+            if (!state.skipDamageConfirm) return;
+            if (state.confirmingHits || state.damageClaimedPhase || !state.hasRolled) return;
+            if (!allDiceResolved()) return;
+            const oddOverlay = document.getElementById('odd-overlay');
+            if (!oddOverlay || !oddOverlay.classList.contains('clickable')) return;
+            confirmHitResults();
+        }
+
+        function confirmHitResults() {
+            if (state.confirmingHits || state.damageClaimedPhase) return;
+            if (!allDiceResolved()) {
+                const remaining = (state.currentRoll || []).filter((_, i) => !getDieResult(i)).length;
+                showDiceIncompleteModal(remaining);
+                return;
+            }
+
+            const currentPlayer = getCurrentPlayer();
+            if (!currentPlayer) return;
+            state.confirmingHits = true;
+            state.totalDamage = getHitsTotalDamage(state.hits);
+
+            const proceedAfterDamageConfirm = () => {
+                document.getElementById('odd-overlay').classList.remove('clickable');
+                document.getElementById('even-overlay').classList.remove('clickable');
+                document.getElementById('combined-overlay').classList.remove('clickable');
+
+                if (state.totalDamage > 0) {
+                    const aimResult = consumeAimForCurrentPlayer(currentPlayer);
+                    if (aimResult.applied) {
+                        addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim success! (+${aimResult.bonus} DP)`, 'info');
+                    } else if (aimResult.hadAim) {
+                        addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
+                    }
+                    syncHitRecorderUI();
+                    state.totalDamage = getHitsTotalDamage(state.hits);
+                    const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
+                    let acquiredItem = null;
+                    let swapItem = null;
+                    let d12Roll = null;
+                    if (isCritical) {
+                        currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
+                        if (state.modBuffOnCritical) currentPlayer.buffActive = true;
+                        if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
+                            compactInventory(currentPlayer);
+                            const slotIdx = (currentPlayer.inventory || [null,null,null]).findIndex(s => s === null);
+                            d12Roll = Math.floor(Math.random() * 12) + 1;
+                            const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
+                            if (item && slotIdx >= 0) {
+                                if (!currentPlayer.inventory) currentPlayer.inventory = [null, null, null];
+                                if (!currentPlayer.inventoryLocked) currentPlayer.inventoryLocked = [false, false, false];
+                                currentPlayer.inventory[slotIdx] = item.id;
+                                currentPlayer.inventoryLocked[slotIdx] = true;
+                                trackItemAcquired(currentPlayer, item.id);
+                                acquiredItem = item;
+                                addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
+                            } else if (item && slotIdx < 0) {
+                                swapItem = item;
+                                addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}! (inventory full)`, 'info');
+                            } else {
+                                addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                            }
+                        } else {
+                            addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
+                        }
+                        showCriticalReaction(currentPlayer.name);
+                    } else {
+                        addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')})`, 'info');
+                    }
+                    updatePlayersPanel();
+                    const proceedAfterCritical = () => {
+                        showTargetSelection();
+                    };
+                    if (swapItem && d12Roll !== null && !currentPlayer.isBot) {
+                        showItemSwapModal(currentPlayer, swapItem, d12Roll, () => { updatePlayersPanel(); proceedAfterCritical(); });
+                    } else if (swapItem && currentPlayer.isBot) {
+                        botAutoSwapItem(currentPlayer, swapItem);
+                        updatePlayersPanel();
+                        proceedAfterCritical();
+                    } else if (acquiredItem && d12Roll !== null && !currentPlayer.isBot) {
+                        showCriticalItemModal(d12Roll, acquiredItem, proceedAfterCritical);
+                    } else {
+                        proceedAfterCritical();
+                    }
+                } else {
+                    const aimResult = consumeAimForCurrentPlayer(currentPlayer);
+                    if (aimResult.hadAim) addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
+                    if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
+                    addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
+                    showMissReaction();
+                    finishTurnNoAttack();
+                }
+            };
+
+            proceedAfterDamageConfirm();
         }
 
         function showHitRecorder(initialHits) {
@@ -4345,6 +4421,7 @@
 
             const maxDiceScores = Math.max(0, MAX_SCORES_PER_TURN - state.dropsThisTurn);
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice(0, maxDiceScores) : [];
+            state.confirmingHits = false;
 
             attackPrompt.classList.add('hidden');
 
@@ -4367,12 +4444,12 @@
                     `).join('')}
                 </div>
                 <p class="dice-resolve-hint" style="margin: 8px 0 0; font-size: 0.82rem; opacity: 0.8; text-align: center;">Tap each die to record Hit, Miss, or Drop</p>
-                <div style="margin-top: 12px;">
+                <div class="confirm-hits-wrap" style="margin-top: 12px;${state.skipDamageConfirm ? ' display:none;' : ''}">
                     <button class="btn btn-primary confirm-incomplete" id="confirm-hits-btn" title="Record Hit, Miss, or Drop for every die first" aria-disabled="true">Confirm</button>
                 </div>
                 ${state.itemsEnabled && canPlayerUseItemsNow(currentPlayer.id) ? `
                     <p style="margin: 10px 0 0; font-size: 0.85rem; opacity: 0.85; text-align: center;">
-                        Tap an item on your player card to use it (optional, once per turn) before confirming.
+                        Tap an item on your player card to use it (optional, once per turn) ${state.skipDamageConfirm ? 'before all dice are recorded' : 'before confirming'}.
                     </p>
                 ` : ''}
             `;
@@ -4388,92 +4465,10 @@
                 });
             });
 
-            document.getElementById('confirm-hits-btn').addEventListener('click', () => {
-                if (!allDiceResolved()) {
-                    const remaining = (state.currentRoll || []).filter((_, i) => !getDieResult(i)).length;
-                    showDiceIncompleteModal(remaining);
-                    return;
-                }
-                state.totalDamage = getHitsTotalDamage(state.hits);
-                const proceedAfterDamageConfirm = () => {
-                    document.getElementById('odd-overlay').classList.remove('clickable');
-                    document.getElementById('even-overlay').classList.remove('clickable');
-                    document.getElementById('combined-overlay').classList.remove('clickable');
-
-                    if (state.totalDamage > 0) {
-                        const aimResult = consumeAimForCurrentPlayer(currentPlayer);
-                        if (aimResult.applied) {
-                            addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim success! (+${aimResult.bonus} DP)`, 'info');
-                        } else if (aimResult.hadAim) {
-                            addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
-                        }
-                        syncHitRecorderUI();
-                        state.totalDamage = getHitsTotalDamage(state.hits);
-                        const isCritical = state.hits.length === MAX_SCORES_PER_TURN;
-                        let acquiredItem = null;
-                        let swapItem = null;
-                        let d12Roll = null;
-                        if (isCritical) {
-                            currentPlayer.criticals = (currentPlayer.criticals || 0) + 1;
-                            if (state.modBuffOnCritical) currentPlayer.buffActive = true;
-                            if (state.itemsEnabled && typeof DAGGERDIE_GET_ITEM_BY_D12 === 'function') {
-                                compactInventory(currentPlayer);
-                                const slotIdx = (currentPlayer.inventory || [null,null,null]).findIndex(s => s === null);
-                                d12Roll = Math.floor(Math.random() * 12) + 1;
-                                const item = DAGGERDIE_GET_ITEM_BY_D12(d12Roll);
-                                if (item && slotIdx >= 0) {
-                                    if (!currentPlayer.inventory) currentPlayer.inventory = [null, null, null];
-                                    if (!currentPlayer.inventoryLocked) currentPlayer.inventoryLocked = [false, false, false];
-                                    currentPlayer.inventory[slotIdx] = item.id;
-                                    currentPlayer.inventoryLocked[slotIdx] = true;
-                                    trackItemAcquired(currentPlayer, item.id);
-                                    acquiredItem = item;
-                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}!`, 'info');
-                                } else if (item && slotIdx < 0) {
-                                    swapItem = item;
-                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical! Found ${item.name}! (inventory full)`, 'info');
-                                } else {
-                                    addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
-                                }
-                            } else {
-                                addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')}) — Critical!`, 'info');
-                            }
-                            showCriticalReaction(currentPlayer.name);
-                        } else {
-                            addLogEntry(`${currentPlayer.name} claimed ${state.totalDamage} damage points! (Hit: ${state.hits.map(h => getHitEffectiveRoll(h)).join(', ')})`, 'info');
-                        }
-                        updatePlayersPanel();
-                        const proceedAfterCritical = () => {
-                            showTargetSelection();
-                        };
-                        // Auto-deal damage still pauses for human item swap / critical reveal;
-                        // only bots auto-resolve inventory when full.
-                        if (swapItem && d12Roll !== null && !currentPlayer.isBot) {
-                            showItemSwapModal(currentPlayer, swapItem, d12Roll, () => { updatePlayersPanel(); proceedAfterCritical(); });
-                        } else if (swapItem && currentPlayer.isBot) {
-                            botAutoSwapItem(currentPlayer, swapItem);
-                            updatePlayersPanel();
-                            proceedAfterCritical();
-                        } else if (acquiredItem && d12Roll !== null && !currentPlayer.isBot) {
-                            showCriticalItemModal(d12Roll, acquiredItem, proceedAfterCritical);
-                        } else {
-                            proceedAfterCritical();
-                        }
-                    } else {
-                        const aimResult = consumeAimForCurrentPlayer(currentPlayer);
-                        if (aimResult.hadAim) addLogEntry(`${currentPlayer.name} called ${aimResult.zone} — Aim missed.`, 'info');
-                        if (state.modNerfOnMiss) currentPlayer.nerfActive = true;
-                        addLogEntry(`${currentPlayer.name} missed all targets!`, 'info');
-                        showMissReaction();
-                        finishTurnNoAttack();
-                    }
-                };
-                if (state.skipDamageConfirm) {
-                    proceedAfterDamageConfirm();
-                } else {
-                    showDamageConfirmModal(`Total damage: ${state.totalDamage}`, proceedAfterDamageConfirm);
-                }
-            });
+            const confirmBtn = document.getElementById('confirm-hits-btn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => confirmHitResults());
+            }
         }
 
         const criticalItemModal = document.getElementById('critical-item-modal');
@@ -4702,38 +4697,6 @@
                 if (e.target === diceIncompleteModal) closeDiceIncompleteModal();
             });
         }
-
-        const damageConfirmModal = document.getElementById('damage-confirm-modal');
-        const damageConfirmRolls = document.getElementById('damage-confirm-rolls');
-        const damageConfirmDetail = document.getElementById('damage-confirm-detail');
-        const damageConfirmYesBtn = document.getElementById('damage-confirm-yes-btn');
-        const damageConfirmEditBtn = document.getElementById('damage-confirm-edit-btn');
-        let damageConfirmCallback = null;
-
-        function showDamageConfirmModal(detailText, onYes) {
-            damageConfirmDetail.textContent = detailText || 'Continue?';
-            if (damageConfirmRolls) {
-                const rolls = (state.hits || []).map(h => h.roll);
-                damageConfirmRolls.innerHTML = rolls.length > 0
-                    ? rolls.map(v => `<span class="confirm-roll-pill">${v}</span>`).join('')
-                    : '<span class="confirm-roll-pill">No hits</span>';
-            }
-            damageConfirmCallback = onYes;
-            damageConfirmModal.classList.add('open');
-        }
-
-        function closeDamageConfirmModal() {
-            damageConfirmModal.classList.remove('open');
-            damageConfirmCallback = null;
-        }
-
-        damageConfirmYesBtn.addEventListener('click', () => {
-            const cb = damageConfirmCallback;
-            closeDamageConfirmModal();
-            if (cb) cb();
-        });
-        damageConfirmEditBtn.addEventListener('click', closeDamageConfirmModal);
-        damageConfirmModal.addEventListener('click', (e) => { if (e.target === damageConfirmModal) closeDamageConfirmModal(); });
 
         const attackConfirmModal = document.getElementById('attack-confirm-modal');
         const attackConfirmTitle = document.getElementById('attack-confirm-title');
@@ -6199,14 +6162,12 @@ ${itemRows}
             document.getElementById('settings-modal')?.classList.remove('open');
             document.getElementById('player-stats-modal')?.classList.remove('open');
             document.getElementById('item-use-modal')?.classList.remove('open');
-            document.getElementById('damage-confirm-modal')?.classList.remove('open');
             document.getElementById('critical-item-modal')?.classList.remove('open');
             document.getElementById('item-swap-modal')?.classList.remove('open');
             document.getElementById('throw-result-modal')?.classList.remove('open');
             document.getElementById('game-ledger-modal')?.classList.remove('open');
             criticalItemProceedCallback = null;
             itemSwapCallback = null;
-            damageConfirmCallback = null;
             itemUseContext = null;
             playerStatsModalPlayerId = null;
             applySettingsForNewGame();
