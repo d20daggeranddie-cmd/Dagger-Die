@@ -111,7 +111,21 @@
   .back-btn:focus { outline: 2px solid #feca57; outline-offset: 4px; border-radius: 4px; }
   .back-btn svg { width: 28px; height: 28px; }
 
-  .resources-wrap { position: absolute; top: 20px; right: 20px; }
+  .resources-wrap { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; align-items: center; }
+  .sound-toggle-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: rgba(255,255,255,0.75);
+    transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  }
+  .sound-toggle-btn:hover { color: #48dbfb; transform: scale(1.1); }
+  .sound-toggle-btn:focus { outline: 2px solid #48dbfb; outline-offset: 4px; border-radius: 4px; }
+  .sound-toggle-btn svg { width: 26px; height: 26px; }
+  .sound-toggle-btn .icon-muted { display: none; }
+  .sound-toggle-btn.sound-off .icon-on { display: none; }
+  .sound-toggle-btn.sound-off .icon-muted { display: block; }
+  .sound-toggle-btn.sound-off { opacity: 0.5; }
   .resources-star-btn {
     display: flex; align-items: center; justify-content: center;
     width: 48px; height: 48px;
@@ -457,6 +471,18 @@
       </div>
 
       <div class="resources-wrap">
+        <button type="button" class="sound-toggle-btn" id="sound-toggle-btn" aria-label="Mute sound effects" aria-pressed="true" title="Sound effects on">
+          <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
         <button type="button" class="resources-star-btn" id="resources-btn" aria-label="Resources">
           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -643,6 +669,7 @@
     data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
     data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
   <script src="rpg-bg-canvas.js"></script>
+  <script src="audio.js"></script>
   <script>
     const compState = {
       targets: [],
@@ -661,6 +688,24 @@
     const noPlayers = document.getElementById('no-players');
     const finalizeWrap = document.getElementById('finalize-wrap');
     const finalizeBtn = document.getElementById('finalize-btn');
+    const soundToggleBtn = document.getElementById('sound-toggle-btn');
+
+    function syncSoundToggleUi() {
+      if (!soundToggleBtn) return;
+      const enabled = DaggerDieAudio.isEnabled();
+      soundToggleBtn.classList.toggle('sound-off', !enabled);
+      soundToggleBtn.setAttribute('aria-pressed', String(enabled));
+      soundToggleBtn.setAttribute('aria-label', enabled ? 'Mute sound effects' : 'Enable sound effects');
+      soundToggleBtn.title = enabled ? 'Sound effects on' : 'Sound effects off';
+    }
+
+    if (soundToggleBtn) {
+      syncSoundToggleUi();
+      soundToggleBtn.addEventListener('click', () => {
+        DaggerDieAudio.toggleEnabled();
+        syncSoundToggleUi();
+      });
+    }
 
     const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
     const leaderboardChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-leaderboard') : null;
@@ -716,6 +761,8 @@
         d.classList.remove('odd', 'even');
       });
 
+      DaggerDieAudio.startDiceRoll();
+
       for (let i = 0; i < 15; i++) {
         diceEls.forEach(d => { d.textContent = rollD20(); });
         await sleep(50);
@@ -730,6 +777,8 @@
         d.textContent = val;
         d.classList.add(val % 2 === 0 ? 'even' : 'odd');
       });
+
+      DaggerDieAudio.stopDiceRoll();
 
       rollBtn.textContent = 'Targets Locked';
 
