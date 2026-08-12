@@ -430,6 +430,14 @@
           <p id="persistent-settings-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">When unchecked (default), settings reset to defaults each new game. When checked, your selections are kept until you uncheck this.</p>
         </div>
         <div class="options-group">
+          <h4>Audio</h4>
+          <div class="option-row">
+            <input type="checkbox" id="sound-enabled" aria-describedby="sound-enabled-desc">
+            <label for="sound-enabled">Sound effects</label>
+          </div>
+          <p id="sound-enabled-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Play dice rolling and hit sounds.</p>
+        </div>
+        <div class="options-group">
           <h4>Auto-Advance</h4>
           <div class="option-row">
             <input type="checkbox" id="auto-roll-turn-order" aria-describedby="auto-roll-desc">
@@ -538,6 +546,7 @@
     data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
     data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
   <script src="rpg-bg-canvas.js"></script>
+  <script src="audio.js"></script>
   <script>
     // Resources modal (star button)
     const resourcesBtn = document.getElementById('resources-btn');
@@ -656,6 +665,7 @@
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
     const BOTTOMLESS_BACKPACK_KEY = 'daggerdie_bottomlessBackpack';
     const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
+    const SOUND_ENABLED_KEY = 'daggerdie_soundEnabled';
 
     document.getElementById('options-toggle').addEventListener('click', () => {
       const toggle = document.getElementById('options-toggle');
@@ -671,7 +681,8 @@
       AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
       MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY, MOD_PARTY_KEY,
-      ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTTOMLESS_BACKPACK_KEY, BOTS_ENABLED_KEY
+      ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTTOMLESS_BACKPACK_KEY, BOTS_ENABLED_KEY,
+      SOUND_ENABLED_KEY
     ];
     if (!isPersistent()) {
       ALL_SETTING_KEYS.forEach(k => localStorage.removeItem(k));
@@ -680,6 +691,10 @@
     const autoRollTurnOrderCheckbox = document.getElementById('auto-roll-turn-order');
     autoRollTurnOrderCheckbox.checked = localStorage.getItem(AUTO_ROLL_TURN_ORDER_KEY) === 'true';
     autoRollTurnOrderCheckbox.addEventListener('change', () => localStorage.setItem(AUTO_ROLL_TURN_ORDER_KEY, autoRollTurnOrderCheckbox.checked));
+
+    const soundEnabledCheckbox = document.getElementById('sound-enabled');
+    soundEnabledCheckbox.checked = DaggerDieAudio.isEnabled();
+    soundEnabledCheckbox.addEventListener('change', () => localStorage.setItem(SOUND_ENABLED_KEY, soundEnabledCheckbox.checked));
 
     const autoBeginGameCheckbox = document.getElementById('auto-begin-game');
     autoBeginGameCheckbox.checked = localStorage.getItem(AUTO_BEGIN_GAME_KEY) === 'true';
