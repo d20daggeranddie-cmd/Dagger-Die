@@ -247,6 +247,22 @@
             height: 22px;
         }
 
+        .sound-toggle-btn .icon-muted {
+            display: none;
+        }
+
+        .sound-toggle-btn.sound-off .icon-on {
+            display: none;
+        }
+
+        .sound-toggle-btn.sound-off .icon-muted {
+            display: block;
+        }
+
+        .sound-toggle-btn.sound-off {
+            opacity: 0.55;
+        }
+
         .settings-modal-overlay {
             display: none;
             position: fixed;
@@ -458,6 +474,94 @@
         #throw-result-modal-content,
         #turn-summary-modal.open {
             animation: summary-overlay-in 0.25s ease-out;
+        }
+        #throw-result-modal-content {
+            max-width: 340px;
+            padding: 0;
+            border: 2px solid rgba(212, 168, 75, 0.4);
+            box-shadow:
+                0 0 40px rgba(212, 168, 75, 0.15),
+                0 24px 70px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            text-align: center;
+            background: linear-gradient(180deg, #1a2440 0%, #12192e 50%, #0e1225 100%);
+            border-radius: 24px;
+            overflow: hidden;
+            animation: summary-pop-in 0.3s ease-out;
+        }
+        .throw-result-header {
+            padding: 28px 28px 18px;
+            background:
+                radial-gradient(ellipse 80% 120% at 50% -20%, rgba(212, 168, 75, 0.12) 0%, transparent 70%);
+        }
+        .throw-result-roll {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            font-size: 3.25rem;
+            font-weight: 700;
+            text-align: center;
+            color: #feca57;
+            margin: 10px 0 0;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(254, 202, 87, 0.35), 0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 0.04em;
+        }
+        .throw-result-body {
+            padding: 0 28px 28px;
+        }
+        .throw-result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 0 0 14px;
+        }
+        .throw-result-actions .btn {
+            width: 100%;
+            margin-top: 0;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 12px;
+            border: 1.5px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .throw-result-hit {
+            background: rgba(46, 204, 113, 0.18);
+            border-color: rgba(46, 204, 113, 0.5);
+            color: #86efac;
+        }
+        .throw-result-hit:hover {
+            background: rgba(46, 204, 113, 0.32);
+            border-color: #2ecc71;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 204, 113, 0.25);
+        }
+        .throw-result-miss {
+            background: rgba(127, 140, 141, 0.22);
+            border-color: rgba(189, 195, 199, 0.45);
+            color: #d5dbdb;
+        }
+        .throw-result-miss:hover {
+            background: rgba(127, 140, 141, 0.36);
+            border-color: rgba(189, 195, 199, 0.65);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(127, 140, 141, 0.2);
+        }
+        .throw-result-drop {
+            background: rgba(231, 76, 60, 0.18);
+            border-color: rgba(231, 76, 60, 0.5);
+            color: #ff8f8f;
+        }
+        .throw-result-drop:hover {
+            background: rgba(231, 76, 60, 0.32);
+            border-color: #e74c3c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.25);
+        }
+        .throw-result-actions .btn.selected {
+            box-shadow: 0 0 0 2px rgba(254, 202, 87, 0.85), 0 0 16px rgba(254, 202, 87, 0.25);
+        }
+        #throw-result-cancel-btn {
+            margin-top: 0;
         }
         @keyframes summary-overlay-in {
             from { opacity: 0; }
@@ -1191,43 +1295,6 @@
         @keyframes resultChipIn {
             0% { opacity: 0; transform: scale(0.7); }
             100% { opacity: 1; transform: scale(1); }
-        }
-        .throw-result-roll {
-            font-size: 3rem;
-            font-weight: 800;
-            text-align: center;
-            color: #feca57;
-            margin: 0 0 18px;
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(254, 202, 87, 0.35);
-        }
-        .throw-result-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 0 0 12px;
-        }
-        .throw-result-actions .btn {
-            width: 100%;
-            margin-top: 0;
-        }
-        .throw-result-hit {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
-            color: #fff;
-        }
-        .throw-result-miss {
-            background: linear-gradient(45deg, #5d6d7e, #7f8c8d);
-            color: #fff;
-        }
-        .throw-result-drop {
-            background: linear-gradient(45deg, #c0392b, #e74c3c);
-            color: #fff;
-        }
-        .throw-result-actions .btn.selected {
-            box-shadow: 0 0 0 3px rgba(254, 202, 87, 0.75);
-        }
-        #throw-result-cancel-btn {
-            margin-top: 0;
         }
 
         /* Miss onscreen reaction */
@@ -2201,6 +2268,18 @@
                         </svg>
                         <span class="ledger-badge" id="ledger-badge"></span>
                     </button>
+                    <button type="button" class="settings-gear-btn sound-toggle-btn" id="sound-toggle-btn" aria-label="Mute sound effects" aria-pressed="true" title="Sound effects on">
+                        <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        </svg>
+                        <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <line x1="23" y1="9" x2="17" y2="15"></line>
+                            <line x1="17" y1="9" x2="23" y2="15"></line>
+                        </svg>
+                    </button>
                     <button type="button" class="settings-gear-btn" id="settings-gear-btn" aria-label="Game settings">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
@@ -2348,6 +2427,11 @@
                 <label for="persistent-settings-cb">Persistent settings</label>
             </div>
             <p id="persistent-settings-hint" class="setting-hint">When unchecked (default), settings reset to defaults each new game. When checked, your selections are kept until you uncheck this.</p>
+            <div class="option-row" style="margin-top: 20px;">
+                <input type="checkbox" id="sound-enabled-cb" aria-describedby="sound-enabled-hint">
+                <label for="sound-enabled-cb">Sound effects</label>
+            </div>
+            <p id="sound-enabled-hint" class="setting-hint">Play dice rolling and hit sounds.</p>
             <h4 class="settings-section-title" style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem; color: #48dbfb;">Auto Advance</h4>
             <div class="option-row">
                 <input type="checkbox" id="auto-roll-dice-cb" aria-describedby="auto-roll-dice-hint">
@@ -2450,15 +2534,20 @@
     <!-- Throw result modal (Hit / Miss / Drop) -->
     <div class="player-stats-modal-overlay" id="throw-result-modal" role="dialog" aria-label="Throw result">
         <div class="player-stats-modal" id="throw-result-modal-content">
-            <div class="modal-eyebrow">Throw Result</div>
-            <h3 style="margin-bottom: 8px;">What happened?</h3>
-            <div id="throw-result-roll" class="throw-result-roll"></div>
-            <div class="throw-result-actions">
-                <button type="button" class="btn throw-result-hit" id="throw-result-hit-btn">Hit</button>
-                <button type="button" class="btn throw-result-miss" id="throw-result-miss-btn">Miss</button>
-                <button type="button" class="btn throw-result-drop" id="throw-result-drop-btn">Drop</button>
+            <div class="throw-result-header">
+                <div class="modal-eyebrow">Throw Result</div>
+                <div id="throw-result-roll" class="throw-result-roll" aria-live="polite"></div>
             </div>
-            <button type="button" class="btn btn-secondary" id="throw-result-cancel-btn">Cancel</button>
+            <div class="throw-result-body">
+                <div class="throw-result-actions">
+                    <button type="button" class="btn throw-result-hit" id="throw-result-hit-btn">Hit</button>
+                    <button type="button" class="btn throw-result-miss" id="throw-result-miss-btn">Miss</button>
+                    <button type="button" class="btn throw-result-drop" id="throw-result-drop-btn">Drop</button>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="throw-result-cancel-btn">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2572,6 +2661,7 @@
     })();
     </script>
     <script src="rpg-bg-canvas.js"></script>
+    <script src="audio.js"></script>
     <script src="characters.js"></script>
     <script src="teams.js"></script>
     <script src="items.js"></script>
@@ -2666,8 +2756,29 @@
         const autoDealDamageCb = document.getElementById('auto-deal-damage-cb');
         const autoAdvanceAfterDamageCb = document.getElementById('auto-advance-after-damage-cb');
         const skipDamageConfirmCb = document.getElementById('skip-damage-confirm-cb');
+        const soundEnabledCb = document.getElementById('sound-enabled-cb');
+        const soundToggleBtn = document.getElementById('sound-toggle-btn');
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
+
+        function syncSoundToggleUi() {
+            const enabled = DaggerDieAudio.isEnabled();
+            if (soundEnabledCb) soundEnabledCb.checked = enabled;
+            if (soundToggleBtn) {
+                soundToggleBtn.classList.toggle('sound-off', !enabled);
+                soundToggleBtn.setAttribute('aria-pressed', String(enabled));
+                soundToggleBtn.setAttribute('aria-label', enabled ? 'Mute sound effects' : 'Enable sound effects');
+                soundToggleBtn.title = enabled ? 'Sound effects on' : 'Sound effects off';
+            }
+        }
+
+        if (soundToggleBtn) {
+            syncSoundToggleUi();
+            soundToggleBtn.addEventListener('click', () => {
+                DaggerDieAudio.toggleEnabled();
+                syncSoundToggleUi();
+            });
+        }
 
         useCustomHpCb.addEventListener('change', () => {
             customHpInput.disabled = !useCustomHpCb.checked;
@@ -2683,6 +2794,7 @@
         if (autoDealDamageCb) autoDealDamageCb.addEventListener('change', applySettingsFromModal);
         if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.addEventListener('change', applySettingsFromModal);
         if (skipDamageConfirmCb) skipDamageConfirmCb.addEventListener('change', applySettingsFromModal);
+        if (soundEnabledCb) soundEnabledCb.addEventListener('change', applySettingsFromModal);
 
         if (itemsEnabledCb) itemsEnabledCb.addEventListener('change', () => {
             if (!itemsEnabledCb.checked) {
@@ -2734,6 +2846,8 @@
             if (autoDealDamageCb) autoDealDamageCb.checked = localStorage.getItem('daggerdie_autoDealDamage') === 'true';
             if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.checked = localStorage.getItem('daggerdie_autoAdvanceAfterDamage') === 'true';
             if (skipDamageConfirmCb) skipDamageConfirmCb.checked = localStorage.getItem('daggerdie_skipDamageConfirm') === 'true';
+            if (soundEnabledCb) soundEnabledCb.checked = DaggerDieAudio.isEnabled();
+            syncSoundToggleUi();
             modBuffOnCriticalCb.disabled = readOnly;
             modNerfOnMissCb.disabled = readOnly;
             modVampireCb.disabled = readOnly;
@@ -2784,6 +2898,10 @@
                 localStorage.setItem('daggerdie_skipDamageConfirm', String(skipDamageConfirmCb.checked));
                 state.skipDamageConfirm = skipDamageConfirmCb.checked;
             }
+            if (soundEnabledCb) {
+                localStorage.setItem(DaggerDieAudio.SOUND_ENABLED_KEY, String(soundEnabledCb.checked));
+            }
+            syncSoundToggleUi();
             const wasStartWithRandom = state.itemsStartWithRandom;
             state.itemsStartWithRandom = itemsStartWithRandomCb ? itemsStartWithRandomCb.checked : false;
             if (wasStartWithRandom && !state.itemsStartWithRandom && state.players.length > 0) {
@@ -3080,6 +3198,7 @@
                 const playerDiv = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
                 const rollValue = playerDiv.querySelector('.roll-value');
 
+                DaggerDieAudio.startDiceRoll();
                 for (let i = 0; i < 10; i++) {
                     rollValue.textContent = rollD20();
                     await sleep(50);
@@ -3087,6 +3206,7 @@
 
                 player.turnOrderRoll = rollD20();
                 rollValue.textContent = player.turnOrderRoll;
+                DaggerDieAudio.stopDiceRoll();
                 await sleep(300);
             }
 
@@ -3144,10 +3264,12 @@
                         const playerDiv = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
                         if (playerDiv) {
                             const rollValue = playerDiv.querySelector('.roll-value');
+                            DaggerDieAudio.startDiceRoll();
                             for (let i = 0; i < 8; i++) {
                                 rollValue.textContent = rollD20();
                                 await sleep(40);
                             }
+                            DaggerDieAudio.stopDiceRoll();
                         }
                         player.turnOrderRoll = rollD20();
                         const div = document.querySelector(`.turn-order-player[data-player="${player.id}"]`);
@@ -3605,6 +3727,7 @@
         }
 
         function showDamageImpact(targetId, damage, attackerName, attackerColor) {
+            DaggerDieAudio.playPlayerHit(damage);
             const card = playersPanel.querySelector(`.player-card[data-player="${targetId}"]`);
             if (!card) return;
             const rect = card.getBoundingClientRect();
@@ -3734,6 +3857,8 @@
                 die.classList.remove('odd', 'even');
             });
 
+            DaggerDieAudio.startDiceRoll();
+
             for (let i = 0; i < 15; i++) {
                 dice.forEach(die => {
                     die.textContent = rollD20();
@@ -3753,6 +3878,8 @@
                 die.textContent = value;
                 die.classList.add(value % 2 === 0 ? 'even' : 'odd');
             });
+
+            DaggerDieAudio.stopDiceRoll();
 
             highlightTargets(state.currentRoll);
             displayRollResults();
