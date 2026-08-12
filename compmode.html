@@ -240,7 +240,17 @@
   .btn-board-toggle svg { opacity: 0.7; }
 
   .targets-container {
-    display: flex; gap: 15px; justify-content: center; flex-wrap: nowrap;
+    display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; width: 100%;
+  }
+  #dual-boards .target-wrapper {
+    flex: 1 1 0; min-width: 0; width: auto; max-width: none;
+  }
+  #dual-boards .target-image-container {
+    padding: 5px; box-sizing: border-box;
+  }
+  #dual-boards .target-board-inline {
+    top: 5px; left: 5px;
+    width: calc(100% - 10px); height: calc(100% - 10px);
   }
   .target-wrapper { position: relative; width: 180px; }
   .target-label {
