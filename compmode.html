@@ -276,8 +276,13 @@
     fill: rgba(251, 191, 36, 0.35); stroke: #fbbf24; stroke-width: 2.5;
     filter: url(#glow-comp); animation: pulse 1.5s infinite;
   }
-  .highlight-zone text { font-family: serif; fill: #b0a8c8; pointer-events: none; transition: fill 0.3s ease; }
-  .highlight-zone text.d20-num-center { fill: #c8bfe0; font-weight: bold; }
+  .highlight-zone text,
+  .d20-num {
+    font-family: serif; fill: #b0a8c8; pointer-events: none; transition: fill 0.3s ease;
+    text-anchor: middle; dominant-baseline: central;
+  }
+  .highlight-zone text.d20-num-center,
+  .d20-num-center { fill: #c8bfe0; font-weight: bold; }
   .highlight-zone.active text { fill: #fbbf24; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
@@ -320,14 +325,35 @@
     text-align: left; font-weight: 600; color: rgba(255,255,255,0.95);
     white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;
   }
+  .scorecard-table tr.player-row {
+    cursor: pointer; transition: background 0.15s;
+  }
+  .scorecard-table tr.player-row:hover {
+    background: rgba(254, 202, 87, 0.08);
+  }
+  .scorecard-table tr.player-row.row-locked:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  .scorecard-table tr.player-row.row-finalized {
+    cursor: default;
+  }
+  .scorecard-table tr.player-row.row-finalized:hover {
+    background: transparent;
+  }
+  .scorecard-table .player-name-cell {
+    position: relative;
+  }
+  .scorecard-table .player-name-cell .score-hint {
+    display: block; font-size: 0.7rem; font-weight: 400;
+    color: rgba(254, 202, 87, 0.65); margin-top: 2px;
+  }
   .scorecard-table .hit-cell {
-    cursor: pointer; user-select: none;
+    user-select: none;
     border-radius: 8px; transition: all 0.2s; min-width: 44px;
     position: relative;
   }
   .scorecard-table .hit-cell.pending { color: rgba(255,255,255,0.18); }
   .scorecard-table .hit-cell.pending svg { vertical-align: middle; }
-  .scorecard-table .hit-cell:hover { background: rgba(255,255,255,0.1); }
   .scorecard-table .hit-cell.hit {
     background: rgba(46, 204, 113, 0.25); color: #2ecc71; font-weight: bold;
     box-shadow: inset 0 0 8px rgba(46, 204, 113, 0.2);
@@ -336,44 +362,57 @@
     background: rgba(231, 76, 60, 0.2); color: #e74c3c; font-weight: bold;
     box-shadow: inset 0 0 8px rgba(231, 76, 60, 0.15);
   }
-  .scorecard-table .hit-cell.locked {
-    cursor: default;
+  .scorecard-table tr.row-locked .player-name-cell {
+    padding-left: 24px;
   }
-  .scorecard-table tr.row-locked td:first-child {
-    position: relative; padding-left: 24px;
-  }
-  .scorecard-table tr.row-locked td:first-child::before {
+  .scorecard-table tr.row-locked .player-name-cell::before {
     content: '\1F512'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
     font-size: 0.7rem; opacity: 0.5;
   }
 
-  /* Hit/Miss prompt overlay */
+  /* Scoring modal */
   .hm-overlay {
     position: fixed; inset: 0; z-index: 1000;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center;
+    padding: 16px;
   }
   .hm-dialog {
     background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
     border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
     box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
-    padding: 28px; min-width: 260px; text-align: center;
+    padding: 28px; min-width: min(340px, 100%); max-width: 440px; width: 100%;
+    text-align: center;
   }
-  .hm-title { font-family: 'Cinzel', Georgia, serif; font-size: 1.1rem; color: #feca57; margin-bottom: 8px; }
-  .hm-target { font-size: 2rem; font-weight: bold; color: #fff; margin-bottom: 20px; }
-  .hm-buttons { display: flex; gap: 12px; justify-content: center; }
+  .hm-title { font-family: 'Cinzel', Georgia, serif; font-size: 1.15rem; color: #feca57; margin-bottom: 4px; }
+  .hm-subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-bottom: 18px; }
+  .hm-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .hm-btn {
     padding: 12px 28px; border: none; border-radius: 10px; font-size: 1rem;
     font-weight: bold; cursor: pointer; transition: all 0.2s;
   }
   .hm-btn-hit { background: linear-gradient(45deg, #2ecc71, #27ae60); color: #fff; }
   .hm-btn-hit:hover { box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
-  .hm-btn-miss { background: linear-gradient(45deg, #e74c3c, #c0392b); color: #fff; }
-  .hm-btn-miss:hover { box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4); transform: translateY(-2px); }
   .hm-btn-cancel { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); }
   .hm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
-  .hm-summary { font-size: 0.95rem; color: rgba(255,255,255,0.85); margin-bottom: 20px; line-height: 1.6; }
+  .hm-summary { font-size: 0.95rem; color: rgba(255,255,255,0.85); margin: 16px 0 20px; line-height: 1.6; }
   .hm-summary strong { color: #feca57; }
+  .score-targets {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .score-target-btn {
+    width: 52px; height: 52px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45);
+    font-size: 1.15rem; font-weight: 700; cursor: pointer;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .score-target-btn:hover { border-color: rgba(254, 202, 87, 0.5); color: #fff; }
+  .score-target-btn.is-hit {
+    background: rgba(46, 204, 113, 0.3); border-color: #2ecc71; color: #2ecc71;
+    box-shadow: 0 0 12px rgba(46, 204, 113, 0.25);
+  }
+  .score-target-btn.is-hit:hover { border-color: #27ae60; color: #fff; }
   .scorecard-table .total-cell {
     font-weight: bold; font-size: 1.1rem; color: rgba(255,255,255,0.9);
   }
@@ -420,6 +459,8 @@
     .mode-subtitle { font-size: 1.05rem; }
     .die { width: 44px; height: 44px; font-size: 1.25rem; border-radius: 10px; }
     .scorecard-table th, .scorecard-table td { padding: 8px 5px; font-size: 0.85rem; }
+    .score-target-btn { width: 46px; height: 46px; font-size: 1.05rem; }
+    .hm-dialog { padding: 22px 16px; }
     .m3-logo { width: 28px; bottom: 8px; right: 8px; }
   }
 </style>
@@ -681,7 +722,7 @@
           <thead id="scorecard-head"></thead>
           <tbody id="scorecard-body"></tbody>
         </table>
-        <div class="no-players" id="no-players">No players yet. Register above to begin.</div>
+        <div class="no-players" id="no-players">No players yet. Register above, then tap a player to score.</div>
       </div>
 
       <!-- Finalize -->
@@ -761,9 +802,9 @@
             let status = 'registered';
             if (compState.finalized) status = 'locked';
             else if (compState.phase === 'tiebreaker' && p.tbActive) {
-              status = p.tbLocked ? 'locked' : (scored ? 'tiebreaker' : 'tiebreaker');
+              status = p.tbLocked ? 'scored' : 'tiebreaker';
             } else if (p.locked || (compState.phase === 'tiebreaker' && !p.tbActive)) {
-              status = 'locked';
+              status = 'scored';
             } else if (scored) {
               status = 'throwing';
             }
@@ -1012,13 +1053,13 @@
     function renderScorecard() {
       if (compState.players.length === 0) {
         noPlayers.style.display = 'block';
+        scorecardBody.innerHTML = '';
         return;
       }
       noPlayers.style.display = 'none';
 
       const maxScore = Math.max(...compState.players.map(p => getTotal(p)));
       const showTb = compState.phase === 'tiebreaker';
-      // Keep registration order; only filter to active throwers during tiebreakers
       const displayPlayers = showTb
         ? compState.players.filter(p => p.tbActive)
         : compState.players;
@@ -1032,16 +1073,29 @@
         const hits = inTb ? player.tbHits : player.hits;
         const isLocked = compState.finalized ||
           (inTb ? player.tbLocked : (player.locked || (showTb && !player.tbActive)));
+        const canOpen = !compState.finalized && (inTb || !showTb);
 
-        let rowClass = '';
-        if (inTb && !player.tbLocked) rowClass = 'row-tb';
-        else if (isLocked) rowClass = 'row-locked';
-        if (inTb && player.tbLocked) rowClass = (rowClass + ' row-tb-done').trim();
+        let rowClass = 'player-row';
+        if (inTb && !player.tbLocked) rowClass += ' row-tb';
+        else if (isLocked) rowClass += ' row-locked';
+        if (inTb && player.tbLocked) rowClass += ' row-tb-done';
+        if (compState.finalized) rowClass += ' row-finalized';
 
-        html += '<tr' + (rowClass ? ' class="' + rowClass + '"' : '') + '>';
-        html += '<td>' + escHtml(player.name) + '</td>';
+        const scored = hits.some(h => h !== null);
+        let hint = '';
+        if (canOpen) {
+          if (inTb && player.tbLocked) hint = 'Tap to edit TB';
+          else if (inTb) hint = 'Tap to score TB';
+          else if (player.locked) hint = 'Tap to edit';
+          else if (scored) hint = 'Tap to edit';
+          else hint = 'Tap to score';
+        }
+
+        html += '<tr class="' + rowClass + '"' +
+          (canOpen ? ' data-player="' + pIdx + '" tabindex="0" role="button"' : '') + '>';
+        html += '<td class="player-name-cell">' + escHtml(player.name) +
+          (hint ? '<span class="score-hint">' + hint + '</span>' : '') + '</td>';
         hits.forEach((hit, hIdx) => {
-          const lockedClass = isLocked ? ' locked' : '';
           let stateClass = '';
           let val = '';
           if (hit === true) {
@@ -1054,10 +1108,7 @@
             stateClass = ' pending';
             val = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>';
           }
-          const clickable = inTb || (!showTb && !compState.finalized);
-          html += '<td class="hit-cell' + stateClass + lockedClass + '"' +
-            (clickable ? ' data-player="' + pIdx + '" data-hit="' + hIdx + '"' : '') +
-            '>' + val + '</td>';
+          html += '<td class="hit-cell' + stateClass + '">' + val + '</td>';
         });
         const hitCount = hits.filter(h => h === true).length;
         html += '<td class="hits-cell">' + hitCount + '/9</td>';
@@ -1074,74 +1125,118 @@
     }
 
     scorecardBody.addEventListener('click', e => {
-      const cell = e.target.closest('.hit-cell');
-      if (!cell || compState.finalized) return;
-      const pIdx = parseInt(cell.dataset.player);
-      const hIdx = parseInt(cell.dataset.hit);
-      if (Number.isNaN(pIdx) || Number.isNaN(hIdx)) return;
-      const player = compState.players[pIdx];
-      if (!player) return;
-
-      if (compState.phase === 'tiebreaker') {
-        if (!player.tbActive || player.tbLocked) return;
-        if (player.tbHits[hIdx] !== null) {
-          player.tbHits[hIdx] = null;
-          renderScorecard();
-          broadcastLeaderboardState();
-          return;
-        }
-        showHitMissPrompt(compState.targets[hIdx], result => {
-          player.tbHits[hIdx] = result;
-          renderScorecard();
-          broadcastLeaderboardState();
-          checkAllScored(pIdx);
-        });
-        return;
-      }
-
-      if (player.locked) return;
-      if (player.hits[hIdx] !== null) {
-        player.hits[hIdx] = null;
-        renderScorecard();
-        broadcastProjectorState();
-        broadcastLeaderboardState();
-        return;
-      }
-
-      showHitMissPrompt(compState.targets[hIdx], result => {
-        player.hits[hIdx] = result;
-        renderScorecard();
-        broadcastProjectorState();
-        broadcastLeaderboardState();
-        checkAllScored(pIdx);
-      });
+      const row = e.target.closest('tr.player-row[data-player]');
+      if (!row || compState.finalized) return;
+      const pIdx = parseInt(row.dataset.player, 10);
+      if (Number.isNaN(pIdx)) return;
+      showScoringModal(pIdx);
     });
 
-    function checkAllScored(pIdx) {
-      const player = compState.players[pIdx];
-      if (!player) return;
+    scorecardBody.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('tr.player-row[data-player]');
+      if (!row || compState.finalized) return;
+      e.preventDefault();
+      const pIdx = parseInt(row.dataset.player, 10);
+      if (Number.isNaN(pIdx)) return;
+      showScoringModal(pIdx);
+    });
 
-      if (compState.phase === 'tiebreaker') {
-        if (!player.tbActive || player.tbLocked) return;
-        if (player.tbHits.every(h => h !== null)) {
-          showLockConfirm(player, getHitsTotal(player.tbHits), player.tbHits.filter(h => h === true).length, () => {
-            player.tbLocked = true;
-            renderScorecard();
-            broadcastLeaderboardState();
-            checkTiebreakerRoundComplete();
-          });
-        }
-        return;
+    function showScoringModal(pIdx) {
+      const player = compState.players[pIdx];
+      if (!player || compState.finalized) return;
+
+      const inTb = compState.phase === 'tiebreaker' && player.tbActive;
+      if (compState.phase === 'tiebreaker' && !player.tbActive) return;
+
+      const existing = inTb ? (player.tbHits || new Array(9).fill(null)) : player.hits;
+      // Start from existing hits; unmarked/null treated as miss (not selected)
+      const draft = existing.map(h => h === true);
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Score ' + player.name);
+
+      const title = inTb ? 'Tiebreaker Score' : 'Score Player';
+      const subtitle = 'Tap the targets that were hits, then submit.';
+
+      function draftTotal() {
+        return draft.reduce((sum, hit, i) => sum + (hit ? compState.targets[i] : 0), 0);
+      }
+      function draftHits() {
+        return draft.filter(Boolean).length;
+      }
+      function renderSummary() {
+        const el = overlay.querySelector('.hm-summary');
+        if (!el) return;
+        el.innerHTML =
+          'Hits: <strong>' + draftHits() + '/9</strong> &nbsp;·&nbsp; Total: <strong>' + draftTotal() + '</strong>';
       }
 
-      if (player.locked) return;
-      if (player.hits.every(h => h !== null)) {
-        showLockConfirm(player, getTotal(player), player.hits.filter(h => h === true).length, () => {
-          player.locked = true;
+      let targetsHtml = '<div class="score-targets" role="group" aria-label="Target hits">';
+      compState.targets.forEach((t, i) => {
+        targetsHtml +=
+          '<button type="button" class="score-target-btn' + (draft[i] ? ' is-hit' : '') + '"' +
+          ' data-idx="' + i + '" aria-pressed="' + (draft[i] ? 'true' : 'false') + '"' +
+          ' title="Target ' + t + '">' + t + '</button>';
+      });
+      targetsHtml += '</div>';
+
+      overlay.innerHTML =
+        '<div class="hm-dialog">' +
+          '<div class="hm-title">' + title + '</div>' +
+          '<div class="hm-subtitle"><strong style="color:#fff">' + escHtml(player.name) + '</strong><br>' + subtitle + '</div>' +
+          targetsHtml +
+          '<div class="hm-summary"></div>' +
+          '<div class="hm-buttons">' +
+            '<button type="button" class="hm-btn hm-btn-hit">Submit</button>' +
+            '<button type="button" class="hm-btn hm-btn-cancel">Cancel</button>' +
+          '</div>' +
+        '</div>';
+
+      renderSummary();
+
+      overlay.querySelector('.score-targets').addEventListener('click', e => {
+        const btn = e.target.closest('.score-target-btn');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        if (Number.isNaN(idx)) return;
+        draft[idx] = !draft[idx];
+        btn.classList.toggle('is-hit', draft[idx]);
+        btn.setAttribute('aria-pressed', draft[idx] ? 'true' : 'false');
+        renderSummary();
+      });
+
+      function close() { overlay.remove(); }
+
+      overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+      overlay.querySelector('.hm-btn-hit').addEventListener('click', () => {
+        const result = draft.slice();
+        if (inTb) {
+          const wasLocked = player.tbLocked;
+          player.tbHits = result;
+          player.tbLocked = true;
+          close();
           renderScorecard();
           broadcastLeaderboardState();
-        });
-      }
+          if (!wasLocked) checkTiebreakerRoundComplete();
+        } else {
+          player.hits = result;
+          player.locked = true;
+          close();
+          renderScorecard();
+          broadcastProjectorState();
+          broadcastLeaderboardState();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      overlay.querySelector('.hm-btn-hit').focus();
     }
 
     function checkTiebreakerRoundComplete() {
@@ -1185,65 +1280,6 @@
       updateScorecardChrome();
       renderScorecard();
       broadcastLeaderboardState();
-    }
-
-    function showLockConfirm(player, total, hitCount, onConfirm) {
-      const overlay = document.createElement('div');
-      overlay.className = 'hm-overlay';
-      const title = compState.phase === 'tiebreaker' ? 'Lock Tiebreaker?' : 'Lock Scores?';
-      overlay.innerHTML =
-        '<div class="hm-dialog">' +
-          '<div class="hm-title">' + title + '</div>' +
-          '<div class="hm-summary">' +
-            '<strong>' + escHtml(player.name) + '</strong><br>' +
-            'Hits: ' + hitCount + '/9<br>' +
-            'Total: <strong>' + total + '</strong>' +
-          '</div>' +
-          '<div class="hm-buttons">' +
-            '<button class="hm-btn hm-btn-hit">Lock</button>' +
-            '<button class="hm-btn hm-btn-cancel">Edit</button>' +
-          '</div>' +
-        '</div>';
-
-      overlay.querySelector('.hm-btn-hit').addEventListener('click', () => {
-        overlay.remove();
-        onConfirm();
-      });
-      overlay.querySelector('.hm-btn-cancel').addEventListener('click', () => {
-        overlay.remove();
-      });
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) overlay.remove();
-      });
-
-      document.body.appendChild(overlay);
-    }
-
-    function showHitMissPrompt(targetVal, callback) {
-      const overlay = document.createElement('div');
-      overlay.className = 'hm-overlay';
-      overlay.innerHTML =
-        '<div class="hm-dialog">' +
-          '<div class="hm-title">Target Zone</div>' +
-          '<div class="hm-target">' + targetVal + '</div>' +
-          '<div class="hm-buttons">' +
-            '<button class="hm-btn hm-btn-hit">Hit</button>' +
-            '<button class="hm-btn hm-btn-miss">Miss</button>' +
-          '</div>' +
-        '</div>';
-
-      function close(result) {
-        overlay.remove();
-        callback(result);
-      }
-
-      overlay.querySelector('.hm-btn-hit').addEventListener('click', () => close(true));
-      overlay.querySelector('.hm-btn-miss').addEventListener('click', () => close(false));
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) overlay.remove();
-      });
-
-      document.body.appendChild(overlay);
     }
 
     function finishGame() {
