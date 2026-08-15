@@ -468,7 +468,7 @@
             <input type="checkbox" id="skip-damage-confirm" aria-describedby="skip-damage-confirm-desc">
             <label for="skip-damage-confirm">Skip damage confirmations</label>
           </div>
-          <p id="skip-damage-confirm-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Skip the confirmation prompts when claiming and assigning damage. Useful for faster play.</p>
+          <p id="skip-damage-confirm-desc" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Hides the Confirm button and advances as soon as every die has Hit, Miss, or Drop. Also skips damage assignment prompts.</p>
         </div>
         <div class="options-group">
           <h4>Mods</h4>
@@ -502,6 +502,16 @@
             <label for="mod-party-cb">Party</label>
           </div>
           <p id="mod-party-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Players choose teams on the character select screen. Last team standing wins.</p>
+          <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-boss-cb" aria-describedby="mod-boss-hint">
+            <label for="mod-boss-cb">Boss Mode</label>
+          </div>
+          <p id="mod-boss-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Mark which players are bosses on the character select screen. Bosses use a separate HP value from everyone else.</p>
+          <div class="custom-hp-row" id="boss-hp-row">
+            <label for="boss-hp-input">Boss HP (20–999)</label>
+            <input type="number" id="boss-hp-input" min="20" max="999" placeholder="e.g. 100" disabled>
+            <span id="boss-hp-error" class="custom-hp-error" aria-live="polite"></span>
+          </div>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-desc">
             <label for="items-enabled-cb">Items</label>
@@ -661,6 +671,8 @@
     const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
     const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
     const MOD_PARTY_KEY = 'daggerdie_modParty';
+    const MOD_BOSS_KEY = 'daggerdie_modBoss';
+    const BOSS_HP_KEY = 'daggerdie_bossHp';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
     const BOTTOMLESS_BACKPACK_KEY = 'daggerdie_bottomlessBackpack';
@@ -681,6 +693,7 @@
       AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
       MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY, MOD_PARTY_KEY,
+      MOD_BOSS_KEY, BOSS_HP_KEY,
       ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTTOMLESS_BACKPACK_KEY, BOTS_ENABLED_KEY,
       SOUND_ENABLED_KEY
     ];
@@ -723,6 +736,9 @@
     const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
     const modVampireCb = document.getElementById('mod-vampire-cb');
     const modPartyCb = document.getElementById('mod-party-cb');
+    const modBossCb = document.getElementById('mod-boss-cb');
+    const bossHpInput = document.getElementById('boss-hp-input');
+    const bossHpError = document.getElementById('boss-hp-error');
 
     useCustomHpCb.checked = localStorage.getItem(USE_CUSTOM_HP_KEY) === 'true';
     const savedHp = localStorage.getItem(CUSTOM_HP_KEY);
@@ -733,6 +749,10 @@
     modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
     modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
     modPartyCb.checked = localStorage.getItem(MOD_PARTY_KEY) === 'true';
+    modBossCb.checked = localStorage.getItem(MOD_BOSS_KEY) === 'true';
+    const savedBossHp = localStorage.getItem(BOSS_HP_KEY);
+    bossHpInput.value = (savedBossHp !== null && savedBossHp !== '') ? savedBossHp : '100';
+    bossHpInput.disabled = !modBossCb.checked;
     const itemsEnabledCb = document.getElementById('items-enabled-cb');
     itemsEnabledCb.checked = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
     const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
@@ -782,6 +802,38 @@
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
     modVampireCb.addEventListener('change', () => localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked)));
     modPartyCb.addEventListener('change', () => localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked)));
+
+    function validateAndPersistBossHp() {
+      const val = bossHpInput.value.trim();
+      bossHpInput.classList.remove('hp-valid', 'hp-invalid');
+      bossHpError.textContent = '';
+      if (!modBossCb.checked) {
+        return;
+      }
+      if (val === '') {
+        localStorage.setItem(BOSS_HP_KEY, '100');
+        return;
+      }
+      const n = parseInt(val, 10);
+      if (isNaN(n) || n < 20 || n > 999) {
+        bossHpInput.classList.add('hp-invalid');
+        bossHpError.textContent = isNaN(n) ? 'Enter a number between 20 and 999.' :
+          n < 20 ? 'Minimum HP is 20.' : 'Maximum HP is 999.';
+        return;
+      }
+      bossHpInput.classList.add('hp-valid');
+      localStorage.setItem(BOSS_HP_KEY, String(n));
+    }
+
+    modBossCb.addEventListener('change', () => {
+      bossHpInput.disabled = !modBossCb.checked;
+      localStorage.setItem(MOD_BOSS_KEY, String(modBossCb.checked));
+      if (modBossCb.checked && !bossHpInput.value.trim()) bossHpInput.value = '100';
+      validateAndPersistBossHp();
+    });
+    bossHpInput.addEventListener('input', validateAndPersistBossHp);
+    bossHpInput.addEventListener('blur', validateAndPersistBossHp);
+    if (modBossCb.checked) validateAndPersistBossHp();
     itemsEnabledCb.addEventListener('change', () => {
       localStorage.setItem(ITEMS_ENABLED_KEY, String(itemsEnabledCb.checked));
       if (!itemsEnabledCb.checked) {
