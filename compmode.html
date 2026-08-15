@@ -381,11 +381,11 @@
     background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
     border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
     box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
-    padding: 28px; min-width: min(340px, 100%); max-width: 440px; width: 100%;
+    padding: 20px 22px 22px; min-width: min(340px, 100%); max-width: 400px; width: 100%;
     text-align: center;
   }
-  .hm-title { font-family: 'Cinzel', Georgia, serif; font-size: 1.15rem; color: #feca57; margin-bottom: 4px; }
-  .hm-subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-bottom: 18px; }
+  .hm-title { font-family: 'Cinzel', Georgia, serif; font-size: 1.1rem; color: #feca57; margin-bottom: 2px; }
+  .hm-subtitle { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
   .hm-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .hm-btn {
     padding: 12px 28px; border: none; border-radius: 10px; font-size: 1rem;
@@ -395,24 +395,52 @@
   .hm-btn-hit:hover { box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
   .hm-btn-cancel { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); }
   .hm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
-  .hm-summary { font-size: 0.95rem; color: rgba(255,255,255,0.85); margin: 16px 0 20px; line-height: 1.6; }
+  .hm-summary { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin: 12px 0 14px; line-height: 1.5; }
   .hm-summary strong { color: #feca57; }
-  .score-targets {
-    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-    margin-bottom: 4px;
+  .score-throws {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 0;
   }
-  .score-target-btn {
-    width: 52px; height: 52px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45);
-    font-size: 1.15rem; font-weight: 700; cursor: pointer;
-    transition: all 0.15s; font-family: inherit;
+  .score-throw-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.15s, border-color 0.15s; cursor: pointer;
   }
-  .score-target-btn:hover { border-color: rgba(254, 202, 87, 0.5); color: #fff; }
-  .score-target-btn.is-hit {
-    background: rgba(46, 204, 113, 0.3); border-color: #2ecc71; color: #2ecc71;
-    box-shadow: 0 0 12px rgba(46, 204, 113, 0.25);
+  .score-throw-row:hover { border-color: rgba(254, 202, 87, 0.35); }
+  .score-throw-row.is-hit {
+    background: rgba(46, 204, 113, 0.12); border-color: rgba(46, 204, 113, 0.35);
   }
-  .score-target-btn.is-hit:hover { border-color: #27ae60; color: #fff; }
+  .score-throw-row.is-miss {
+    background: rgba(231, 76, 60, 0.12); border-color: rgba(231, 76, 60, 0.35);
+  }
+  .score-throw-num {
+    flex: 0 0 auto; min-width: 1.4rem;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+    color: #feca57; font-family: 'Cinzel', Georgia, serif;
+  }
+  .score-throw-target {
+    flex: 1 1 auto; text-align: left;
+    font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1;
+  }
+  .score-throw-toggle {
+    display: inline-flex; flex: 0 0 auto;
+    border-radius: 7px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .score-throw-opt {
+    padding: 6px 10px; border: none; min-width: 46px;
+    font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35);
+    font-family: inherit; transition: all 0.12s;
+  }
+  .score-throw-opt:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .score-throw-opt.is-active[data-val="hit"] {
+    background: rgba(46, 204, 113, 0.35); color: #2ecc71;
+  }
+  .score-throw-opt.is-active[data-val="miss"] {
+    background: rgba(231, 76, 60, 0.35); color: #e74c3c;
+  }
   .scorecard-table .total-cell {
     font-weight: bold; font-size: 1.1rem; color: rgba(255,255,255,0.9);
   }
@@ -459,8 +487,13 @@
     .mode-subtitle { font-size: 1.05rem; }
     .die { width: 44px; height: 44px; font-size: 1.25rem; border-radius: 10px; }
     .scorecard-table th, .scorecard-table td { padding: 8px 5px; font-size: 0.85rem; }
-    .score-target-btn { width: 46px; height: 46px; font-size: 1.05rem; }
-    .hm-dialog { padding: 22px 16px; }
+    .score-throw-row { padding: 4px 6px; gap: 6px; }
+    .score-throw-target { font-size: 0.98rem; }
+    .score-throw-opt { padding: 5px 8px; min-width: 42px; font-size: 0.68rem; }
+    .hm-dialog { padding: 16px 14px 18px; }
+    .hm-subtitle { font-size: 0.75rem; margin-bottom: 10px; }
+    .hm-summary { margin: 10px 0 12px; font-size: 0.85rem; }
+    .hm-btn { padding: 10px 22px; font-size: 0.95rem; }
     .m3-logo { width: 28px; bottom: 8px; right: 8px; }
   }
 </style>
@@ -824,13 +857,8 @@
     function broadcastProjectorState() {
       if (!projectorChannel || !compState.targets.length) return;
       try {
-        const claimed = [];
-        compState.players.forEach(p => {
-          p.hits.forEach((h, i) => {
-            if (h === true && !claimed.includes(compState.targets[i])) claimed.push(compState.targets[i]);
-          });
-        });
-        projectorChannel.postMessage({ type: 'update', rolls: compState.targets, claimed: claimed });
+        // Comp mode only highlights locked targets — do not flip faces to claimed/green as scores are entered
+        projectorChannel.postMessage({ type: 'update', rolls: compState.targets, claimed: [] });
       } catch (e) {}
     }
 
@@ -1150,8 +1178,8 @@
       if (compState.phase === 'tiebreaker' && !player.tbActive) return;
 
       const existing = inTb ? (player.tbHits || new Array(9).fill(null)) : player.hits;
-      // Start from existing hits; unmarked/null treated as miss (not selected)
-      const draft = existing.map(h => h === true);
+      // Tri-state: null = unmarked, true = hit (green), false = miss (red)
+      const draft = existing.map(h => (h === true ? true : h === false ? false : null));
 
       const overlay = document.createElement('div');
       overlay.className = 'hm-overlay';
@@ -1160,13 +1188,13 @@
       overlay.setAttribute('aria-label', 'Score ' + player.name);
 
       const title = inTb ? 'Tiebreaker Score' : 'Score Player';
-      const subtitle = 'Tap the targets that were hits, then submit.';
+      const subtitle = 'Mark each throw — Hit turns green, Miss turns red. Unmarked count as miss on submit.';
 
       function draftTotal() {
-        return draft.reduce((sum, hit, i) => sum + (hit ? compState.targets[i] : 0), 0);
+        return draft.reduce((sum, hit, i) => sum + (hit === true ? compState.targets[i] : 0), 0);
       }
       function draftHits() {
-        return draft.filter(Boolean).length;
+        return draft.filter(h => h === true).length;
       }
       function renderSummary() {
         const el = overlay.querySelector('.hm-summary');
@@ -1174,21 +1202,41 @@
         el.innerHTML =
           'Hits: <strong>' + draftHits() + '/9</strong> &nbsp;·&nbsp; Total: <strong>' + draftTotal() + '</strong>';
       }
+      function syncThrowRow(row, val) {
+        row.classList.toggle('is-hit', val === true);
+        row.classList.toggle('is-miss', val === false);
+        row.querySelectorAll('.score-throw-opt').forEach(opt => {
+          const active = (opt.dataset.val === 'hit' && val === true) ||
+            (opt.dataset.val === 'miss' && val === false);
+          opt.classList.toggle('is-active', active);
+          opt.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
 
-      let targetsHtml = '<div class="score-targets" role="group" aria-label="Target hits">';
+      let throwsHtml = '<div class="score-throws" role="group" aria-label="Throw results">';
       compState.targets.forEach((t, i) => {
-        targetsHtml +=
-          '<button type="button" class="score-target-btn' + (draft[i] ? ' is-hit' : '') + '"' +
-          ' data-idx="' + i + '" aria-pressed="' + (draft[i] ? 'true' : 'false') + '"' +
-          ' title="Target ' + t + '">' + t + '</button>';
+        const val = draft[i];
+        const isHit = val === true;
+        const isMiss = val === false;
+        throwsHtml +=
+          '<div class="score-throw-row' + (isHit ? ' is-hit' : '') + (isMiss ? ' is-miss' : '') + '" data-idx="' + i + '">' +
+            '<span class="score-throw-num">#' + (i + 1) + '</span>' +
+            '<span class="score-throw-target">' + t + '</span>' +
+            '<div class="score-throw-toggle" role="group" aria-label="Throw ' + (i + 1) + ' result">' +
+              '<button type="button" class="score-throw-opt' + (isHit ? ' is-active' : '') + '"' +
+              ' data-val="hit" aria-pressed="' + (isHit ? 'true' : 'false') + '">Hit</button>' +
+              '<button type="button" class="score-throw-opt' + (isMiss ? ' is-active' : '') + '"' +
+              ' data-val="miss" aria-pressed="' + (isMiss ? 'true' : 'false') + '">Miss</button>' +
+            '</div>' +
+          '</div>';
       });
-      targetsHtml += '</div>';
+      throwsHtml += '</div>';
 
       overlay.innerHTML =
         '<div class="hm-dialog">' +
           '<div class="hm-title">' + title + '</div>' +
           '<div class="hm-subtitle"><strong style="color:#fff">' + escHtml(player.name) + '</strong><br>' + subtitle + '</div>' +
-          targetsHtml +
+          throwsHtml +
           '<div class="hm-summary"></div>' +
           '<div class="hm-buttons">' +
             '<button type="button" class="hm-btn hm-btn-hit">Submit</button>' +
@@ -1198,14 +1246,22 @@
 
       renderSummary();
 
-      overlay.querySelector('.score-targets').addEventListener('click', e => {
-        const btn = e.target.closest('.score-target-btn');
-        if (!btn) return;
-        const idx = parseInt(btn.dataset.idx, 10);
+      overlay.querySelector('.score-throws').addEventListener('click', e => {
+        const opt = e.target.closest('.score-throw-opt');
+        const row = e.target.closest('.score-throw-row');
+        if (!row) return;
+        const idx = parseInt(row.dataset.idx, 10);
         if (Number.isNaN(idx)) return;
-        draft[idx] = !draft[idx];
-        btn.classList.toggle('is-hit', draft[idx]);
-        btn.setAttribute('aria-pressed', draft[idx] ? 'true' : 'false');
+        if (opt) {
+          const want = opt.dataset.val === 'hit' ? true : false;
+          draft[idx] = draft[idx] === want ? null : want;
+        } else {
+          // Row tap cycles: unmarked → hit → miss → unmarked
+          if (draft[idx] === null) draft[idx] = true;
+          else if (draft[idx] === true) draft[idx] = false;
+          else draft[idx] = null;
+        }
+        syncThrowRow(row, draft[idx]);
         renderSummary();
       });
 
@@ -1216,7 +1272,8 @@
       overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
       overlay.querySelector('.hm-btn-hit').addEventListener('click', () => {
-        const result = draft.slice();
+        // Unmarked throws default to miss on submit
+        const result = draft.map(h => (h === true ? true : false));
         if (inTb) {
           const wasLocked = player.tbLocked;
           player.tbHits = result;
