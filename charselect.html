@@ -256,6 +256,34 @@
             width: 22px;
             height: 22px;
         }
+        .boss-toggle-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+        .boss-toggle-btn:hover {
+            border-color: rgba(254, 202, 87, 0.6);
+            color: #feca57;
+        }
+        .boss-toggle-btn.is-boss {
+            border-color: #feca57;
+            background: rgba(254, 202, 87, 0.25);
+            color: #feca57;
+        }
+        .boss-toggle-btn svg {
+            width: 22px;
+            height: 22px;
+        }
 
         .player-input.error input,
         .player-input.error-duplicate input {
@@ -674,6 +702,7 @@
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
         const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
         const MOD_PARTY_KEY = 'daggerdie_modParty';
+        const MOD_BOSS_KEY = 'daggerdie_modBoss';
         const CHARACTERS = window.DAGGERDIE_CHARACTERS || [];
         const TEAMS = window.DAGGERDIE_TEAMS || [];
         const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
@@ -754,6 +783,15 @@
             btn.setAttribute('aria-label', isBot ? 'Bot: ' + (skill ? skill.label : '') : 'Set as bot');
         }
 
+        function updateBossButtonState(row) {
+            const btn = row.querySelector('.boss-toggle-btn');
+            if (!btn) return;
+            const isBoss = row.dataset.isBoss === 'true';
+            btn.classList.toggle('is-boss', isBoss);
+            btn.title = isBoss ? 'Boss' : 'Set as boss';
+            btn.setAttribute('aria-label', isBoss ? 'Boss (click to unset)' : 'Set as boss');
+        }
+
         function buildBotDifficultyOptions() {
             botDifficultyOptions.innerHTML = `
                 <button type="button" class="bot-difficulty-option bot-difficulty-human" data-skill-id="">Human</button>
@@ -788,6 +826,10 @@
 
         function partyEnabled() {
             return localStorage.getItem(MOD_PARTY_KEY) === 'true';
+        }
+
+        function bossModeEnabled() {
+            return localStorage.getItem(MOD_BOSS_KEY) === 'true';
         }
 
         function buildTeamPickerGrid() {
@@ -845,6 +887,7 @@
                     characterId: row.dataset.characterId || '',
                     isBot: row.dataset.isBot || 'false',
                     botSkill: row.dataset.botSkill || '',
+                    isBoss: row.dataset.isBoss || 'false',
                     teamId: row.dataset.teamId || ''
                 });
             });
@@ -858,6 +901,7 @@
             }
             const showBots = botsEnabled();
             const showTeams = partyEnabled() && TEAMS.length > 0;
+            const showBosses = bossModeEnabled();
             for (let i = 0; i < count; i++) {
                 const prev = savedData[i];
                 const fallbackChar = CHARACTERS.length ? CHARACTERS[i % CHARACTERS.length] : FALLBACK_CHAR;
@@ -865,6 +909,7 @@
                 const selectedChar = CHARACTERS.find(c => c.id === charId) || fallbackChar;
                 const defaultBotSkill = (prev && prev.botSkill) || BOT_SKILLS[1].id;
                 const isBot = prev ? prev.isBot : 'false';
+                const isBoss = prev ? prev.isBoss : 'false';
                 const teamId = (prev && prev.teamId) || (showTeams ? TEAMS[i % TEAMS.length].id : '');
                 const selectedTeam = teamId ? (TEAM_BY_ID[teamId] || null) : null;
                 const div = document.createElement('div');
@@ -872,11 +917,17 @@
                 div.dataset.player = String(i);
                 div.dataset.characterId = selectedChar.id;
                 div.dataset.isBot = isBot;
+                div.dataset.isBoss = isBoss;
                 div.dataset.botSkill = defaultBotSkill;
                 div.dataset.teamId = teamId;
                 const botButtonHtml = showBots ? `
                         <button type="button" class="bot-toggle-btn" data-player="${i}" aria-label="Set as bot" title="Set as bot">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M12 10V6"/><path d="M8 6h8"/></svg>
+                        </button>
+                ` : '';
+                const bossButtonHtml = showBosses ? `
+                        <button type="button" class="boss-toggle-btn" data-player="${i}" aria-label="Set as boss" title="Set as boss">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 7l5.5 4L12 4l3.5 7L21 7l-2 9H5zm0 2h14v2H5v-2z"/></svg>
                         </button>
                 ` : '';
                 const teamButtonHtml = showTeams ? `
@@ -889,6 +940,7 @@
                         <button type="button" class="character-avatar-btn" title="${selectedChar.name} – click to change">${prefixSvgIds(selectedChar.svg, 'cs-p' + i + '-' + selectedChar.id)}</button>
                         ${teamButtonHtml}
                         ${botButtonHtml}
+                        ${bossButtonHtml}
                     </div>
                 `;
                 if (prev && prev.name) {
@@ -914,6 +966,14 @@
                         botDifficultyModal.classList.add('open');
                     });
                     updateBotButtonState(div);
+                }
+                if (showBosses) {
+                    const bossBtn = div.querySelector('.boss-toggle-btn');
+                    bossBtn.addEventListener('click', () => {
+                        div.dataset.isBoss = div.dataset.isBoss === 'true' ? 'false' : 'true';
+                        updateBossButtonState(div);
+                    });
+                    updateBossButtonState(div);
                 }
             }
             playerSetup.querySelectorAll('input[type="text"]').forEach(input => {
@@ -1029,6 +1089,7 @@
                 const char = CHARACTERS.find(c => c.id === characterId) || fbc;
                 const isBot = allowBots && (row.dataset.isBot === 'true');
                 const botSkill = (row.dataset.botSkill || 'novice');
+                const isBoss = bossModeEnabled() && (row.dataset.isBoss === 'true');
                 const teamId = row.dataset.teamId || undefined;
                 payload.push({
                     name,
@@ -1036,6 +1097,7 @@
                     color: char ? char.color : '#8b7355',
                     isBot: isBot,
                     botSkill: isBot ? botSkill : undefined,
+                    isBoss: isBoss,
                     teamId: teamId
                 });
             });
@@ -1072,7 +1134,9 @@
                         'daggerdie_bottomlessBackpack',
                         'daggerdie_botsEnabled',
                         'daggerdie_modVampire',
-                        'daggerdie_modParty'
+                        'daggerdie_modParty',
+                        'daggerdie_modBoss',
+                        'daggerdie_bossHp'
                     ].forEach(k => localStorage.removeItem(k));
                     window.location.href = 'startgame.html';
                 }
