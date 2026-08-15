@@ -905,6 +905,30 @@
             transform: scale(1.05);
         }
 
+        .player-card.is-boss {
+            border-color: #e74c3c;
+        }
+        .player-card.is-boss.current {
+            border-color: #feca57;
+        }
+        .player-card.is-boss::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 18px;
+            pointer-events: none;
+            box-shadow: 0 0 14px 3px rgba(220, 38, 38, 0.45);
+            animation: boss-glow-pulse 2.8s ease-in-out infinite;
+        }
+        .player-card.is-boss.eliminated::after {
+            animation: none;
+            opacity: 0.35;
+        }
+        @keyframes boss-glow-pulse {
+            0%, 100% { box-shadow: 0 0 10px 2px rgba(220, 38, 38, 0.35); }
+            50% { box-shadow: 0 0 28px 8px rgba(220, 38, 38, 0.8); }
+        }
+
         .player-card.eliminated {
             opacity: 0.4;
             filter: grayscale(1);
@@ -977,6 +1001,9 @@
         .player-card.poisoned { box-shadow: 0 0 14px rgba(196, 132, 252, 0.35); }
         .player-card.free-drops { box-shadow: 0 0 14px rgba(56, 189, 248, 0.35); }
         .player-card.aiming { box-shadow: 0 0 14px rgba(167, 139, 250, 0.35); }
+        .player-card.is-boss:not(.current) {
+            border-color: #e74c3c;
+        }
         .player-card.hp-change-up {
             animation: hp-heal-flash 0.55s ease;
         }
@@ -1463,6 +1490,30 @@
             margin-top: 5px;
         }
 
+        .player-card-boss-badge {
+            font-size: 0.75rem;
+            margin: 0 22px 10px;
+            color: #feca57;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .player-card-boss-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+        .settings-modal .boss-players-row {
+            margin-left: 30px;
+            margin-bottom: 16px;
+        }
+        .settings-modal .boss-players-row .option-row {
+            margin-top: 6px;
+        }
+
         .player-card-bot-skill {
             font-size: 0.75rem;
             margin-top: 4px;
@@ -1922,6 +1973,13 @@
             font-weight: bold;
             color: #feca57;
         }
+        .turn-order-boss-label {
+            color: #feca57;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
 
         /* Winner Screen */
         #winner-screen {
@@ -2082,6 +2140,19 @@
             border-left: 2px solid transparent;
             white-space: nowrap;
             color: rgba(255,255,255,0.6);
+        }
+
+        .log-turn-tag {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #feca57;
+            background: rgba(254, 202, 87, 0.12);
+            border: 1px solid rgba(254, 202, 87, 0.28);
+            border-radius: 4px;
+            padding: 1px 6px;
+            margin-top: 1px;
         }
 
         .log-turn-start {
@@ -2590,6 +2661,19 @@
             </div>
             <p id="mod-party-hint" class="setting-hint">Players choose teams on the character select screen. Last team standing wins.</p>
             <div class="option-row">
+                <input type="checkbox" id="mod-boss-cb" aria-describedby="mod-boss-hint">
+                <label for="mod-boss-cb">Boss Mode</label>
+            </div>
+            <p id="mod-boss-hint" class="setting-hint">Mark bosses below (or on character select). Bosses use a separate HP value from everyone else.</p>
+            <div class="custom-hp-row" id="boss-hp-row">
+                <label for="boss-hp-input">Boss HP (20–999)</label>
+                <input type="number" id="boss-hp-input" min="20" max="999" placeholder="e.g. 100" disabled>
+            </div>
+            <div id="boss-players-row" class="boss-players-row" style="display: none;">
+                <div class="setting-hint" style="margin-bottom: 4px;">Mark which players are bosses:</div>
+                <div id="boss-players-list"></div>
+            </div>
+            <div class="option-row">
                 <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
                 <label for="items-enabled-cb">Items</label>
             </div>
@@ -2632,6 +2716,7 @@
                 <div id="player-stats-avatar" class="player-stats-avatar"></div>
                 <div class="player-stats-meta">
                     <div id="player-stats-hp" class="player-stats-row"></div>
+                    <div id="player-stats-role" class="player-stats-row"></div>
                     <div id="player-stats-turn-order" class="player-stats-row"></div>
                     <div id="player-stats-status" class="player-stats-row"></div>
                     <div id="player-stats-hit-drop" class="player-stats-row"></div>
@@ -2828,15 +2913,26 @@
             modNerfOnMiss: false,
             modVampire: false,
             modParty: false,
+            modBoss: false,
             itemsEnabled: false,
             itemsStartWithRandom: false,
             bottomlessBackpack: false,
-            itemUsePhase: false
+            itemUsePhase: false,
+            turnNumber: 0
         };
         let previousHpByPlayerId = {};
 
         const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
         const brawlLeaderboardChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-brawl-leaderboard') : null;
+
+        let pendingBrawlLeaderboardImpacts = [];
+
+        function postBrawlLeaderboardFx(fx) {
+            if (!brawlLeaderboardChannel || !fx) return;
+            try {
+                brawlLeaderboardChannel.postMessage({ type: 'fx', fx });
+            } catch (e) {}
+        }
 
         function broadcastBrawlLeaderboardState() {
             if (!brawlLeaderboardChannel || !state.players.length) return;
@@ -2879,16 +2975,20 @@
                         freeDrops: !!(p.freeDropsActive || (p.freeDropsCount || 0) > 0),
                         aiming: !!(p.aimActive && p.aimCalledZone !== null),
                         effects,
+                        isBoss: !!p.isBoss,
                         isCurrent: !!(current && p.id === current.id && state.phase !== 'finished')
                     };
                 });
+                const impacts = pendingBrawlLeaderboardImpacts.splice(0);
                 brawlLeaderboardChannel.postMessage({
                     type: 'leaderboard',
                     phase: state.phase,
                     currentPlayerId: current ? current.id : null,
                     partyMode: !!state.modParty,
+                    bossMode: !!state.modBoss,
                     itemsEnabled: !!state.itemsEnabled,
-                    players
+                    players,
+                    impacts
                 });
             } catch (e) {}
         }
@@ -2936,6 +3036,10 @@
         const modNerfOnMissCb = document.getElementById('mod-nerf-on-miss-cb');
         const modVampireCb = document.getElementById('mod-vampire-cb');
         const modPartyCb = document.getElementById('mod-party-cb');
+        const modBossCb = document.getElementById('mod-boss-cb');
+        const bossHpInput = document.getElementById('boss-hp-input');
+        const bossPlayersRow = document.getElementById('boss-players-row');
+        const bossPlayersList = document.getElementById('boss-players-list');
         const itemsEnabledCb = document.getElementById('items-enabled-cb');
         const itemsStartWithRandomCb = document.getElementById('items-start-with-random-cb');
         const bottomlessBackpackCb = document.getElementById('bottomless-backpack-cb');
@@ -2977,6 +3081,15 @@
         modNerfOnMissCb.addEventListener('change', applySettingsFromModal);
         modVampireCb.addEventListener('change', applySettingsFromModal);
         modPartyCb.addEventListener('change', applySettingsFromModal);
+        if (modBossCb) modBossCb.addEventListener('change', () => {
+            if (bossHpInput) {
+                bossHpInput.disabled = !modBossCb.checked || state.hasScoreBeenEntered;
+                if (modBossCb.checked && !bossHpInput.value.trim()) bossHpInput.value = '100';
+            }
+            populateBossPlayersList();
+            applySettingsFromModal();
+        });
+        if (bossHpInput) bossHpInput.addEventListener('blur', applySettingsFromModal);
         if (autoRollDiceCb) autoRollDiceCb.addEventListener('change', applySettingsFromModal);
         if (autoDealDamageCb) autoDealDamageCb.addEventListener('change', applySettingsFromModal);
         if (autoAdvanceAfterDamageCb) autoAdvanceAfterDamageCb.addEventListener('change', applySettingsFromModal);
@@ -3020,6 +3133,13 @@
             modNerfOnMissCb.checked = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
             modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
             modPartyCb.checked = localStorage.getItem(MOD_PARTY_KEY) === 'true';
+            if (modBossCb) modBossCb.checked = state.players.length > 0 ? !!state.modBoss : (localStorage.getItem(MOD_BOSS_KEY) === 'true');
+            if (bossHpInput) {
+                const savedBossHp = localStorage.getItem(BOSS_HP_KEY);
+                bossHpInput.value = (savedBossHp !== null && savedBossHp !== '') ? savedBossHp : '100';
+                bossHpInput.disabled = readOnly || !(modBossCb && modBossCb.checked);
+            }
+            populateBossPlayersList();
             if (itemsEnabledCb) itemsEnabledCb.checked = readOnly ? state.itemsEnabled : (localStorage.getItem(ITEMS_ENABLED_KEY) === 'true');
             if (itemsStartWithRandomCb) {
                 const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
@@ -3039,6 +3159,8 @@
             modNerfOnMissCb.disabled = readOnly;
             modVampireCb.disabled = readOnly;
             modPartyCb.disabled = readOnly;
+            if (modBossCb) modBossCb.disabled = readOnly;
+            if (bossHpInput) bossHpInput.disabled = readOnly || !(modBossCb && modBossCb.checked);
             if (itemsEnabledCb) itemsEnabledCb.disabled = readOnly;
             if (itemsStartWithRandomCb) itemsStartWithRandomCb.disabled = readOnly;
             if (bottomlessBackpackCb) bottomlessBackpackCb.disabled = readOnly;
@@ -3059,6 +3181,18 @@
             localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
             localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked));
             localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked));
+            if (modBossCb) localStorage.setItem(MOD_BOSS_KEY, String(modBossCb.checked));
+            if (modBossCb && modBossCb.checked && bossHpInput) {
+                const bossVal = bossHpInput.value.trim();
+                const bossN = bossVal === '' ? 100 : parseInt(bossVal, 10);
+                if (!isNaN(bossN) && bossN >= 20 && bossN <= 999) {
+                    localStorage.setItem(BOSS_HP_KEY, String(bossN));
+                } else if (bossVal !== '') {
+                    alert('Please enter a Boss HP value between 20 and 999.');
+                } else {
+                    localStorage.setItem(BOSS_HP_KEY, '100');
+                }
+            }
             localStorage.setItem(USE_CUSTOM_HP_KEY, String(useCustomHpCb.checked));
             if (useCustomHpCb.checked) {
                 const val = customHpInput.value.trim();
@@ -3108,47 +3242,55 @@
                 updatePlayersPanel();
                 if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             }
+            state.modBuffOnCritical = modBuffOnCriticalCb.checked;
+            state.modNerfOnMiss = modNerfOnMissCb.checked;
+            state.modVampire = modVampireCb.checked;
+            state.modParty = modPartyCb.checked;
+            state.modBoss = modBossCb ? modBossCb.checked : false;
+            if (bossPlayersList) {
+                bossPlayersList.querySelectorAll('input[data-player-id]').forEach(cb => {
+                    const id = parseInt(cb.dataset.playerId, 10);
+                    const p = state.players.find(pl => pl.id === id);
+                    if (p) p.isBoss = !!cb.checked;
+                });
+            }
             if (!state.hasScoreBeenEntered) {
+                let canApplyHp = true;
                 if (useCustomHpCb.checked) {
                     const val = customHpInput.value.trim();
                     const n = val === '' ? NaN : parseInt(val, 10);
                     if (!isNaN(n) && n >= 20 && n <= 999) {
                         localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
                         localStorage.setItem(CUSTOM_HP_KEY, String(n));
-                        if (state.players.length > 0) {
-                            state.players.forEach(p => {
-                                p.hp = n;
-                                p.maxHp = n;
-                            });
-                            updatePlayersPanel();
-                            if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
+                    } else {
+                        canApplyHp = false;
+                        if (val !== '') {
+                            alert('Please enter a value between 20 and 999.');
                         }
-                    } else if (val !== '') {
-                        alert('Please enter a value between 20 and 999.');
                     }
                 } else {
                     localStorage.setItem(USE_CUSTOM_HP_KEY, 'false');
-                    if (state.players.length > 0) {
-                        const defaultHp = getDefaultHp(state.players.length);
-                        state.players.forEach(p => {
-                            p.hp = defaultHp;
-                            p.maxHp = defaultHp;
-                        });
-                        updatePlayersPanel();
-                        if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
-                    }
+                }
+                if (canApplyHp && state.players.length > 0) {
+                    applyStartingHpToPlayers();
+                    updatePlayersPanel();
+                    if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
                 }
             }
-            state.modBuffOnCritical = modBuffOnCriticalCb.checked;
-            state.modNerfOnMiss = modNerfOnMissCb.checked;
-            state.modVampire = modVampireCb.checked;
-            state.modParty = modPartyCb.checked;
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(state.modNerfOnMiss));
                 localStorage.setItem(MOD_VAMPIRE_KEY, String(state.modVampire));
                 localStorage.setItem(MOD_PARTY_KEY, String(state.modParty));
+                localStorage.setItem(MOD_BOSS_KEY, String(state.modBoss));
+                if (state.modBoss && bossHpInput) {
+                    const bossVal = bossHpInput.value.trim();
+                    const bossN = bossVal === '' ? 100 : parseInt(bossVal, 10);
+                    if (!isNaN(bossN) && bossN >= 20 && bossN <= 999) {
+                        localStorage.setItem(BOSS_HP_KEY, String(bossN));
+                    }
+                }
                 if (useCustomHpCb.checked) {
                     localStorage.setItem(USE_CUSTOM_HP_KEY, 'true');
                     localStorage.setItem(CUSTOM_HP_KEY, String(customHpInput.value.trim()));
@@ -3160,6 +3302,8 @@
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
                 localStorage.removeItem(MOD_VAMPIRE_KEY);
                 localStorage.removeItem(MOD_PARTY_KEY);
+                localStorage.removeItem(MOD_BOSS_KEY);
+                localStorage.removeItem(BOSS_HP_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
             }
@@ -3299,6 +3443,8 @@
         const MOD_NERF_ON_MISS_KEY = 'daggerdie_modNerfOnMiss';
         const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
         const MOD_PARTY_KEY = 'daggerdie_modParty';
+        const MOD_BOSS_KEY = 'daggerdie_modBoss';
+        const BOSS_HP_KEY = 'daggerdie_bossHp';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
         const BOTTOMLESS_BACKPACK_KEY = 'daggerdie_bottomlessBackpack';
@@ -3313,6 +3459,7 @@
             state.modNerfOnMiss = localStorage.getItem(MOD_NERF_ON_MISS_KEY) === 'true';
             state.modVampire = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
             state.modParty = localStorage.getItem(MOD_PARTY_KEY) === 'true';
+            state.modBoss = localStorage.getItem(MOD_BOSS_KEY) === 'true';
             state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             state.itemsStartWithRandom = localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true';
             state.bottomlessBackpack = localStorage.getItem(BOTTOMLESS_BACKPACK_KEY) === 'true';
@@ -3337,6 +3484,10 @@
         function restoreGameState(snapshot) {
             Object.assign(state, snapshot);
             if (!Array.isArray(state.missedDiceIndices)) state.missedDiceIndices = [];
+            if (typeof state.turnNumber !== 'number') state.turnNumber = 0;
+            if (Array.isArray(state.players)) {
+                state.players.forEach(p => { p.isBoss = !!p.isBoss; });
+            }
             applySettingsForNewGame();
             clearHpFeedbackSnapshot();
 
@@ -3390,6 +3541,49 @@
             return 60;
         }
 
+        function getBossHp() {
+            const saved = localStorage.getItem(BOSS_HP_KEY);
+            const n = saved !== null && saved !== '' ? parseInt(saved, 10) : 100;
+            if (!isNaN(n) && n >= 20 && n <= 999) return n;
+            return 100;
+        }
+
+        function getStartingHpForPlayer(p, playerCount) {
+            if (state.modBoss && p && p.isBoss) return getBossHp();
+            return getDefaultHp(playerCount);
+        }
+
+        function applyStartingHpToPlayers() {
+            const count = state.players.length;
+            state.players.forEach(p => {
+                const hp = getStartingHpForPlayer(p, count);
+                p.hp = hp;
+                p.maxHp = hp;
+            });
+        }
+
+        function populateBossPlayersList() {
+            if (!bossPlayersList || !bossPlayersRow) return;
+            const enabled = !!(modBossCb && modBossCb.checked);
+            bossPlayersRow.style.display = (enabled && state.players.length) ? 'block' : 'none';
+            if (!enabled || !state.players.length) {
+                bossPlayersList.innerHTML = '';
+                return;
+            }
+            const readOnly = state.hasScoreBeenEntered;
+            bossPlayersList.innerHTML = state.players.map(p => `
+                <div class="option-row">
+                    <input type="checkbox" id="boss-player-${p.id}" data-player-id="${p.id}" ${p.isBoss ? 'checked' : ''} ${readOnly ? 'disabled' : ''}>
+                    <label for="boss-player-${p.id}">${escapeHtml(p.name)}</label>
+                </div>
+            `).join('');
+            if (!readOnly) {
+                bossPlayersList.querySelectorAll('input[data-player-id]').forEach(cb => {
+                    cb.addEventListener('change', applySettingsFromModal);
+                });
+            }
+        }
+
         function getTeamBadgeInlineHtml(p) {
             if (!p.teamId) return '';
             const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
@@ -3410,12 +3604,14 @@
             const rollsDiv = document.getElementById('turn-order-rolls');
             rollsDiv.innerHTML = state.players.map(p => {
                 const teamBadge = (state.modParty && p.teamId) ? getTeamBadgeInlineHtml(p) : '';
+                const bossLabel = (state.modBoss && p.isBoss) ? '<span class="turn-order-boss-label">Boss</span>' : '';
                 return `
                 <div class="turn-order-player" data-player="${p.id}">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
                         ${teamBadge}
                         <span>${p.name}</span>
+                        ${bossLabel}
                     </div>
                     <span class="roll-value">-</span>
                 </div>
@@ -3457,6 +3653,7 @@
             function updateTurnOrderDisplay() {
                 rollsDiv.innerHTML = state.players.map((p, idx) => {
                     const teamBadge = (state.modParty && p.teamId) ? getTeamBadgeInlineHtml(p) : '';
+                    const bossLabel = (state.modBoss && p.isBoss) ? '<span class="turn-order-boss-label">Boss</span>' : '';
                     return `
                     <div class="turn-order-player" data-player="${p.id}">
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -3464,6 +3661,7 @@
                             ${getPlayerAvatarHtml(p, { size: 30, className: '' })}
                             ${teamBadge}
                             <span>${p.name}</span>
+                            ${bossLabel}
                         </div>
                         <span class="roll-value">${p.turnOrderRoll}</span>
                     </div>
@@ -3563,6 +3761,12 @@
             state.droppedDiceIndices = [];
             state.missedDiceIndices = [];
             state.damageDealtThisTurn = false;
+            state.turnNumber = 1;
+            const firstPlayer = getCurrentPlayer();
+            if (firstPlayer) {
+                firstPlayer.turnsTaken = 1;
+                addLogEntry(`Turn 1 — ${firstPlayer.name}'s 1st turn begins.`, 'turn-start');
+            }
             updateGameUI();
         });
 
@@ -3597,7 +3801,6 @@
                 return;
             }
             applySettingsForNewGame();
-            const defaultHp = getDefaultHp(payload.length);
             const CHAR_BY_ID = window.DAGGERDIE_CHARACTER_BY_ID || {};
             state.players = payload.map((p, idx) => {
                 const hex = p.color || (p.characterId && CHAR_BY_ID[p.characterId] ? CHAR_BY_ID[p.characterId].color : '#8b7355');
@@ -3606,8 +3809,8 @@
                     name: p.name,
                     color: { name: p.characterId && CHAR_BY_ID[p.characterId] ? CHAR_BY_ID[p.characterId].name : 'Custom', hex },
                     characterId: p.characterId || null,
-                    hp: defaultHp,
-                    maxHp: defaultHp,
+                    hp: 0,
+                    maxHp: 0,
                     turnOrderRoll: 0,
                     eliminated: false,
                     totalRolled: 0,
@@ -3622,11 +3825,13 @@
                     isBot: !!p.isBot,
                     botSkill: p.botSkill && BOT_SKILLS[p.botSkill] ? p.botSkill : 'novice',
                     teamId: p.teamId || null,
+                    isBoss: !!p.isBoss,
                     inventory: [null, null, null],
                     inventoryLocked: [false, false, false],
                     itemStats: { acquired: 0, used: 0, acquiredById: {}, usedById: {} }
                 };
             });
+            applyStartingHpToPlayers();
             state.players.forEach(givePlayerRandomStartItem);
             state.players.forEach(fillInventoryBottomlessBackpack);
             clearHpFeedbackSnapshot();
@@ -3667,6 +3872,11 @@
                 return `<div class="${baseClass} player-avatar-char" style="width:${size}px;height:${size}px;flex-shrink:0;overflow:hidden;border-radius:50%;">${svg}</div>`;
             }
             return `<div class="${baseClass}" style="width:${size}px;height:${size}px;background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
+        }
+
+        function getBossBadgeHtml(p) {
+            if (!state.modBoss || !p.isBoss) return '';
+            return `<div class="player-card-boss-badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 7l5.5 4L12 4l3.5 7L21 7l-2 9H5zm0 2h14v2H5v-2z"/></svg> Boss</div>`;
         }
 
         function getTeamBadgeHtml(p, cssClass) {
@@ -3871,7 +4081,7 @@
                     current.eliminated = true;
                     addLogEntry(`${current.name} has been eliminated!`, 'info');
                     updatePlayersPanel();
-                    spawnDeathGhost(rect);
+                    spawnDeathGhost(rect, current.id);
                     checkWinCondition();
                     if (state.phase === 'playing') nextTurn();
                     return;
@@ -3925,7 +4135,8 @@
             }, 1100);
         }
 
-        function spawnDeathGhost(cardRect) {
+        function spawnDeathGhost(cardRect, playerId) {
+            if (playerId != null) postBrawlLeaderboardFx({ kind: 'death', targetId: playerId });
             if (!cardRect || cardRect.width === 0) return;
             const ghost = document.createElement('div');
             ghost.className = 'death-ghost';
@@ -3961,6 +4172,12 @@
 
         function showDamageImpact(targetId, damage, attackerName, attackerColor) {
             DaggerDieAudio.playPlayerHit(damage);
+            pendingBrawlLeaderboardImpacts.push({
+                targetId,
+                damage,
+                attackerName: attackerName || '',
+                attackerColor: attackerColor || '#ccc'
+            });
             const card = playersPanel.querySelector(`.player-card[data-player="${targetId}"]`);
             if (!card) return;
             const rect = card.getBoundingClientRect();
@@ -4002,6 +4219,13 @@
 
         function showItemAppliedAnimation(targetId, item) {
             if (!item) return;
+            postBrawlLeaderboardFx({
+                kind: 'item',
+                targetId,
+                itemId: item.id,
+                itemName: item.name,
+                itemType: item.type
+            });
             const card = playersPanel.querySelector(`.player-card[data-player="${targetId}"]`);
             if (!card) return;
 
@@ -4034,11 +4258,12 @@
         function updatePlayersPanel() {
             const currentPlayer = getCurrentPlayer();
             const newHtml = state.players.map(p => `
-                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.freezeActive ? 'frozen' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
+                <div class="player-card ${p.id === currentPlayer.id ? 'current' : ''} ${p.eliminated ? 'eliminated' : ''} ${state.modBoss && p.isBoss ? 'is-boss' : ''} ${p.buffActive ? 'buffed' : ''} ${p.nerfActive ? 'nerfed' : ''} ${(p.shieldActive || (p.shieldTurns || 0) > 0) ? 'shielded' : ''} ${p.focusActive ? 'focused' : ''} ${p.freezeActive ? 'frozen' : ''} ${((p.regenTurns || 0) > 0 && (p.regenRemaining || 0) > 0) ? 'regening' : ''} ${((p.poisonTurns || 0) > 0 && (p.poisonRemaining || 0) > 0) ? 'poisoned' : ''} ${(p.freeDropsActive || (p.freeDropsCount || 0) > 0) ? 'free-drops' : ''} ${(p.aimActive && p.aimCalledZone !== null) ? 'aiming' : ''}"
                      data-player="${p.id}">
                     <button type="button" class="player-card-stats-btn" data-player="${p.id}" aria-label="Stats and drops">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     </button>
+                    ${getBossBadgeHtml(p)}
                     ${getPlayerAvatarHtml(p)}
                     <div class="player-name">${p.name}</div>
                     <div class="player-hp">${p.hp} HP</div>
@@ -4072,8 +4297,9 @@
 
         function updateCurrentPlayerDisplay() {
             const current = getCurrentPlayer();
-            currentPlayerNameEl.textContent = current.name;
-            currentPlayerNameEl.style.color = current.color.hex;
+            const n = state.turnNumber || 1;
+            currentPlayerNameEl.textContent = current ? `${n} — ${current.name}` : '-';
+            currentPlayerNameEl.style.color = current ? current.color.hex : '';
         }
 
         async function performDiceRoll() {
@@ -4836,7 +5062,7 @@
                         addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage', { hpSnapshots: [{ id: currentPlayer.id, hp: currentPlayer.hp, maxHp: currentPlayer.maxHp }] });
                     }
                     updatePlayersPanel();
-                    spawnDeathGhost(rect);
+                    spawnDeathGhost(rect, targetPlayer.id);
                 } else {
                     updatePlayersPanel();
                 }
@@ -4974,7 +5200,7 @@
                         addLogEntry(`${currentPlayer.name} drained ${vampireHeal} HP from ${targetPlayer.name}!`, 'damage', { hpSnapshots: [{ id: currentPlayer.id, hp: currentPlayer.hp, maxHp: currentPlayer.maxHp }] });
                     }
                     updatePlayersPanel();
-                    spawnDeathGhost(rect);
+                    spawnDeathGhost(rect, targetPlayer.id);
                 } else {
                     updatePlayersPanel();
                 }
@@ -5074,6 +5300,7 @@
             if (!state.damageDealtThisTurn) state.dropsThisTurnLogIndices.push(state.gameLog.length - 1);
             updatePlayersPanel();
             syncHitRecorderUI();
+            postBrawlLeaderboardFx({ kind: 'drop', targetId: current.id });
 
             requestAnimationFrame(() => {
                 const card = document.querySelector(`.player-card[data-player="${current.id}"]`);
@@ -5089,7 +5316,7 @@
                 current.eliminated = true;
                 addLogEntry(`${current.name} has been eliminated!`, 'info');
                 updatePlayersPanel();
-                spawnDeathGhost(rect);
+                spawnDeathGhost(rect, current.id);
                 checkWinCondition();
                 if (state.phase === 'playing') {
                     nextTurn();
@@ -5159,6 +5386,18 @@
             playerStatsTitle.textContent = player.name;
             playerStatsAvatar.innerHTML = getPlayerAvatarHtml(player, { size: 64, className: '' });
             playerStatsHp.textContent = `${player.hp} / ${player.maxHp} HP`;
+            const playerStatsRole = document.getElementById('player-stats-role');
+            if (playerStatsRole) {
+                if (state.modBoss && player.isBoss) {
+                    playerStatsRole.style.display = '';
+                    playerStatsRole.textContent = 'Boss';
+                    playerStatsRole.style.color = '#feca57';
+                    playerStatsRole.style.fontWeight = '700';
+                } else {
+                    playerStatsRole.style.display = 'none';
+                    playerStatsRole.textContent = '';
+                }
+            }
             playerStatsTurnOrder.textContent = `Turn order: #${state.players.indexOf(player) + 1}`;
             const statuses = getPlayerStatusEffectsForItemModal(player).map(s => s.label);
             if (statuses.length > 0) {
@@ -5349,8 +5588,7 @@
                 target.aimBonus = 0;
                 target.regenRemaining = 0;
                 target.regenTurns = 0;
-                target.poisonRemaining = 0;
-                target.poisonTurns = 0;
+                clearPlayerPoison(target);
                 addLogEntry(`${user.name} used ${item.name} — ${target.name} resurrected with ${reviveHp} HP (status cleared)!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'metal-fragment') {
                 target.shieldActive = true;
@@ -5383,8 +5621,10 @@
                 target.hp = Math.max(0, target.hp - immediatePoison);
                 target.poisonRemaining = 10;
                 target.poisonTurns = 2;
+                target.poisonedById = user.id;
+                target.poisonedOnTurn = state.turnNumber || 1;
                 if (target.hp <= 0) target.eliminated = true;
-                addLogEntry(`${user.name} used ${item.name} on ${target.name} — -${immediatePoison} HP now, Poison -10 HP over 2 turns!`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
+                addLogEntry(`${user.name} used ${item.name} on ${target.name} — ${target.name} received ${immediatePoison} damage from poison dealt by ${user.name} on turn ${state.turnNumber || 1}. Poison continues for 2 turns.`, 'info', { hpSnapshots: [{ id: target.id, hp: target.hp, maxHp: target.maxHp }] });
             } else if (item.id === 'ticket') {
                 target.freeDropsActive = true;
                 target.freeDropsCount = 3;
@@ -5408,8 +5648,7 @@
                 target.aimBonus = 0;
                 target.regenRemaining = 0;
                 target.regenTurns = 0;
-                target.poisonRemaining = 0;
-                target.poisonTurns = 0;
+                clearPlayerPoison(target);
                 addLogEntry(`${user.name} used ${item.name} on ${target.name} — Status cleared!`, 'info');
             } else {
                 return false;
@@ -5715,6 +5954,7 @@
             }
             // Clear buff/nerf for the player whose turn is starting (their "1 turn" of effect has ended)
             const nextPlayer = state.players[nextIdx];
+            incrementTurnNumber();
             if (nextPlayer) {
                 nextPlayer.buffActive = false;
                 nextPlayer.nerfActive = false;
@@ -5723,22 +5963,29 @@
                     nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + heal);
                     nextPlayer.regenRemaining -= heal;
                     nextPlayer.regenTurns--;
-                    if (heal > 0) addLogEntry(`${nextPlayer.name} regens +${heal} HP!`, 'info', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
+                    if (heal > 0) addLogEntry(`${nextPlayer.name} received ${heal} HP from regen on turn ${state.turnNumber}.`, 'heal', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
                 }
                 if (nextPlayer.poisonRemaining > 0 && nextPlayer.poisonTurns > 0) {
                     const dmg = Math.min(5, nextPlayer.poisonRemaining);
                     nextPlayer.hp = Math.max(0, nextPlayer.hp - dmg);
                     nextPlayer.poisonRemaining -= dmg;
                     nextPlayer.poisonTurns--;
-                    addLogEntry(`${nextPlayer.name} takes ${dmg} poison damage!`, 'damage', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
-                    if (dmg > 0) showDamageImpact(nextPlayer.id, dmg, 'Poison', '#c084fc');
+                    addLogEntry(formatPoisonTickMessage(nextPlayer, dmg), 'damage', { hpSnapshots: [{ id: nextPlayer.id, hp: nextPlayer.hp, maxHp: nextPlayer.maxHp }] });
+                    if (dmg > 0) {
+                        const source = state.players.find(p => p.id === nextPlayer.poisonedById);
+                        showDamageImpact(nextPlayer.id, dmg, source ? source.name : 'Poison', source && source.color ? source.color.hex : '#c084fc');
+                    }
+                    if (nextPlayer.poisonTurns <= 0 || nextPlayer.poisonRemaining <= 0) {
+                        nextPlayer.poisonedById = null;
+                        nextPlayer.poisonedOnTurn = null;
+                    }
                     if (nextPlayer.hp <= 0) {
                         nextPlayer.eliminated = true;
-                        addLogEntry(`${nextPlayer.name} has been eliminated!`, 'info');
+                        addLogEntry(`${nextPlayer.name} has been eliminated by poison on turn ${state.turnNumber}!`, 'info');
                         updatePlayersPanel();
                         const card = document.querySelector(`.player-card[data-player="${nextPlayer.id}"]`);
                         const rect = card ? card.getBoundingClientRect() : null;
-                        spawnDeathGhost(rect);
+                        spawnDeathGhost(rect, nextPlayer.id);
                         checkWinCondition();
                         if (state.phase === 'finished') return;
                         nextTurn();
@@ -5752,13 +5999,13 @@
             const nextPlayer2 = state.players[nextIdx];
             if (nextPlayer2 && nextPlayer2.freezeActive) {
                 nextPlayer2.freezeActive = false;
-                addLogEntry(`${nextPlayer2.name} is frozen and skips their turn!`, 'info');
+                addLogEntry(`Turn ${state.turnNumber} — ${nextPlayer2.name} is frozen and skips their turn.`, 'turn-start');
                 updatePlayersPanel();
                 setTimeout(() => nextTurn(), 800);
                 return;
             }
 
-            addLogEntry(`${getCurrentPlayer().name}'s turn begins.`, 'turn-start');
+            logPlayerTurnStart(getCurrentPlayer());
             updateGameUI();
         }
 
@@ -5856,9 +6103,10 @@
 
             const playerRows = state.players.map(p => {
                 let status = p.eliminated ? 'Eliminated' : (winningTeam && p.teamId === winningTeamId ? 'Winner' : (winner && p.id === winner.id ? 'Winner' : 'Survived'));
+                const bossTag = (state.modBoss && p.isBoss) ? ' (Boss)' : '';
                 return `
                 <tr>
-                    <td><span class="report-color-dot" style="background:${p.color.hex}"></span> ${escapeHtml(p.name)}</td>
+                    <td><span class="report-color-dot" style="background:${p.color.hex}"></span> ${escapeHtml(p.name)}${bossTag}</td>
                     <td>${p.hp} / ${p.maxHp}</td>
                     <td><span class="report-status report-status-${status.toLowerCase().replace(/\s/g,'')}">${status}</span></td>
                 </tr>`;
@@ -5885,11 +6133,13 @@
                         <tr><td>Items used</td><td>${p.itemStats.used || 0}</td></tr>
                         <tr><td>Acquired breakdown</td><td>${escapeHtml(formatItemStatsMapForReport(p.itemStats.acquiredById))}</td></tr>
                         <tr><td>Used breakdown</td><td>${escapeHtml(formatItemStatsMapForReport(p.itemStats.usedById))}</td></tr>` : '';
+                const bossRow = (state.modBoss && p.isBoss) ? `<tr><td>Role</td><td>Boss</td></tr>` : '';
                 return `
                 <div class="report-player-card" style="border-left-color: ${p.color.hex}">
-                    <h3 class="report-player-name">${getPlayerAvatarHtml(p, { size: 24, className: 'report-avatar' })} ${escapeHtml(p.name)}</h3>
+                    <h3 class="report-player-name">${getPlayerAvatarHtml(p, { size: 24, className: 'report-avatar' })} ${escapeHtml(p.name)}${(state.modBoss && p.isBoss) ? ' (Boss)' : ''}</h3>
                     <table class="report-stats-table">
                         <tr><td>Status</td><td><span class="report-status report-status-${status.toLowerCase().replace(/\s/g,'')}">${status}</span></td></tr>
+                        ${bossRow}
                         <tr><td>Final HP</td><td>${p.hp} / ${p.maxHp}</td></tr>
                         <tr><td>Hits dealt</td><td>${hitCount}</td></tr>
                         <tr><td>Drops (self-damage)</td><td>${dropCount}</td></tr>
@@ -6082,17 +6332,64 @@ ${itemRows}
         }
 
         function getLogPlayerColor(message) {
-            if (!state.players || !state.players.length) return null;
+            if (!state.players || !state.players.length || !message) return null;
+            const dash = message.match(/^Turn \d+ — (.+)$/);
+            const body = dash ? dash[1] : message;
             for (const p of state.players) {
-                if (message.startsWith(p.name + ' ') || message.startsWith(p.name + '\u2019s ') || message.startsWith(p.name + "'s ")) {
+                if (body.startsWith(p.name + ' ') || body.startsWith(p.name + '\u2019s ') || body.startsWith(p.name + "'s ")) {
                     return p.color.hex;
                 }
             }
             return null;
         }
 
+        function ordinal(n) {
+            const v = n % 100;
+            if (v >= 11 && v <= 13) return n + 'th';
+            switch (n % 10) {
+                case 1: return n + 'st';
+                case 2: return n + 'nd';
+                case 3: return n + 'rd';
+                default: return n + 'th';
+            }
+        }
+
+        function incrementTurnNumber() {
+            state.turnNumber = (state.turnNumber || 0) + 1;
+            return state.turnNumber;
+        }
+
+        function logPlayerTurnStart(player) {
+            if (!player) return;
+            player.turnsTaken = (player.turnsTaken || 0) + 1;
+            addLogEntry(`Turn ${state.turnNumber} — ${player.name}'s ${ordinal(player.turnsTaken)} turn begins.`, 'turn-start');
+        }
+
+        function clearPlayerPoison(player) {
+            if (!player) return;
+            player.poisonRemaining = 0;
+            player.poisonTurns = 0;
+            player.poisonedById = null;
+            player.poisonedOnTurn = null;
+        }
+
+        function formatPoisonTickMessage(victim, dmg) {
+            const source = victim.poisonedById != null ? state.players.find(p => p.id === victim.poisonedById) : null;
+            const appliedTurn = victim.poisonedOnTurn;
+            if (source && appliedTurn) {
+                return `${victim.name} received ${dmg} damage from poison dealt by ${source.name} on turn ${appliedTurn}.`;
+            }
+            if (source) {
+                return `${victim.name} received ${dmg} damage from poison dealt by ${source.name} on turn ${state.turnNumber}.`;
+            }
+            return `${victim.name} received ${dmg} damage from poison on turn ${state.turnNumber}.`;
+        }
+
         function buildLogEntryHtml(entry) {
             let html = '';
+            if (entry.turnNumber && entry.type !== 'turn-start') {
+                html += `<span class="log-turn-tag">Turn ${entry.turnNumber}</span>`;
+            }
             const color = getLogPlayerColor(entry.message);
             if (color) {
                 html += `<span class="log-player-dot" style="background:${color}"></span>`;
@@ -6111,6 +6408,7 @@ ${itemRows}
 
         function addLogEntry(message, type = 'info', opts = {}) {
             const logEntry = { message, type };
+            if (state.turnNumber) logEntry.turnNumber = state.turnNumber;
             if (opts.hpSnapshots) logEntry.hpSnapshots = opts.hpSnapshots;
             state.gameLog.push(logEntry);
             const empty = gameLogEntries.querySelector('.ledger-empty');
@@ -6171,10 +6469,7 @@ ${itemRows}
             itemUseContext = null;
             playerStatsModalPlayerId = null;
             applySettingsForNewGame();
-            const defaultHp = getDefaultHp(state.players.length);
             state.players.forEach(p => {
-                p.hp = defaultHp;
-                p.maxHp = defaultHp;
                 p.eliminated = false;
                 p.turnOrderRoll = 0;
                 p.totalRolled = 0;
@@ -6195,6 +6490,9 @@ ${itemRows}
                 p.regenTurns = 0;
                 p.poisonRemaining = 0;
                 p.poisonTurns = 0;
+                p.poisonedById = null;
+                p.poisonedOnTurn = null;
+                p.turnsTaken = 0;
                 p.freeDropsActive = false;
                 p.freeDropsCount = 0;
                 p.inventory = [null, null, null];
@@ -6203,6 +6501,7 @@ ${itemRows}
                 p.hadStartItem = false;
                 p.rememberedStartItemId = undefined;
             });
+            applyStartingHpToPlayers();
             state.players.forEach(givePlayerRandomStartItem);
             state.players.forEach(fillInventoryBottomlessBackpack);
             state.currentPlayerIndex = 0;
@@ -6228,6 +6527,7 @@ ${itemRows}
             state.droppedDiceIndices = [];
             state.missedDiceIndices = [];
             state.damageDealtThisTurn = false;
+            state.turnNumber = 0;
 
             winnerScreen.style.display = 'none';
             gameScreen.style.display = 'none';
@@ -6271,6 +6571,9 @@ ${itemRows}
                     MOD_BUFF_ON_CRITICAL_KEY,
                     MOD_NERF_ON_MISS_KEY,
                     MOD_VAMPIRE_KEY,
+                    MOD_PARTY_KEY,
+                    MOD_BOSS_KEY,
+                    BOSS_HP_KEY,
                     ITEMS_ENABLED_KEY,
                     ITEMS_START_WITH_RANDOM_KEY,
                     'daggerdie_botsEnabled'
