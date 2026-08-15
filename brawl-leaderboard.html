@@ -9,13 +9,17 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    height: 100%;
+  }
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #0a0c18;
     min-height: 100vh;
+    min-height: 100dvh;
     color: #fff;
-    line-height: 1.6;
-    overflow-x: hidden;
+    line-height: 1.4;
+    overflow: hidden;
   }
 
   /* ── RPG background layers ── */
@@ -75,24 +79,35 @@
   @keyframes idxTorchFlicker { 0% { opacity: 0.6; transform: scale(1); } 25% { opacity: 1; transform: scale(1.05); } 50% { opacity: 0.7; transform: scale(0.98); } 75% { opacity: 0.9; transform: scale(1.02); } 100% { opacity: 0.65; transform: scale(1); } }
   #idxParticleCanvas { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
 
-  .main-content { position: relative; z-index: 10; min-height: 100vh; display: flex; flex-direction: column; }
-  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; width: 100%; flex: 1; }
+  .main-content {
+    position: relative; z-index: 10;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    /* Extra side margin so cards stay slightly slim and background shows */
+    padding: 2vh 7vw 1.2vh;
+  }
+  .container {
+    max-width: none; margin: 0 auto; padding: 0;
+    width: 100%; flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+  }
 
-  header { text-align: center; margin-bottom: 24px; }
+  header { text-align: center; flex: 0 0 auto; margin-bottom: 0.6vh; }
   h1 {
     font-family: 'Cinzel Decorative', 'Times New Roman', serif;
-    font-size: 2.2rem; font-weight: 700; color: #d4a84b;
+    font-size: clamp(1.5rem, 2.8vh, 2.2rem); font-weight: 700; color: #d4a84b;
     text-shadow: 2px 2px 0 #5c3d1e, 4px 4px 0 rgba(0,0,0,0.3), 0 0 20px rgba(212, 168, 75, 0.3);
-    letter-spacing: 3px; margin-bottom: 4px;
+    letter-spacing: 3px; margin-bottom: 0; line-height: 1.1;
   }
   .subtitle {
     font-family: 'Cinzel', Georgia, serif;
-    font-size: 1rem; color: #feca57; letter-spacing: 2px;
+    font-size: clamp(0.8rem, 1.4vh, 1.05rem); color: #feca57; letter-spacing: 2px;
   }
 
   .status-bar {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 24px; font-size: 0.8rem; color: rgba(255,255,255,0.5);
+    margin-bottom: 0.8vh; font-size: 0.7rem; color: rgba(255,255,255,0.5);
+    flex: 0 0 auto;
   }
   .status-dot {
     width: 8px; height: 8px; border-radius: 50%; background: #555;
@@ -101,38 +116,61 @@
   .status-dot.connected { background: #2ecc71; box-shadow: 0 0 6px rgba(46,204,113,0.6); }
 
   .finalized-banner {
-    display: none; text-align: center; padding: 12px; margin-bottom: 20px;
-    border-radius: 12px;
+    display: none; text-align: center; padding: 8px; margin-bottom: 0.8vh;
+    border-radius: 12px; flex: 0 0 auto;
     background: linear-gradient(45deg, rgba(254,202,87,0.15), rgba(212,168,75,0.15));
     border: 1px solid rgba(254,202,87,0.3);
-    font-family: 'Cinzel', Georgia, serif; font-size: 1rem; color: #feca57;
+    font-family: 'Cinzel', Georgia, serif; font-size: 0.95rem; color: #feca57;
     letter-spacing: 1px;
   }
   .finalized-banner.visible { display: block; }
 
-  /* Match main game player cards */
+  /* 2×3 grid sized for 1080×1920 portrait: 6 large cards fill the screen */
   .players-panel {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 30px;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1.6vh 2.2vw;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    align-content: stretch;
   }
+  .players-panel.count-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; max-width: 70%; margin: 0 auto; }
+  .players-panel.count-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+  .players-panel.count-3,
+  .players-panel.count-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .players-panel.count-5,
+  .players-panel.count-6 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
 
   .player-card {
     position: relative;
+    container-type: size;
     background: rgba(255,255,255,0.1);
     border-radius: 15px;
-    padding: 20px;
-    min-width: 150px;
+    padding: 0.85em 0.9em;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
     text-align: center;
-    transition: all 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
     border: 3px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* Scale to the card itself so content always stays in bounds */
+    font-size: clamp(10px, min(5.2cqh, 7.5cqw), 28px);
   }
   .player-card.current {
     border-color: #feca57;
     box-shadow: 0 0 20px rgba(254, 202, 87, 0.4);
-    transform: scale(1.05);
+    z-index: 1;
   }
   .player-card.eliminated {
     opacity: 0.4;
@@ -163,11 +201,12 @@
   .player-card.aiming { box-shadow: 0 0 14px rgba(167, 139, 250, 0.35); }
 
   .player-avatar {
-    width: 60px;
-    height: 60px;
+    width: 3.4em;
+    height: 3.4em;
     border-radius: 50%;
-    margin: 0 auto 10px;
-    flex-shrink: 0;
+    margin: 0 auto 0.4em;
+    flex: 0 1 auto;
+    min-height: 0;
   }
   .player-avatar.player-avatar-char {
     overflow: hidden;
@@ -180,45 +219,61 @@
 
   .player-name {
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 0.35em;
+    font-size: 1em;
+    line-height: 1.15;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .player-hp {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
+    font-size: 1.45em;
+    margin-bottom: 0.2em;
+    line-height: 1.05;
   }
   .hp-bar {
     width: 100%;
-    height: 10px;
+    max-width: 11em;
+    height: 0.55em;
     background: rgba(0,0,0,0.3);
     border-radius: 5px;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .hp-fill {
     height: 100%;
     transition: width 0.5s;
   }
   .player-turn-order {
-    font-size: 0.8rem;
+    font-size: 0.8em;
     opacity: 0.7;
-    margin-top: 5px;
+    margin-top: 0.25em;
+    line-height: 1.2;
   }
   .player-card-bot-skill {
-    font-size: 0.75rem;
-    margin-top: 4px;
+    font-size: 0.75em;
+    margin-top: 0.2em;
     color: #48dbfb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    flex-wrap: wrap;
   }
   .player-card-team-badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    margin-top: 4px;
-    font-size: 0.7rem;
+    gap: 0.3em;
+    margin-top: 0.2em;
+    font-size: 0.7em;
     color: rgba(255,255,255,0.8);
+    max-width: 100%;
   }
   .player-card-team-badge .team-badge-icon {
-    width: 20px;
-    height: 20px;
+    width: 1.25em;
+    height: 1.25em;
     border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
@@ -228,15 +283,21 @@
     width: 100%;
     height: 100%;
   }
+  .player-card-team-badge span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .player-card-status {
-    font-size: 0.75rem;
+    font-size: 0.72em;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-top: 6px;
-    padding: 3px 8px;
+    margin-top: 0.3em;
+    padding: 0.15em 0.5em;
     border-radius: 6px;
+    line-height: 1.2;
   }
   .player-card-status.buff { background: rgba(46, 204, 113, 0.3); color: #2ecc71; }
   .player-card-status.nerf { background: rgba(231, 76, 60, 0.3); color: #ff8f8f; }
@@ -250,13 +311,14 @@
 
   .player-card-inventory {
     display: flex;
-    gap: 4px;
+    gap: 0.3em;
     justify-content: center;
-    margin-top: 8px;
+    margin-top: 0.4em;
+    flex-shrink: 0;
   }
   .player-card-inventory-slot {
-    width: 28px;
-    height: 28px;
+    width: 1.65em;
+    height: 1.65em;
     border: 2px solid rgba(255,255,255,0.3);
     border-radius: 6px;
     background: rgba(0,0,0,0.3);
@@ -264,6 +326,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .player-card-inventory-slot.has-item {
     border-color: rgba(254,202,87,0.6);
@@ -273,8 +336,8 @@
     filter: grayscale(0.35);
   }
   .player-card-inventory-slot svg {
-    width: 20px;
-    height: 20px;
+    width: 1.2em;
+    height: 1.2em;
     image-rendering: pixelated;
   }
 
@@ -282,17 +345,28 @@
     text-align: center; padding: 60px 20px;
     color: rgba(255,255,255,0.4); font-style: italic;
     font-family: 'Cinzel', Georgia, serif;
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1rem, 2vh, 1.4rem);
   }
 
   footer {
-    text-align: center; padding: 20px; color: rgba(255,255,255,0.3); font-size: 0.75rem;
+    text-align: center; padding: 0.6vh 12px 0.4vh; color: rgba(255,255,255,0.3); font-size: 0.65rem;
     border-top: 1px solid rgba(255,255,255,0.06);
+    flex: 0 0 auto;
   }
 
-  @media (max-width: 500px) {
-    h1 { font-size: 1.6rem; }
-    .subtitle { font-size: 0.85rem; }
-    .player-hp { font-size: 1.25rem; }
+  .fs-hint {
+    position: fixed; bottom: 10px; left: 14px; z-index: 50;
+    font-size: 12px; color: rgba(255,255,255,0.45); font-family: sans-serif;
+    pointer-events: none; letter-spacing: 0.02em;
+  }
+
+  @media (orientation: landscape) and (max-height: 900px) {
+    .players-panel.count-5,
+    .players-panel.count-6 {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 1fr 1fr;
+    }
   }
 </style>
 </head>
@@ -381,6 +455,8 @@
     <footer>Dagger &amp; Die &mdash; Brawl Mode</footer>
   </div>
 
+  <div class="fs-hint">Press F for full screen</div>
+
   <script src="rpg-bg-particles.js"
     data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
     data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
@@ -412,9 +488,9 @@
       const char = p.characterId && CHAR_BY_ID[p.characterId];
       if (char) {
         const svg = prefixSvgIds(char.svg, 'lb-p' + p.id);
-        return '<div class="player-avatar player-avatar-char" style="width:60px;height:60px;">' + svg + '</div>';
+        return '<div class="player-avatar player-avatar-char">' + svg + '</div>';
       }
-      return '<div class="player-avatar" style="width:60px;height:60px;background:' + escHtml(p.color) + ';"></div>';
+      return '<div class="player-avatar" style="background:' + escHtml(p.color) + ';"></div>';
     }
 
     function getTeamBadgeHtml(p, partyMode) {
@@ -453,9 +529,9 @@
         return;
       }
       noData.style.display = 'none';
-      playersPanel.style.display = 'flex';
-
       const ordered = players.slice().sort((a, b) => (a.turnOrder || 0) - (b.turnOrder || 0));
+      playersPanel.style.display = 'grid';
+      playersPanel.className = 'players-panel count-' + Math.min(6, Math.max(1, ordered.length));
 
       playersPanel.innerHTML = ordered.map(p => {
         const classes = ['player-card'];
@@ -509,6 +585,23 @@
     } else {
       statusText.textContent = 'BroadcastChannel not supported in this browser.';
     }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(function() {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      if ((e.key === 'f' || e.key === 'F') && !e.target.matches('input, textarea')) {
+        toggleFullscreen();
+      }
+    });
   </script>
 </body>
 </html>
