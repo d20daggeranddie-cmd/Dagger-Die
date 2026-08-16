@@ -163,12 +163,6 @@
     box-shadow: 0 0 20px rgba(254, 202, 87, 0.4);
     transform: scale(1.05);
   }
-  .player-card.is-boss {
-    border-color: #e74c3c;
-  }
-  .player-card.is-boss.current {
-    border-color: #feca57;
-  }
   .player-card.is-boss::after {
     content: '';
     position: absolute;
@@ -206,6 +200,14 @@
     border-color: #e74c3c;
     box-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 0 15px rgba(254, 202, 87, 0.3);
   }
+  .player-card.is-boss,
+  .player-card.is-boss.current,
+  .player-card.is-boss.buffed,
+  .player-card.is-boss.nerfed,
+  .player-card.is-boss.buffed.current,
+  .player-card.is-boss.nerfed.current {
+    border-color: transparent;
+  }
   .player-card.shielded { box-shadow: 0 0 14px rgba(129, 140, 248, 0.35); }
   .player-card.focused { box-shadow: 0 0 14px rgba(250, 204, 21, 0.35); }
   .player-card.frozen { box-shadow: 0 0 14px rgba(96, 184, 240, 0.45); }
@@ -213,9 +215,6 @@
   .player-card.poisoned { box-shadow: 0 0 14px rgba(196, 132, 252, 0.35); }
   .player-card.free-drops { box-shadow: 0 0 14px rgba(56, 189, 248, 0.35); }
   .player-card.aiming { box-shadow: 0 0 14px rgba(167, 139, 250, 0.35); }
-  .player-card.is-boss:not(.current) {
-    border-color: #e74c3c;
-  }
   .player-card.hp-change-down {
     animation: hp-damage-flash 0.55s ease;
   }
