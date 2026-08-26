@@ -113,6 +113,14 @@
   .targets-row {
     display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
   }
+  .die-slot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .die-slot-num {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em;
+    color: rgba(254, 202, 87, 0.9); line-height: 1;
+  }
   .die-badge {
     width: 44px; height: 44px;
     background: linear-gradient(145deg, #2d3436, #1e272e);
@@ -336,8 +344,11 @@
     function renderTargets(targets) {
       if (!targets || !targets.length) { targetsPanel.style.display = 'none'; return; }
       targetsPanel.style.display = '';
-      targetsRow.innerHTML = targets.map(t =>
-        '<div class="die-badge ' + (t % 2 === 0 ? 'even' : 'odd') + '">' + t + '</div>'
+      targetsRow.innerHTML = targets.map((t, i) =>
+        '<div class="die-slot">' +
+          '<span class="die-slot-num">' + (i + 1) + '</span>' +
+          '<div class="die-badge ' + (t % 2 === 0 ? 'even' : 'odd') + '">' + t + '</div>' +
+        '</div>'
       ).join('');
     }
 
