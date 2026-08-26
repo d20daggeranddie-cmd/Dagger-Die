@@ -187,18 +187,69 @@
     display: flex; flex-wrap: wrap;
     gap: 8px; justify-content: center; margin-bottom: 16px;
   }
+  .die-slot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .die-slot-num {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+    color: rgba(254, 202, 87, 0.75); line-height: 1;
+  }
   .die {
     width: 52px; height: 52px;
     background: linear-gradient(145deg, #2d3436, #1e272e);
     border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; font-weight: bold;
+    font-size: 1.5rem; font-weight: bold; font-family: inherit;
     box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
     transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.5);
+    padding: 0; margin: 0; appearance: none; -webkit-appearance: none;
   }
-  .die.rolling { animation: roll 0.1s infinite; }
+  .die:disabled { cursor: default; opacity: 1; }
+  .die.selectable {
+    cursor: pointer;
+  }
+  .die.selectable:hover {
+    border-color: #feca57; color: #feca57;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(254, 202, 87, 0.25);
+  }
+  .die.selectable:focus {
+    outline: 2px solid #feca57; outline-offset: 3px;
+  }
+  .die.rolling { animation: roll 0.1s infinite; pointer-events: none; }
   .die.odd { color: #ff6b6b; border-color: #ff6b6b; }
   .die.even { color: #48dbfb; border-color: #48dbfb; }
+  .dice-hint {
+    text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.55);
+    margin: -6px 0 14px;
+  }
+  .dice-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .btn-secondary {
+    background: linear-gradient(45deg, #feca57, #d4a84b); color: #1a1040;
+  }
+  .btn-secondary:hover { box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4); transform: translateY(-2px); }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .die-picker-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    margin: 8px 0 16px;
+  }
+  .die-picker-num {
+    aspect-ratio: 1; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9);
+    font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .die-picker-num:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+  .die-picker-num.odd { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.55); }
+  .die-picker-num.even { color: #48dbfb; border-color: rgba(72, 219, 251, 0.55); }
+  .die-picker-num.is-selected {
+    background: rgba(254, 202, 87, 0.2); border-color: #feca57; color: #feca57;
+    box-shadow: 0 0 12px rgba(254, 202, 87, 0.25);
+  }
   @keyframes roll {
     0%, 100% { transform: rotate(0deg) scale(1); }
     25% { transform: rotate(10deg) scale(1.1); }
@@ -320,7 +371,29 @@
     background: rgba(10, 12, 24, 0.95); z-index: 2;
     border-bottom: 2px solid rgba(254, 202, 87, 0.3);
   }
-  .scorecard-table thead th:first-child { text-align: left; }
+  .scorecard-table thead tr.scorecard-roll-row th {
+    position: sticky; top: 0; z-index: 3;
+    background: transparent; border-bottom: none;
+    padding-top: 0; padding-bottom: 6px;
+    vertical-align: bottom;
+  }
+  .scorecard-table thead tr.scorecard-target-row th {
+    top: 1.6rem;
+  }
+  .scorecard-table thead th:first-child,
+  .scorecard-table thead th.th-label { text-align: left; }
+  .scorecard-table thead th.th-roll-num {
+    font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 0.04em; color: rgba(254, 202, 87, 0.85);
+    line-height: 1;
+  }
+  .scorecard-table thead th.th-roll-spacer {
+    color: transparent; user-select: none;
+  }
+  .scorecard-table thead th.th-target-val {
+    padding-top: 8px; padding-bottom: 8px;
+    font-size: 1.05rem; font-weight: 700; color: #feca57;
+  }
   .scorecard-table tbody td:first-child {
     text-align: left; font-weight: 600; color: rgba(255,255,255,0.95);
     white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;
@@ -470,10 +543,27 @@
     font-size: 0.8rem; color: rgba(255,255,255,0.55);
   }
 
-  /* ─── Finalize ─── */
+  /* ─── Finalize / Backup ─── */
   .finalize-wrap { text-align: center; margin-bottom: 40px; display: none; }
   .finalize-wrap.visible { display: block; }
   .btn-finalize:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .backup-bar {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    margin-top: 16px;
+  }
+  .backup-bar .btn-backup {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; color: rgba(255,255,255,0.85);
+    font-size: 0.8rem; padding: 8px 14px; cursor: pointer; font-family: inherit;
+    transition: all 0.2s;
+  }
+  .backup-bar .btn-backup:hover { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(254,202,87,0.45); }
+  .backup-status {
+    width: 100%; text-align: center; font-size: 0.75rem;
+    color: rgba(255,255,255,0.45); margin-top: 4px; min-height: 1.1em;
+  }
+  .backup-status.has-save { color: rgba(46, 204, 113, 0.85); }
 
   footer { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
 
@@ -486,6 +576,10 @@
     h1 { font-size: 2rem; }
     .mode-subtitle { font-size: 1.05rem; }
     .die { width: 44px; height: 44px; font-size: 1.25rem; border-radius: 10px; }
+    .dice-actions { gap: 8px; }
+    .dice-actions .btn { padding: 12px 22px; font-size: 0.95rem; }
+    .die-picker-grid { gap: 6px; }
+    .die-picker-num { font-size: 1rem; border-radius: 8px; }
     .scorecard-table th, .scorecard-table td { padding: 8px 5px; font-size: 0.85rem; }
     .score-throw-row { padding: 4px 6px; gap: 6px; }
     .score-throw-target { font-size: 0.98rem; }
@@ -611,6 +705,14 @@
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
               Live Leaderboard
             </button>
+            <button type="button" id="resources-export-backup-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export competition backup
+            </button>
+            <button type="button" id="resources-restore-backup-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Restore competition backup
+            </button>
           </div>
         </div>
       </div>
@@ -642,18 +744,22 @@
       <!-- Targets Panel (dice + board) -->
       <div class="target-panel" id="target-panel">
         <h3 class="section-title">Target Dice</h3>
+        <p class="dice-hint" id="dice-hint">Roll all, or tap a die to choose 1–20</p>
         <div class="dice-grid" id="dice-grid">
-          <div class="die" id="die0">-</div>
-          <div class="die" id="die1">-</div>
-          <div class="die" id="die2">-</div>
-          <div class="die" id="die3">-</div>
-          <div class="die" id="die4">-</div>
-          <div class="die" id="die5">-</div>
-          <div class="die" id="die6">-</div>
-          <div class="die" id="die7">-</div>
-          <div class="die" id="die8">-</div>
+          <div class="die-slot"><span class="die-slot-num">1</span><button type="button" class="die selectable" id="die0" aria-label="Target 1">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">2</span><button type="button" class="die selectable" id="die1" aria-label="Target 2">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">3</span><button type="button" class="die selectable" id="die2" aria-label="Target 3">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">4</span><button type="button" class="die selectable" id="die3" aria-label="Target 4">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">5</span><button type="button" class="die selectable" id="die4" aria-label="Target 5">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">6</span><button type="button" class="die selectable" id="die5" aria-label="Target 6">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">7</span><button type="button" class="die selectable" id="die6" aria-label="Target 7">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">8</span><button type="button" class="die selectable" id="die7" aria-label="Target 8">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">9</span><button type="button" class="die selectable" id="die8" aria-label="Target 9">-</button></div>
         </div>
-        <button class="btn btn-primary btn-center" id="roll-btn">Roll Targets</button>
+        <div class="dice-actions" id="dice-actions">
+          <button type="button" class="btn btn-primary" id="roll-btn">Roll Targets</button>
+          <button type="button" class="btn btn-secondary" id="lock-btn" disabled>Lock Targets</button>
+        </div>
 
         <div class="board-area" id="board-area" style="display:none;">
           <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
@@ -761,6 +867,12 @@
       <!-- Finalize -->
       <div class="finalize-wrap" id="finalize-wrap">
         <button class="btn btn-finalize" id="finalize-btn">Finalize Game</button>
+        <div class="backup-bar">
+          <button type="button" class="btn-backup" id="export-backup-btn" title="Download a JSON backup of targets, players, and scores">Export Backup</button>
+          <button type="button" class="btn-backup" id="restore-backup-btn" title="Restore from a previously exported backup file">Restore Backup</button>
+          <div class="backup-status" id="backup-status"></div>
+        </div>
+        <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
       </div>
 
       <footer>
@@ -785,6 +897,8 @@
     };
 
     const rollBtn = document.getElementById('roll-btn');
+    const lockBtn = document.getElementById('lock-btn');
+    const diceHint = document.getElementById('dice-hint');
     const regPanel = document.getElementById('reg-panel');
     const regInput = document.getElementById('reg-input');
     const joinBtn = document.getElementById('join-btn');
@@ -868,8 +982,92 @@
     const diceEls = [];
     for (let i = 0; i < 9; i++) diceEls.push(document.getElementById('die' + i));
 
+    const draftTargets = new Array(9).fill(null);
+    let targetsLocked = false;
+    let rolling = false;
+
+    function allDraftSet() {
+      return draftTargets.every(v => typeof v === 'number' && v >= 1 && v <= 20);
+    }
+
+    function renderDraftDice() {
+      diceEls.forEach((d, idx) => {
+        const val = draftTargets[idx];
+        d.classList.remove('odd', 'even', 'rolling');
+        if (val == null) {
+          d.textContent = '-';
+          d.setAttribute('aria-label', 'Target ' + (idx + 1) + ', not set — tap to choose');
+        } else {
+          d.textContent = val;
+          d.classList.add(val % 2 === 0 ? 'even' : 'odd');
+          d.setAttribute('aria-label', 'Target ' + (idx + 1) + ', value ' + val + (targetsLocked ? '' : ' — tap to change'));
+        }
+        d.classList.toggle('selectable', !targetsLocked);
+        d.disabled = targetsLocked || rolling;
+      });
+      lockBtn.disabled = targetsLocked || rolling || !allDraftSet();
+      rollBtn.disabled = targetsLocked || rolling;
+    }
+
+    function openDiePicker(dieIndex) {
+      if (targetsLocked || rolling) return;
+
+      const current = draftTargets[dieIndex];
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Choose target ' + (dieIndex + 1));
+
+      let numsHtml = '<div class="die-picker-grid" role="group" aria-label="D20 values">';
+      for (let n = 1; n <= 20; n++) {
+        const parity = n % 2 === 0 ? 'even' : 'odd';
+        const selected = current === n ? ' is-selected' : '';
+        numsHtml +=
+          '<button type="button" class="die-picker-num ' + parity + selected + '" data-val="' + n + '"' +
+          ' aria-pressed="' + (current === n ? 'true' : 'false') + '">' + n + '</button>';
+      }
+      numsHtml += '</div>';
+
+      overlay.innerHTML =
+        '<div class="hm-dialog">' +
+          '<div class="hm-title">Choose Target #' + (dieIndex + 1) + '</div>' +
+          '<div class="hm-subtitle">Pick a number from 1 to 20</div>' +
+          numsHtml +
+          '<div class="hm-buttons">' +
+            '<button type="button" class="hm-btn hm-btn-cancel">Cancel</button>' +
+          '</div>' +
+        '</div>';
+
+      function close() { overlay.remove(); }
+
+      overlay.querySelector('.die-picker-grid').addEventListener('click', e => {
+        const btn = e.target.closest('.die-picker-num');
+        if (!btn) return;
+        const val = parseInt(btn.dataset.val, 10);
+        if (Number.isNaN(val)) return;
+        draftTargets[dieIndex] = val;
+        close();
+        renderDraftDice();
+      });
+
+      overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+      document.body.appendChild(overlay);
+      const focusBtn = overlay.querySelector('.die-picker-num.is-selected') || overlay.querySelector('.die-picker-num');
+      if (focusBtn) focusBtn.focus();
+    }
+
+    diceEls.forEach((d, idx) => {
+      d.addEventListener('click', () => openDiePicker(idx));
+    });
+
     async function performRoll() {
-      rollBtn.disabled = true;
+      if (targetsLocked || rolling) return;
+      rolling = true;
+      renderDraftDice();
 
       diceEls.forEach(d => {
         d.classList.add('rolling');
@@ -883,33 +1081,304 @@
         await sleep(50);
       }
 
-      compState.targets = [];
-      for (let i = 0; i < 9; i++) compState.targets.push(rollD20());
-
-      diceEls.forEach((d, idx) => {
-        d.classList.remove('rolling');
-        const val = compState.targets[idx];
-        d.textContent = val;
-        d.classList.add(val % 2 === 0 ? 'even' : 'odd');
-      });
+      for (let i = 0; i < 9; i++) draftTargets[i] = rollD20();
 
       DaggerDieAudio.stopDiceRoll();
+      rolling = false;
+      renderDraftDice();
+      lockBtn.focus();
+    }
+
+    function lockTargets() {
+      if (targetsLocked || rolling || !allDraftSet()) return;
+
+      compState.targets = draftTargets.slice();
+      targetsLocked = true;
+      rolling = false;
+      showLockedCompetitionUI();
+      saveCompState();
+      regInput.focus();
+    }
+
+    function showLockedCompetitionUI() {
+      for (let i = 0; i < 9; i++) draftTargets[i] = compState.targets[i];
+      renderDraftDice();
 
       rollBtn.textContent = 'Targets Locked';
+      lockBtn.textContent = 'Targets Locked';
+      lockBtn.disabled = true;
+      rollBtn.disabled = true;
+      if (diceHint) diceHint.textContent = 'Targets locked for this competition';
 
       broadcastProjectorState();
       broadcastLeaderboardState();
 
       highlightTargets();
       document.getElementById('board-area').style.display = '';
-      regPanel.classList.add('visible');
+      if (compState.phase === 'tiebreaker' || compState.finalized) {
+        regPanel.classList.remove('visible');
+      } else {
+        regPanel.classList.add('visible');
+      }
       scorecardPanel.classList.add('visible');
       finalizeWrap.classList.add('visible');
-      buildScorecardHeader();
-      regInput.focus();
+      updateScorecardChrome();
+      renderScorecard();
+      updateBackupStatus();
     }
 
     rollBtn.addEventListener('click', performRoll);
+    lockBtn.addEventListener('click', lockTargets);
+    renderDraftDice();
+
+    // ─── Competition backup / restore ───
+    const COMP_STATE_KEY = 'daggerdie_compState';
+    const backupStatusEl = document.getElementById('backup-status');
+    const exportBackupBtn = document.getElementById('export-backup-btn');
+    const restoreBackupBtn = document.getElementById('restore-backup-btn');
+    const restoreFileInput = document.getElementById('restore-file-input');
+
+    function serializeCompState() {
+      return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        targets: compState.targets.slice(),
+        players: compState.players.map(p => ({
+          name: p.name,
+          hits: Array.isArray(p.hits) ? p.hits.slice() : new Array(9).fill(null),
+          locked: !!p.locked,
+          tbActive: !!p.tbActive,
+          tbHits: Array.isArray(p.tbHits) ? p.tbHits.slice() : null,
+          tbLocked: !!p.tbLocked,
+          tbHistory: Array.isArray(p.tbHistory) ? p.tbHistory.slice() : []
+        })),
+        finalized: !!compState.finalized,
+        phase: compState.phase === 'tiebreaker' ? 'tiebreaker' : 'main',
+        tbRound: Number(compState.tbRound) || 0
+      };
+    }
+
+    function saveCompState() {
+      if (!compState.targets.length) return;
+      try {
+        const payload = serializeCompState();
+        localStorage.setItem(COMP_STATE_KEY, JSON.stringify(payload));
+        updateBackupStatus(payload.savedAt);
+      } catch (e) {
+        if (backupStatusEl) {
+          backupStatusEl.textContent = 'Auto-save failed — export a backup file';
+          backupStatusEl.classList.remove('has-save');
+        }
+      }
+    }
+
+    function clearCompStateSave() {
+      try { localStorage.removeItem(COMP_STATE_KEY); } catch (e) {}
+      updateBackupStatus(null);
+    }
+
+    function readSavedCompState() {
+      try {
+        const raw = localStorage.getItem(COMP_STATE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function formatBackupTime(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function updateBackupStatus(savedAt) {
+      if (!backupStatusEl) return;
+      const iso = savedAt || (readSavedCompState() || {}).savedAt;
+      if (iso && compState.targets.length) {
+        backupStatusEl.textContent = 'Auto-saved ' + formatBackupTime(iso);
+        backupStatusEl.classList.add('has-save');
+      } else if (compState.targets.length) {
+        backupStatusEl.textContent = 'Not saved yet';
+        backupStatusEl.classList.remove('has-save');
+      } else {
+        backupStatusEl.textContent = '';
+        backupStatusEl.classList.remove('has-save');
+      }
+    }
+
+    function normalizeHitCell(v) {
+      if (v === true || v === false) return v;
+      return null;
+    }
+
+    function validateCompSnapshot(data) {
+      if (!data || typeof data !== 'object') return 'Backup file is empty or invalid.';
+      if (!Array.isArray(data.targets) || data.targets.length !== 9) {
+        return 'Backup must include 9 target numbers.';
+      }
+      if (!data.targets.every(t => typeof t === 'number' && t >= 1 && t <= 20)) {
+        return 'Target numbers must be between 1 and 20.';
+      }
+      if (!Array.isArray(data.players)) return 'Backup is missing player list.';
+      for (let i = 0; i < data.players.length; i++) {
+        const p = data.players[i];
+        if (!p || typeof p.name !== 'string' || !p.name.trim()) {
+          return 'Player ' + (i + 1) + ' is missing a name.';
+        }
+        if (!Array.isArray(p.hits) || p.hits.length !== 9) {
+          return 'Player "' + p.name + '" has invalid hit data.';
+        }
+      }
+      return null;
+    }
+
+    function applyCompSnapshot(data) {
+      const err = validateCompSnapshot(data);
+      if (err) throw new Error(err);
+
+      compState.targets = data.targets.map(Number);
+      compState.finalized = !!data.finalized;
+      compState.phase = data.phase === 'tiebreaker' ? 'tiebreaker' : 'main';
+      compState.tbRound = Number(data.tbRound) || 0;
+      compState.players = data.players.map(p => ({
+        name: String(p.name).trim().slice(0, 30),
+        hits: p.hits.map(normalizeHitCell),
+        locked: !!p.locked || !!data.finalized,
+        tbActive: !!p.tbActive,
+        tbHits: Array.isArray(p.tbHits) && p.tbHits.length === 9
+          ? p.tbHits.map(normalizeHitCell)
+          : null,
+        tbLocked: !!p.tbLocked,
+        tbHistory: Array.isArray(p.tbHistory)
+          ? p.tbHistory.filter(n => typeof n === 'number')
+          : []
+      }));
+
+      targetsLocked = true;
+      rolling = false;
+      showLockedCompetitionUI();
+
+      if (compState.finalized) {
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Game Finalized';
+      } else if (compState.phase === 'tiebreaker') {
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Tiebreaker in Progress…';
+      } else {
+        finalizeBtn.disabled = false;
+        finalizeBtn.textContent = 'Finalize Game';
+      }
+
+      saveCompState();
+    }
+
+    function exportCompBackup() {
+      if (!compState.targets.length) {
+        const saved = readSavedCompState();
+        if (!saved) {
+          alert('Nothing to export yet. Lock targets first, or restore a backup.');
+          return;
+        }
+        downloadCompBackup(saved);
+        return;
+      }
+      downloadCompBackup(serializeCompState());
+    }
+
+    function downloadCompBackup(payload) {
+      const stamp = (payload.savedAt || new Date().toISOString()).replace(/[:.]/g, '-').slice(0, 19);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'daggerdie-comp-backup-' + stamp + '.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 500);
+    }
+
+    function promptRestoreFile() {
+      if (compState.targets.length && compState.players.length && !compState.finalized) {
+        if (!confirm('Restore will replace the current competition (targets, players, and scores). Continue?')) {
+          return;
+        }
+      }
+      restoreFileInput.value = '';
+      restoreFileInput.click();
+    }
+
+    function restoreCompBackupFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result || ''));
+          applyCompSnapshot(data);
+          alert('Competition restored' +
+            (data.players && data.players.length ? ' — ' + data.players.length + ' player(s).' : '.'));
+        } catch (e) {
+          alert('Could not restore backup: ' + (e.message || 'invalid file'));
+        }
+      };
+      reader.onerror = () => alert('Could not read the backup file.');
+      reader.readAsText(file);
+    }
+
+    function offerResumeSavedCompetition() {
+      if (compState.targets.length) return;
+      const saved = readSavedCompState();
+      if (!saved) return;
+      const err = validateCompSnapshot(saved);
+      if (err) {
+        clearCompStateSave();
+        return;
+      }
+
+      const when = formatBackupTime(saved.savedAt) || 'earlier';
+      const count = Array.isArray(saved.players) ? saved.players.length : 0;
+      const phaseNote = saved.finalized
+        ? ' (finalized)'
+        : (saved.phase === 'tiebreaker' ? ' (tiebreaker)' : '');
+      const msg = 'A saved competition was found from ' + when +
+        ' with ' + count + ' player(s)' + phaseNote + '.\n\n' +
+        'Resume it now?\n\n' +
+        'OK = Resume\nCancel = Discard saved data and start fresh';
+      if (confirm(msg)) {
+        try {
+          applyCompSnapshot(saved);
+        } catch (e) {
+          alert('Could not resume saved competition: ' + (e.message || 'unknown error'));
+          clearCompStateSave();
+        }
+      } else {
+        clearCompStateSave();
+      }
+    }
+
+    exportBackupBtn.addEventListener('click', exportCompBackup);
+    restoreBackupBtn.addEventListener('click', promptRestoreFile);
+    restoreFileInput.addEventListener('change', () => {
+      const file = restoreFileInput.files && restoreFileInput.files[0];
+      restoreCompBackupFromFile(file);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) saveCompState();
+    });
+    setInterval(() => { if (targetsLocked && !rolling) saveCompState(); }, 30000);
 
     const BOARD_MODE_KEY = 'daggerdie_boardMode';
     const boardToggleBtn = document.getElementById('board-toggle-btn');
@@ -957,14 +1426,25 @@
     }
 
     function buildScorecardHeader() {
-      let html = '<tr><th>Player</th>';
-      compState.targets.forEach(t => { html += '<th>' + t + '</th>'; });
-      if (compState.phase === 'tiebreaker') {
-        html += '<th>Hits</th><th>Main</th><th>TB</th></tr>';
-      } else {
-        html += '<th>Hits</th><th>Total</th></tr>';
-      }
-      scorecardHead.innerHTML = html;
+      const trailing = compState.phase === 'tiebreaker'
+        ? ['Hits', 'Main', 'TB']
+        : ['Hits', 'Total'];
+
+      let rollRow = '<tr class="scorecard-roll-row"><th class="th-roll-spacer"></th>';
+      compState.targets.forEach((_, i) => {
+        rollRow += '<th class="th-roll-num">' + (i + 1) + '</th>';
+      });
+      trailing.forEach(() => { rollRow += '<th class="th-roll-spacer"></th>'; });
+      rollRow += '</tr>';
+
+      let targetRow = '<tr class="scorecard-target-row"><th class="th-label">Player</th>';
+      compState.targets.forEach(t => {
+        targetRow += '<th class="th-target-val">' + t + '</th>';
+      });
+      trailing.forEach(label => { targetRow += '<th class="th-label">' + label + '</th>'; });
+      targetRow += '</tr>';
+
+      scorecardHead.innerHTML = rollRow + targetRow;
     }
 
     joinBtn.addEventListener('click', addPlayer);
@@ -995,6 +1475,7 @@
       regInput.focus();
       renderScorecard();
       broadcastLeaderboardState();
+      saveCompState();
     }
 
     function getHitsTotal(hits) {
@@ -1281,6 +1762,7 @@
           close();
           renderScorecard();
           broadcastLeaderboardState();
+          saveCompState();
           if (!wasLocked) checkTiebreakerRoundComplete();
         } else {
           player.hits = result;
@@ -1289,6 +1771,7 @@
           renderScorecard();
           broadcastProjectorState();
           broadcastLeaderboardState();
+          saveCompState();
         }
       });
 
@@ -1337,6 +1820,7 @@
       updateScorecardChrome();
       renderScorecard();
       broadcastLeaderboardState();
+      saveCompState();
     }
 
     function finishGame() {
@@ -1348,6 +1832,7 @@
       updateScorecardChrome();
       renderScorecard();
       broadcastLeaderboardState();
+      saveCompState();
 
       const reportData = {
         targets: compState.targets,
@@ -1401,6 +1886,7 @@
     }
 
     window.addEventListener('beforeunload', () => {
+      saveCompState();
       try { if (projectorChannel) { projectorChannel.postMessage({ type: 'clear' }); projectorChannel.close(); } } catch (e) {}
       try { if (leaderboardChannel) { leaderboardChannel.close(); } } catch (e) {}
     });
@@ -1411,6 +1897,8 @@
       const resourcesModal = document.getElementById('resources-modal');
       const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
       const resourcesLeaderboardBtn = document.getElementById('resources-leaderboard-btn');
+      const resourcesExportBackupBtn = document.getElementById('resources-export-backup-btn');
+      const resourcesRestoreBackupBtn = document.getElementById('resources-restore-backup-btn');
       const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
 
       function openResourcesModal() {
@@ -1438,6 +1926,14 @@
         setTimeout(broadcastLeaderboardState, 800);
       });
 
+      resourcesExportBackupBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        exportCompBackup();
+      });
+      resourcesRestoreBackupBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        promptRestoreFile();
+      });
       const stencilChoiceModal = document.getElementById('stencil-choice-modal');
       const stencilPrintBtn = document.getElementById('stencil-print-btn');
       const stencilCutBtn = document.getElementById('stencil-cut-btn');
@@ -1478,6 +1974,8 @@
         });
       });
     })();
+
+    offerResumeSavedCompetition();
   </script>
   <script src="m3-readme-modal.js"></script>
 </body>
