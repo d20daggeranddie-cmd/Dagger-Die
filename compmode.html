@@ -1,1 +1,1982 @@
-ROLL4initiative!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagger & Die - Competition Mode</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://daggeranddie.us/compmode.html">
+<meta property="og:title" content="Dagger & Die - Competition Mode">
+<meta property="og:description" content="Competition Mode — Admin rolls, players throw for score.">
+<meta name="description" content="Competition Mode — Admin rolls, players throw for score.">
+<meta property="og:image" content="https://daggeranddie.us/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dagger & Die - Competition Mode">
+<meta name="twitter:description" content="Competition Mode — Admin rolls, players throw for score.">
+<meta name="twitter:image" content="https://daggeranddie.us/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NDL380JPBQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NDL380JPBQ');
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0c18;
+    min-height: 100vh;
+    color: #fff;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── RPG background layers ── */
+  .idx-bg-base { position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 120% 80% at 50% 110%, #1a1040 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 20% 80%, #0d1a3a 0%, transparent 50%),
+      radial-gradient(ellipse 80% 60% at 80% 80%, #1a0d2e 0%, transparent 50%),
+      radial-gradient(ellipse 100% 50% at 50% 0%, #0f1628 0%, transparent 60%),
+      linear-gradient(180deg, #080b16 0%, #0e1225 40%, #141833 70%, #1a1040 100%);
+  }
+  .idx-bg-texture { position: fixed; inset: 0; z-index: 1; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+  .idx-bg-vignette { position: fixed; inset: 0; z-index: 2;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(5,5,15,0.7) 100%);
+    pointer-events: none;
+  }
+  .idx-bg-grid { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.02;
+    background-image: linear-gradient(rgba(150,160,200,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(150,160,200,0.3) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .idx-bg-fog { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+  .idx-bg-fog-layer { position: absolute; width: 200%; height: 100%; top: 0; left: -50%;
+    background: radial-gradient(ellipse 300px 80px at 20% 70%, rgba(100,120,180,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 100px at 60% 80%, rgba(80,60,140,0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 250px 60px at 80% 60%, rgba(60,80,160,0.04) 0%, transparent 70%);
+    animation: idxFogDrift 40s ease-in-out infinite alternate;
+  }
+  .idx-bg-fog-layer:nth-child(2) {
+    background: radial-gradient(ellipse 350px 90px at 30% 85%, rgba(70,50,120,0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 280px 70px at 70% 75%, rgba(90,100,170,0.04) 0%, transparent 70%);
+    animation: idxFogDrift2 55s ease-in-out infinite alternate; opacity: 0.8;
+  }
+  @keyframes idxFogDrift { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(5%) translateY(-2%); } }
+  @keyframes idxFogDrift2 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(-4%) translateY(1%); } }
+  .idx-bg-particles { position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+  .idx-bg-particle { position: absolute; border-radius: 50%; opacity: 0; animation: idxFloatUp linear infinite; }
+  @keyframes idxFloatUp { 0% { opacity: 0; transform: translateY(0) translateX(0) scale(1); } 10% { opacity: 1; } 90% { opacity: 0.6; } 100% { opacity: 0; transform: translateY(-100vh) translateX(40px) scale(0.3); } }
+  .idx-bg-runes { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+  .idx-bg-rune { position: absolute; font-family: serif; opacity: 0; animation: idxRuneFloat 12s ease-in-out infinite; filter: blur(0.5px); text-shadow: 0 0 8px currentColor, 0 0 20px currentColor; }
+  @keyframes idxRuneFloat { 0% { opacity: 0; transform: translateY(20px) rotate(0deg) scale(0.8); } 15% { opacity: 0.15; } 50% { opacity: 0.25; transform: translateY(-10px) rotate(5deg) scale(1); } 85% { opacity: 0.12; } 100% { opacity: 0; transform: translateY(-30px) rotate(-3deg) scale(0.9); } }
+  .idx-bg-corner { position: fixed; z-index: 6; width: 120px; height: 120px; pointer-events: none; opacity: 0.12; }
+  .idx-bg-corner svg { width: 100%; height: 100%; }
+  .idx-bg-corner-tl { top: 12px; left: 12px; }
+  .idx-bg-corner-tr { top: 12px; right: 12px; transform: scaleX(-1); }
+  .idx-bg-corner-bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+  .idx-bg-corner-br { bottom: 12px; right: 12px; transform: scale(-1, -1); }
+  .idx-bg-ambient { position: fixed; z-index: 3; pointer-events: none; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(180,140,60,0.03) 0%, transparent 70%); top: 50%; left: 50%;
+    transform: translate(-50%, -50%); animation: idxAmbientPulse 8s ease-in-out infinite;
+  }
+  @keyframes idxAmbientPulse { 0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } }
+  .idx-bg-torch { position: fixed; z-index: 3; pointer-events: none; width: 300px; height: 400px; border-radius: 50%; animation: idxTorchFlicker 3s ease-in-out infinite alternate; }
+  .idx-bg-torch-left { left: -100px; top: 30%; background: radial-gradient(ellipse, rgba(200,120,40,0.04) 0%, transparent 70%); animation-duration: 2.8s; }
+  .idx-bg-torch-right { right: -100px; top: 25%; background: radial-gradient(ellipse, rgba(200,120,40,0.035) 0%, transparent 70%); animation-duration: 3.2s; animation-delay: 0.5s; }
+  @keyframes idxTorchFlicker { 0% { opacity: 0.6; transform: scale(1); } 25% { opacity: 1; transform: scale(1.05); } 50% { opacity: 0.7; transform: scale(0.98); } 75% { opacity: 0.9; transform: scale(1.02); } 100% { opacity: 0.65; transform: scale(1); } }
+  #idxParticleCanvas { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+
+  /* ─── Main content ─── */
+  .main-content { position: relative; z-index: 10; min-height: 100vh; }
+  .container { position: relative; max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+
+  .back-wrap { position: absolute; top: 20px; left: 20px; }
+  .back-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: rgba(255,255,255,0.6);
+    transition: color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+  .back-btn:hover { color: #feca57; transform: scale(1.15); }
+  .back-btn:focus { outline: 2px solid #feca57; outline-offset: 4px; border-radius: 4px; }
+  .back-btn svg { width: 28px; height: 28px; }
+
+  .resources-wrap { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; align-items: center; }
+  .sound-toggle-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: rgba(255,255,255,0.75);
+    transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  }
+  .sound-toggle-btn:hover { color: #48dbfb; transform: scale(1.1); }
+  .sound-toggle-btn:focus { outline: 2px solid #48dbfb; outline-offset: 4px; border-radius: 4px; }
+  .sound-toggle-btn svg { width: 26px; height: 26px; }
+  .sound-toggle-btn .icon-muted { display: none; }
+  .sound-toggle-btn.sound-off .icon-on { display: none; }
+  .sound-toggle-btn.sound-off .icon-muted { display: block; }
+  .sound-toggle-btn.sound-off { opacity: 0.5; }
+  .resources-star-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    padding: 0; border: none; background: transparent;
+    cursor: pointer; color: #f0c040;
+    transition: transform 0.2s ease;
+  }
+  .resources-star-btn:hover { transform: scale(1.15); }
+  .resources-star-btn:focus { outline: 2px solid #f0c040; outline-offset: 4px; border-radius: 4px; }
+  .resources-star-btn svg {
+    width: 36px; height: 36px;
+    filter: drop-shadow(0 0 8px rgba(240, 192, 64, 0.5));
+    animation: star-twinkle 2s ease-in-out infinite;
+  }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 8px rgba(240, 192, 64, 0.5)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(240, 192, 64, 0.9)); }
+  }
+  .resources-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .resources-modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
+  .resources-modal {
+    background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
+    padding: 28px; min-width: 280px; max-width: 90vw;
+    transform: scale(0.95); transition: transform 0.3s ease;
+  }
+  .resources-modal-overlay.open .resources-modal { transform: scale(1); }
+  .resources-modal h3 { font-size: 1.25rem; color: #feca57; margin-bottom: 20px; text-align: center; }
+  .resources-modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .resources-modal-actions button {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 14px 18px;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95);
+    font-size: 0.95rem; text-align: left; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .resources-modal-actions button:hover { background: rgba(255,255,255,0.15); border-color: rgba(240, 192, 64, 0.4); }
+  .resources-modal-actions .icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.9; }
+
+  header { text-align: center; margin-bottom: 12px; }
+  h1 { font-family: 'Cinzel Decorative', 'Times New Roman', serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 10px; color: #d4a84b; text-shadow: 2px 2px 0 #5c3d1e, 4px 4px 0 rgba(0,0,0,0.3), 0 0 20px rgba(212, 168, 75, 0.3); letter-spacing: 4px; }
+  .tagline { font-family: 'Cinzel', Georgia, serif; font-size: 1rem; letter-spacing: 2px; opacity: 0.9; color: #b8a070; }
+  .mode-subtitle {
+    text-align: center; font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.3rem; color: #feca57; letter-spacing: 2px; margin-bottom: 30px;
+    text-shadow: 0 0 12px rgba(254, 202, 87, 0.3);
+  }
+
+  .section-title { text-align: center; font-size: 1.2rem; margin-bottom: 16px; color: #feca57; font-weight: 600; }
+  .dice-grid {
+    display: flex; flex-wrap: wrap;
+    gap: 8px; justify-content: center; margin-bottom: 16px;
+  }
+  .die-slot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .die-slot-num {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em;
+    color: rgba(254, 202, 87, 0.9); line-height: 1;
+  }
+  .die {
+    width: 52px; height: 52px;
+    background: linear-gradient(145deg, #2d3436, #1e272e);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: bold; font-family: inherit;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
+    padding: 0; margin: 0; appearance: none; -webkit-appearance: none;
+  }
+  .die:disabled { cursor: default; opacity: 1; }
+  .die.selectable {
+    cursor: pointer;
+  }
+  .die.selectable:hover {
+    border-color: #feca57; color: #feca57;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(254, 202, 87, 0.25);
+  }
+  .die.selectable:focus {
+    outline: 2px solid #feca57; outline-offset: 3px;
+  }
+  .die.rolling { animation: roll 0.1s infinite; pointer-events: none; }
+  .die.odd { color: #ff6b6b; border-color: #ff6b6b; }
+  .die.even { color: #48dbfb; border-color: #48dbfb; }
+  .dice-hint {
+    text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.55);
+    margin: -6px 0 14px;
+  }
+  .dice-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .btn-secondary {
+    background: linear-gradient(45deg, #feca57, #d4a84b); color: #1a1040;
+  }
+  .btn-secondary:hover { box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4); transform: translateY(-2px); }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .die-picker-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    margin: 8px 0 16px;
+  }
+  .die-picker-num {
+    aspect-ratio: 1; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9);
+    font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .die-picker-num:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+  .die-picker-num.odd { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.55); }
+  .die-picker-num.even { color: #48dbfb; border-color: rgba(72, 219, 251, 0.55); }
+  .die-picker-num.is-selected {
+    background: rgba(254, 202, 87, 0.2); border-color: #feca57; color: #feca57;
+    box-shadow: 0 0 12px rgba(254, 202, 87, 0.25);
+  }
+  @keyframes roll {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(10deg) scale(1.1); }
+    50% { transform: rotate(0deg) scale(1); }
+    75% { transform: rotate(-10deg) scale(1.1); }
+  }
+  .btn {
+    display: inline-block; padding: 12px 36px; border: none; border-radius: 10px;
+    font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s;
+    color: #fff; text-align: center;
+  }
+  .btn-primary { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+  .btn-primary:hover { box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4); transform: translateY(-2px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-finalize { background: linear-gradient(45deg, #feca57, #d4a84b); color: #1a1040; }
+  .btn-finalize:hover { box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4); transform: translateY(-2px); }
+  .btn-center { display: block; margin: 0 auto; }
+
+  /* ─── Target Board ─── */
+  .target-panel {
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 24px;
+    margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .targets-title-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin-bottom: 15px;
+  }
+  .targets-title-row .section-title { margin-bottom: 0; }
+
+  .btn-board-toggle {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; color: rgba(255,255,255,0.8);
+    font-size: 0.75rem; padding: 4px 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-board-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .btn-board-toggle svg { opacity: 0.7; }
+
+  .targets-container {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; width: 100%;
+  }
+  #dual-boards .target-wrapper {
+    flex: 1 1 0; min-width: 0; width: auto; max-width: none;
+  }
+  #dual-boards .target-image-container {
+    padding: 5px; box-sizing: border-box;
+  }
+  #dual-boards .target-board-inline {
+    top: 5px; left: 5px;
+    width: calc(100% - 10px); height: calc(100% - 10px);
+  }
+  .target-wrapper { position: relative; width: 180px; }
+  .target-label {
+    text-align: center; margin-bottom: 5px;
+    font-weight: bold; font-size: 0.85rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  }
+  .target-image-container {
+    position: relative; width: 100%; aspect-ratio: 400 / 460;
+    border-radius: 16px; overflow: hidden;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+  }
+  .target-image-container svg { width: 100%; height: 100%; display: block; position: absolute; top: 0; left: 0; }
+
+  .combined-board-wrapper { display: flex; justify-content: center; }
+  .combined-target-container { max-width: 320px; }
+
+  .highlight-zone { pointer-events: none; transition: all 0.3s; }
+  .highlight-zone .face-shape { fill: #2a1f3d; stroke: #8a7fa8; stroke-width: 1.5; stroke-linejoin: round; }
+  .highlight-zone .face-shape.d20-face-center { fill: #3d2a5c; }
+  .highlight-zone .face-shape.d20-face-outer { fill: #1e1630; }
+  .highlight-zone.active .face-shape {
+    fill: rgba(251, 191, 36, 0.35); stroke: #fbbf24; stroke-width: 2.5;
+    filter: url(#glow-comp); animation: pulse 1.5s infinite;
+  }
+  .highlight-zone text,
+  .d20-num {
+    font-family: serif; fill: #b0a8c8; pointer-events: none; transition: fill 0.3s ease;
+    text-anchor: middle; dominant-baseline: central;
+  }
+  .highlight-zone text.d20-num-center,
+  .d20-num-center { fill: #c8bfe0; font-weight: bold; }
+  .highlight-zone.active text { fill: #fbbf24; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* ─── Registration ─── */
+  .reg-panel {
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 24px;
+    margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15);
+    display: none;
+  }
+  .reg-panel.visible { display: block; }
+  .reg-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .reg-input {
+    padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;
+    min-width: 200px; transition: border-color 0.2s;
+  }
+  .reg-input:focus { outline: none; border-color: #feca57; }
+  .reg-input::placeholder { color: rgba(255,255,255,0.4); }
+  .reg-error { text-align: center; color: #e74c3c; font-size: 0.85rem; min-height: 1.4em; margin-top: 6px; }
+
+  /* ─── Scorecard ─── */
+  .scorecard-panel {
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 24px;
+    margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15);
+    display: none; overflow-x: auto;
+  }
+  .scorecard-panel.visible { display: block; }
+  .scorecard-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .scorecard-table th, .scorecard-table td {
+    padding: 10px 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .scorecard-table thead th {
+    font-family: 'Cinzel', Georgia, serif; font-size: 0.85rem;
+    color: #feca57; font-weight: 600; position: sticky; top: 0;
+    background: rgba(10, 12, 24, 0.95); z-index: 2;
+    border-bottom: 2px solid rgba(254, 202, 87, 0.3);
+  }
+  .scorecard-table thead tr.scorecard-roll-row th {
+    position: sticky; top: 0; z-index: 3;
+    background: transparent; border-bottom: none;
+    padding-top: 0; padding-bottom: 6px;
+    vertical-align: bottom;
+  }
+  .scorecard-table thead tr.scorecard-target-row th {
+    top: 1.6rem;
+  }
+  .scorecard-table thead th:first-child,
+  .scorecard-table thead th.th-label { text-align: left; }
+  .scorecard-table thead th.th-roll-num {
+    font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 0.04em; color: rgba(254, 202, 87, 0.85);
+    line-height: 1;
+  }
+  .scorecard-table thead th.th-roll-spacer {
+    color: transparent; user-select: none;
+  }
+  .scorecard-table thead th.th-target-val {
+    padding-top: 8px; padding-bottom: 8px;
+    font-size: 1.05rem; font-weight: 700; color: #feca57;
+  }
+  .scorecard-table tbody td:first-child {
+    text-align: left; font-weight: 600; color: rgba(255,255,255,0.95);
+    white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+  }
+  .scorecard-table tr.player-row {
+    cursor: pointer; transition: background 0.15s;
+  }
+  .scorecard-table tr.player-row:hover {
+    background: rgba(254, 202, 87, 0.08);
+  }
+  .scorecard-table tr.player-row.row-locked:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  .scorecard-table tr.player-row.row-finalized {
+    cursor: default;
+  }
+  .scorecard-table tr.player-row.row-finalized:hover {
+    background: transparent;
+  }
+  .scorecard-table .player-name-cell {
+    position: relative;
+  }
+  .scorecard-table .player-name-cell .score-hint {
+    display: block; font-size: 0.7rem; font-weight: 400;
+    color: rgba(254, 202, 87, 0.65); margin-top: 2px;
+  }
+  .scorecard-table .hit-cell {
+    user-select: none;
+    border-radius: 8px; transition: all 0.2s; min-width: 44px;
+    position: relative;
+  }
+  .scorecard-table .hit-cell.pending { color: rgba(255,255,255,0.18); }
+  .scorecard-table .hit-cell.pending svg { vertical-align: middle; }
+  .scorecard-table .hit-cell.hit {
+    background: rgba(46, 204, 113, 0.25); color: #2ecc71; font-weight: bold;
+    box-shadow: inset 0 0 8px rgba(46, 204, 113, 0.2);
+  }
+  .scorecard-table .hit-cell.miss {
+    background: rgba(231, 76, 60, 0.2); color: #e74c3c; font-weight: bold;
+    box-shadow: inset 0 0 8px rgba(231, 76, 60, 0.15);
+  }
+  .scorecard-table tr.row-locked .player-name-cell {
+    padding-left: 24px;
+  }
+  .scorecard-table tr.row-locked .player-name-cell::before {
+    content: '\1F512'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+    font-size: 0.7rem; opacity: 0.5;
+  }
+
+  /* Scoring modal */
+  .hm-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .hm-dialog {
+    background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
+    padding: 20px 22px 22px; min-width: min(340px, 100%); max-width: 400px; width: 100%;
+    text-align: center;
+  }
+  .hm-title { font-family: 'Cinzel', Georgia, serif; font-size: 1.1rem; color: #feca57; margin-bottom: 2px; }
+  .hm-subtitle { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
+  .hm-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hm-btn {
+    padding: 12px 28px; border: none; border-radius: 10px; font-size: 1rem;
+    font-weight: bold; cursor: pointer; transition: all 0.2s;
+  }
+  .hm-btn-hit { background: linear-gradient(45deg, #2ecc71, #27ae60); color: #fff; }
+  .hm-btn-hit:hover { box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
+  .hm-btn-cancel { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); }
+  .hm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
+  .hm-summary { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin: 12px 0 14px; line-height: 1.5; }
+  .hm-summary strong { color: #feca57; }
+  .score-throws {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 0;
+  }
+  .score-throw-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.15s, border-color 0.15s; cursor: pointer;
+  }
+  .score-throw-row:hover { border-color: rgba(254, 202, 87, 0.35); }
+  .score-throw-row.is-hit {
+    background: rgba(46, 204, 113, 0.12); border-color: rgba(46, 204, 113, 0.35);
+  }
+  .score-throw-row.is-miss {
+    background: rgba(231, 76, 60, 0.12); border-color: rgba(231, 76, 60, 0.35);
+  }
+  .score-throw-num {
+    flex: 0 0 auto; min-width: 1.4rem;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+    color: #feca57; font-family: 'Cinzel', Georgia, serif;
+  }
+  .score-throw-target {
+    flex: 1 1 auto; text-align: left;
+    font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1;
+  }
+  .score-throw-toggle {
+    display: inline-flex; flex: 0 0 auto;
+    border-radius: 7px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .score-throw-opt {
+    padding: 6px 10px; border: none; min-width: 46px;
+    font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35);
+    font-family: inherit; transition: all 0.12s;
+  }
+  .score-throw-opt:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .score-throw-opt.is-active[data-val="hit"] {
+    background: rgba(46, 204, 113, 0.35); color: #2ecc71;
+  }
+  .score-throw-opt.is-active[data-val="miss"] {
+    background: rgba(231, 76, 60, 0.35); color: #e74c3c;
+  }
+  .scorecard-table .total-cell {
+    font-weight: bold; font-size: 1.1rem; color: rgba(255,255,255,0.9);
+  }
+  .scorecard-table .total-cell.leader { color: #feca57; text-shadow: 0 0 8px rgba(254, 202, 87, 0.4); }
+  .no-players { text-align: center; color: rgba(255,255,255,0.5); font-style: italic; padding: 20px; }
+
+  .scorecard-table .hits-cell {
+    font-size: 0.9rem; color: rgba(255,255,255,0.7); white-space: nowrap;
+  }
+  .scorecard-table .main-score-cell {
+    font-size: 0.85rem; color: rgba(255,255,255,0.55); white-space: nowrap;
+  }
+  .scorecard-table tr.row-tb td:first-child { color: #feca57; }
+  .scorecard-table tr.row-tb-done td:first-child { color: rgba(255,255,255,0.7); }
+
+  .tb-banner {
+    display: none; text-align: center; padding: 14px 16px; margin-bottom: 16px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, rgba(254,202,87,0.12), rgba(212,168,75,0.12));
+    border: 1px solid rgba(254,202,87,0.35);
+    font-size: 0.95rem; color: rgba(255,255,255,0.9); line-height: 1.5;
+  }
+  .tb-banner.visible { display: block; }
+  .tb-banner strong { color: #feca57; }
+  .tb-banner .tb-hint {
+    display: block; margin-top: 4px;
+    font-size: 0.8rem; color: rgba(255,255,255,0.55);
+  }
+
+  /* ─── Finalize / Backup ─── */
+  .finalize-wrap { text-align: center; margin-bottom: 40px; display: none; }
+  .finalize-wrap.visible { display: block; }
+  .btn-finalize:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .backup-bar {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    margin-top: 16px;
+  }
+  .backup-bar .btn-backup {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; color: rgba(255,255,255,0.85);
+    font-size: 0.8rem; padding: 8px 14px; cursor: pointer; font-family: inherit;
+    transition: all 0.2s;
+  }
+  .backup-bar .btn-backup:hover { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(254,202,87,0.45); }
+  .backup-status {
+    width: 100%; text-align: center; font-size: 0.75rem;
+    color: rgba(255,255,255,0.45); margin-top: 4px; min-height: 1.1em;
+  }
+  .backup-status.has-save { color: rgba(46, 204, 113, 0.85); }
+
+  footer { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+  .m3-logo {
+    position: fixed; bottom: 10px; right: 10px; z-index: 50;
+    width: 36px; height: auto; pointer-events: auto; cursor: pointer;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .mode-subtitle { font-size: 1.05rem; }
+    .die { width: 44px; height: 44px; font-size: 1.25rem; border-radius: 10px; }
+    .dice-actions { gap: 8px; }
+    .dice-actions .btn { padding: 12px 22px; font-size: 0.95rem; }
+    .die-picker-grid { gap: 6px; }
+    .die-picker-num { font-size: 1rem; border-radius: 8px; }
+    .scorecard-table th, .scorecard-table td { padding: 8px 5px; font-size: 0.85rem; }
+    .score-throw-row { padding: 4px 6px; gap: 6px; }
+    .score-throw-target { font-size: 0.98rem; }
+    .score-throw-opt { padding: 5px 8px; min-width: 42px; font-size: 0.68rem; }
+    .hm-dialog { padding: 16px 14px 18px; }
+    .hm-subtitle { font-size: 0.75rem; margin-bottom: 10px; }
+    .hm-summary { margin: 10px 0 12px; font-size: 0.85rem; }
+    .hm-btn { padding: 10px 22px; font-size: 0.95rem; }
+    .m3-logo { width: 28px; bottom: 8px; right: 8px; }
+  }
+</style>
+</head>
+<body>
+  <img src="assets/m3.png" alt="M3" class="m3-logo">
+
+  <!-- RPG background layers -->
+  <div class="idx-bg-base"></div>
+  <div class="idx-bg-texture"></div>
+  <div class="idx-bg-grid"></div>
+  <div class="idx-bg-vignette"></div>
+  <div class="idx-bg-fog">
+    <div class="idx-bg-fog-layer"></div>
+    <div class="idx-bg-fog-layer"></div>
+  </div>
+  <div class="idx-bg-torch idx-bg-torch-left"></div>
+  <div class="idx-bg-torch idx-bg-torch-right"></div>
+  <div class="idx-bg-ambient"></div>
+  <div class="idx-bg-particles" id="idxCssParticles"></div>
+  <div class="idx-bg-runes" id="idxRuneContainer"></div>
+  <canvas id="idxParticleCanvas"></canvas>
+  <div class="idx-bg-corner idx-bg-corner-tl">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5 L5 40 Q5 45 10 45 L20 45" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <path d="M5 5 L40 5 Q45 5 45 10 L45 20" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <circle cx="5" cy="5" r="3" fill="#b48c3c" opacity="0.6"/>
+      <path d="M12 12 L12 30 M12 12 L30 12" stroke="#b48c3c" stroke-width="0.8" opacity="0.4"/>
+      <path d="M18 5 Q18 18 5 18" stroke="#b48c3c" stroke-width="0.5" opacity="0.3" fill="none"/>
+      <circle cx="20" cy="20" r="1.5" fill="#b48c3c" opacity="0.3"/>
+      <path d="M30 8 L33 5 L36 8 L33 11 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+      <path d="M8 30 L5 33 L8 36 L11 33 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="idx-bg-corner idx-bg-corner-tr">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5 L5 40 Q5 45 10 45 L20 45" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <path d="M5 5 L40 5 Q45 5 45 10 L45 20" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <circle cx="5" cy="5" r="3" fill="#b48c3c" opacity="0.6"/>
+      <path d="M12 12 L12 30 M12 12 L30 12" stroke="#b48c3c" stroke-width="0.8" opacity="0.4"/>
+      <path d="M18 5 Q18 18 5 18" stroke="#b48c3c" stroke-width="0.5" opacity="0.3" fill="none"/>
+      <circle cx="20" cy="20" r="1.5" fill="#b48c3c" opacity="0.3"/>
+      <path d="M30 8 L33 5 L36 8 L33 11 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+      <path d="M8 30 L5 33 L8 36 L11 33 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="idx-bg-corner idx-bg-corner-bl">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5 L5 40 Q5 45 10 45 L20 45" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <path d="M5 5 L40 5 Q45 5 45 10 L45 20" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <circle cx="5" cy="5" r="3" fill="#b48c3c" opacity="0.6"/>
+      <path d="M12 12 L12 30 M12 12 L30 12" stroke="#b48c3c" stroke-width="0.8" opacity="0.4"/>
+      <path d="M18 5 Q18 18 5 18" stroke="#b48c3c" stroke-width="0.5" opacity="0.3" fill="none"/>
+      <circle cx="20" cy="20" r="1.5" fill="#b48c3c" opacity="0.3"/>
+      <path d="M30 8 L33 5 L36 8 L33 11 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+      <path d="M8 30 L5 33 L8 36 L11 33 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="idx-bg-corner idx-bg-corner-br">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5 L5 40 Q5 45 10 45 L20 45" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <path d="M5 5 L40 5 Q45 5 45 10 L45 20" stroke="#b48c3c" stroke-width="1.5" opacity="0.8"/>
+      <circle cx="5" cy="5" r="3" fill="#b48c3c" opacity="0.6"/>
+      <path d="M12 12 L12 30 M12 12 L30 12" stroke="#b48c3c" stroke-width="0.8" opacity="0.4"/>
+      <path d="M18 5 Q18 18 5 18" stroke="#b48c3c" stroke-width="0.5" opacity="0.3" fill="none"/>
+      <circle cx="20" cy="20" r="1.5" fill="#b48c3c" opacity="0.3"/>
+      <path d="M30 8 L33 5 L36 8 L33 11 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+      <path d="M8 30 L5 33 L8 36 L11 33 Z" stroke="#b48c3c" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="container">
+      <div class="back-wrap">
+        <a href="gametype.html" class="back-btn" aria-label="Back to game modes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+      </div>
+
+      <div class="resources-wrap">
+        <button type="button" class="sound-toggle-btn" id="sound-toggle-btn" aria-label="Mute sound effects" aria-pressed="true" title="Sound effects on">
+          <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <button type="button" class="resources-star-btn" id="resources-btn" aria-label="Resources">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Resources modal -->
+      <div class="resources-modal-overlay" id="resources-modal" role="dialog" aria-label="Resources" aria-modal="true" aria-hidden="true">
+        <div class="resources-modal">
+          <h3>Resources</h3>
+          <div class="resources-modal-actions">
+            <button type="button" id="resources-download-stencil-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download target stencil
+            </button>
+            <button type="button" id="resources-projector-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Dynamic Target (Projector)
+            </button>
+            <button type="button" id="resources-leaderboard-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              Live Leaderboard
+            </button>
+            <button type="button" id="resources-export-backup-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export competition backup
+            </button>
+            <button type="button" id="resources-restore-backup-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Restore competition backup
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stencil choice modal (Print vs Cut) -->
+      <div class="resources-modal-overlay" id="stencil-choice-modal" role="dialog" aria-label="Target stencil format" aria-modal="true" aria-hidden="true">
+        <div class="resources-modal">
+          <h3>Target stencil format</h3>
+          <p style="color: rgba(255,255,255,0.85); font-size: 0.9rem; margin-bottom: 16px;">Choose how you want to use the target stencil:</p>
+          <div class="resources-modal-actions">
+            <button type="button" id="stencil-print-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>
+              Print — PDF for printing on paper
+            </button>
+            <button type="button" id="stencil-cut-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 6l7-3 3 7-3 2"/><path d="M9.5 17.5l5-5"/></svg>
+              Cut — SVG for cutting machines
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <header>
+        <h1>Dagger & Die</h1>
+        <p class="tagline">Precision knife throwing in a retro turn based RPG format</p>
+      </header>
+      <p class="mode-subtitle">Competition Mode</p>
+
+      <!-- Targets Panel (dice + board) -->
+      <div class="target-panel" id="target-panel">
+        <h3 class="section-title">Target Dice</h3>
+        <p class="dice-hint" id="dice-hint">Roll all, or tap a die to choose 1–20</p>
+        <div class="dice-grid" id="dice-grid">
+          <div class="die-slot"><span class="die-slot-num">1</span><button type="button" class="die selectable" id="die0" aria-label="Target 1">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">2</span><button type="button" class="die selectable" id="die1" aria-label="Target 2">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">3</span><button type="button" class="die selectable" id="die2" aria-label="Target 3">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">4</span><button type="button" class="die selectable" id="die3" aria-label="Target 4">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">5</span><button type="button" class="die selectable" id="die4" aria-label="Target 5">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">6</span><button type="button" class="die selectable" id="die5" aria-label="Target 6">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">7</span><button type="button" class="die selectable" id="die6" aria-label="Target 7">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">8</span><button type="button" class="die selectable" id="die7" aria-label="Target 8">-</button></div>
+          <div class="die-slot"><span class="die-slot-num">9</span><button type="button" class="die selectable" id="die8" aria-label="Target 9">-</button></div>
+        </div>
+        <div class="dice-actions" id="dice-actions">
+          <button type="button" class="btn btn-primary" id="roll-btn">Roll Targets</button>
+          <button type="button" class="btn btn-secondary" id="lock-btn" disabled>Lock Targets</button>
+        </div>
+
+        <div class="board-area" id="board-area" style="display:none;">
+          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+          <div class="targets-title-row">
+            <h3 class="section-title" id="targets-title">Target Boards</h3>
+            <button type="button" class="btn-board-toggle" id="board-toggle-btn" title="Switch between 1 board and 2 boards">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              <span id="board-toggle-label">1 Board</span>
+            </button>
+          </div>
+
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+          <defs>
+            <filter id="glow-comp" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feFlood flood-color="#fbbf24" flood-opacity="0.8" result="color"/>
+              <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+              <feMerge><feMergeNode in="shadow"/><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- Dual boards (odd + even) -->
+        <div class="targets-container" id="dual-boards">
+          <div class="target-wrapper">
+            <div class="target-label">Odd (1-19)</div>
+            <div class="target-image-container">
+              <svg class="target-board-inline" id="odd-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <rect width="400" height="460" fill="#2d3748" rx="12"/>
+                <g class="highlight-zone" data-number="15"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="25" y="260" font-size="28">15</text></g>
+                <g class="highlight-zone" data-number="9"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="375" y="260" font-size="28">9</text></g>
+                <g class="highlight-zone" data-number="13"><polygon class="face-shape d20-face d20-face-outer" points="66,316 2,346 200,458"/><text class="d20-num" x="89" y="373" font-size="28">13</text></g>
+                <g class="highlight-zone" data-number="19"><polygon class="face-shape d20-face d20-face-outer" points="334,316 200,458 398,346"/><text class="d20-num" x="311" y="373" font-size="28">19</text></g>
+                <g class="highlight-zone" data-number="17"><polygon class="face-shape d20-face" points="200,2 7,119 200,59"/><text class="d20-num" x="136" y="60" font-size="32">17</text></g>
+                <g class="highlight-zone" data-number="11"><polygon class="face-shape d20-face" points="200,2 200,59 393,119"/><text class="d20-num" x="264" y="60" font-size="32">11</text></g>
+                <g class="highlight-zone" data-number="3"><polygon class="face-shape d20-face" points="7,119 66,316 200,59"/><text class="d20-num" x="91" y="165" font-size="32">3</text></g>
+                <g class="highlight-zone" data-number="7"><polygon class="face-shape d20-face" points="200,59 334,316 393,119"/><text class="d20-num" x="309" y="165" font-size="32">7</text></g>
+                <g class="highlight-zone" data-number="5"><polygon class="face-shape d20-face" points="66,316 200,458 334,316"/><text class="d20-num" x="200" y="363" font-size="32">5</text></g>
+                <g class="highlight-zone" data-number="1"><polygon class="face-shape d20-face d20-face-center" points="200,59 66,316 334,316"/><text class="d20-num d20-num-center" x="200" y="230" font-size="48">1</text></g>
+              </svg>
+            </div>
+          </div>
+          <div class="target-wrapper">
+            <div class="target-label">Even (2-20)</div>
+            <div class="target-image-container">
+              <svg class="target-board-inline" id="even-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <rect width="400" height="460" fill="#2d3748" rx="12"/>
+                <g class="highlight-zone" data-number="12"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="25" y="260" font-size="28">12</text></g>
+                <g class="highlight-zone" data-number="14"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="375" y="260" font-size="28">14</text></g>
+                <g class="highlight-zone" data-number="18"><polygon class="face-shape d20-face d20-face-outer" points="66,316 2,346 200,458"/><text class="d20-num" x="89" y="373" font-size="28">18</text></g>
+                <g class="highlight-zone" data-number="16"><polygon class="face-shape d20-face d20-face-outer" points="334,316 200,458 398,346"/><text class="d20-num" x="311" y="373" font-size="28">16</text></g>
+                <g class="highlight-zone" data-number="10"><polygon class="face-shape d20-face" points="200,2 7,119 200,59"/><text class="d20-num" x="136" y="60" font-size="32">10</text></g>
+                <g class="highlight-zone" data-number="20"><polygon class="face-shape d20-face" points="200,2 200,59 393,119"/><text class="d20-num" x="264" y="60" font-size="32">20</text></g>
+                <g class="highlight-zone" data-number="4"><polygon class="face-shape d20-face" points="7,119 66,316 200,59"/><text class="d20-num" x="91" y="165" font-size="32">4</text></g>
+                <g class="highlight-zone" data-number="6"><polygon class="face-shape d20-face" points="200,59 334,316 393,119"/><text class="d20-num" x="309" y="165" font-size="32">6</text></g>
+                <g class="highlight-zone" data-number="8"><polygon class="face-shape d20-face" points="66,316 200,458 334,316"/><text class="d20-num" x="200" y="363" font-size="32">8</text></g>
+                <g class="highlight-zone" data-number="2"><polygon class="face-shape d20-face d20-face-center" points="200,59 66,316 334,316"/><text class="d20-num d20-num-center" x="200" y="230" font-size="48">2</text></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Combined single board -->
+        <div class="combined-board-wrapper" id="combined-board" style="display:none;">
+          <div class="target-image-container combined-target-container">
+            <svg class="target-board-inline" id="combined-overlay" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="460" fill="#2d3748" rx="12"/>
+              <g class="highlight-zone" data-numbers="15,12"><polygon class="face-shape d20-face d20-face-outer" points="7,119 2,346 66,316"/><text class="d20-num" x="17" y="248" font-size="22">15</text><text class="d20-num" x="33" y="272" font-size="22">12</text></g>
+              <g class="highlight-zone" data-numbers="9,14"><polygon class="face-shape d20-face d20-face-outer" points="393,119 334,316 398,346"/><text class="d20-num" x="367" y="248" font-size="22">9</text><text class="d20-num" x="383" y="272" font-size="22">14</text></g>
+              <g class="highlight-zone" data-numbers="13,18"><polygon class="face-shape d20-face d20-face-outer" points="66,316 2,346 200,458"/><text class="d20-num" x="89" y="363" font-size="22">13</text><text class="d20-num" x="89" y="387" font-size="22">18</text></g>
+              <g class="highlight-zone" data-numbers="19,16"><polygon class="face-shape d20-face d20-face-outer" points="334,316 200,458 398,346"/><text class="d20-num" x="311" y="363" font-size="22">19</text><text class="d20-num" x="311" y="387" font-size="22">16</text></g>
+              <g class="highlight-zone" data-numbers="17,10"><polygon class="face-shape d20-face" points="200,2 7,119 200,59"/><text class="d20-num" x="136" y="50" font-size="24">17</text><text class="d20-num" x="136" y="74" font-size="24">10</text></g>
+              <g class="highlight-zone" data-numbers="11,20"><polygon class="face-shape d20-face" points="200,2 200,59 393,119"/><text class="d20-num" x="264" y="50" font-size="24">11</text><text class="d20-num" x="264" y="74" font-size="24">20</text></g>
+              <g class="highlight-zone" data-numbers="3,4"><polygon class="face-shape d20-face" points="7,119 66,316 200,59"/><text class="d20-num" x="91" y="155" font-size="26">3</text><text class="d20-num" x="91" y="181" font-size="26">4</text></g>
+              <g class="highlight-zone" data-numbers="7,6"><polygon class="face-shape d20-face" points="200,59 334,316 393,119"/><text class="d20-num" x="309" y="155" font-size="26">7</text><text class="d20-num" x="309" y="181" font-size="26">6</text></g>
+              <g class="highlight-zone" data-numbers="5,8"><polygon class="face-shape d20-face" points="66,316 200,458 334,316"/><text class="d20-num" x="200" y="353" font-size="26">5</text><text class="d20-num" x="200" y="379" font-size="26">8</text></g>
+              <g class="highlight-zone" data-numbers="1,2"><polygon class="face-shape d20-face d20-face-center" points="200,59 66,316 334,316"/><text class="d20-num d20-num-center" x="200" y="215" font-size="38">1</text><text class="d20-num d20-num-center" x="200" y="253" font-size="38">2</text></g>
+            </svg>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Player Registration -->
+      <div class="reg-panel" id="reg-panel">
+        <h3 class="section-title">Player Registration</h3>
+        <div class="reg-form">
+          <input type="text" class="reg-input" id="reg-input" placeholder="Enter player name" maxlength="30" autocomplete="off">
+          <button class="btn btn-primary" id="join-btn">Join</button>
+        </div>
+        <div class="reg-error" id="reg-error"></div>
+      </div>
+
+      <!-- Scorecard -->
+      <div class="scorecard-panel" id="scorecard-panel">
+        <h3 class="section-title" id="scorecard-title">Scorecard</h3>
+        <div class="tb-banner" id="tb-banner"></div>
+        <table class="scorecard-table" id="scorecard-table">
+          <thead id="scorecard-head"></thead>
+          <tbody id="scorecard-body"></tbody>
+        </table>
+        <div class="no-players" id="no-players">No players yet. Register above, then tap a player to score.</div>
+      </div>
+
+      <!-- Finalize -->
+      <div class="finalize-wrap" id="finalize-wrap">
+        <button class="btn btn-finalize" id="finalize-btn">Finalize Game</button>
+        <div class="backup-bar">
+          <button type="button" class="btn-backup" id="export-backup-btn" title="Download a JSON backup of targets, players, and scores">Export Backup</button>
+          <button type="button" class="btn-backup" id="restore-backup-btn" title="Restore from a previously exported backup file">Restore Backup</button>
+          <div class="backup-status" id="backup-status"></div>
+        </div>
+        <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
+      </div>
+
+      <footer>
+        <p>Game concept and development by Jeff White</p>
+        <p>Webapp by Aaron Shour @ M3</p>
+      </footer>
+    </div>
+  </main>
+
+  <script src="rpg-bg-particles.js"
+    data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
+    data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
+  <script src="rpg-bg-canvas.js"></script>
+  <script src="audio.js"></script>
+  <script>
+    const compState = {
+      targets: [],
+      players: [],
+      finalized: false,
+      phase: 'main', // 'main' | 'tiebreaker'
+      tbRound: 0
+    };
+
+    const rollBtn = document.getElementById('roll-btn');
+    const lockBtn = document.getElementById('lock-btn');
+    const diceHint = document.getElementById('dice-hint');
+    const regPanel = document.getElementById('reg-panel');
+    const regInput = document.getElementById('reg-input');
+    const joinBtn = document.getElementById('join-btn');
+    const regError = document.getElementById('reg-error');
+    const scorecardPanel = document.getElementById('scorecard-panel');
+    const scorecardTitle = document.getElementById('scorecard-title');
+    const scorecardHead = document.getElementById('scorecard-head');
+    const scorecardBody = document.getElementById('scorecard-body');
+    const noPlayers = document.getElementById('no-players');
+    const tbBanner = document.getElementById('tb-banner');
+    const finalizeWrap = document.getElementById('finalize-wrap');
+    const finalizeBtn = document.getElementById('finalize-btn');
+    const soundToggleBtn = document.getElementById('sound-toggle-btn');
+
+    function syncSoundToggleUi() {
+      if (!soundToggleBtn) return;
+      const enabled = DaggerDieAudio.isEnabled();
+      soundToggleBtn.classList.toggle('sound-off', !enabled);
+      soundToggleBtn.setAttribute('aria-pressed', String(enabled));
+      soundToggleBtn.setAttribute('aria-label', enabled ? 'Mute sound effects' : 'Enable sound effects');
+      soundToggleBtn.title = enabled ? 'Sound effects on' : 'Sound effects off';
+    }
+
+    if (soundToggleBtn) {
+      syncSoundToggleUi();
+      soundToggleBtn.addEventListener('click', () => {
+        DaggerDieAudio.toggleEnabled();
+        syncSoundToggleUi();
+      });
+    }
+
+    const projectorChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-projector') : null;
+    const leaderboardChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-leaderboard') : null;
+
+    function broadcastLeaderboardState() {
+      if (!leaderboardChannel) return;
+      try {
+        leaderboardChannel.postMessage({
+          type: 'leaderboard',
+          targets: compState.targets,
+          finalized: compState.finalized,
+          phase: compState.phase,
+          tbRound: compState.tbRound,
+          players: getSortedPlayers().map(p => {
+            const activeHits = getActiveHits(p);
+            const hitCount = activeHits.filter(h => h === true).length;
+            const scored = activeHits.some(h => h !== null);
+            let status = 'registered';
+            if (compState.finalized) status = 'locked';
+            else if (compState.phase === 'tiebreaker' && p.tbActive) {
+              status = p.tbLocked ? 'scored' : 'tiebreaker';
+            } else if (p.locked || (compState.phase === 'tiebreaker' && !p.tbActive)) {
+              status = 'scored';
+            } else if (scored) {
+              status = 'throwing';
+            }
+            return {
+              name: p.name,
+              hits: hitCount,
+              total: getTotal(p),
+              tbTotal: p.tbActive ? getHitsTotal(p.tbHits) : null,
+              tbHistory: (p.tbHistory || []).slice(),
+              status: status
+            };
+          })
+        });
+      } catch (e) {}
+    }
+
+    function broadcastProjectorState() {
+      if (!projectorChannel || !compState.targets.length) return;
+      try {
+        // Comp mode only highlights locked targets — do not flip faces to claimed/green as scores are entered
+        projectorChannel.postMessage({ type: 'update', rolls: compState.targets, claimed: [] });
+      } catch (e) {}
+    }
+
+    function rollD20() { return Math.floor(Math.random() * 20) + 1; }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    const diceEls = [];
+    for (let i = 0; i < 9; i++) diceEls.push(document.getElementById('die' + i));
+
+    const draftTargets = new Array(9).fill(null);
+    let targetsLocked = false;
+    let rolling = false;
+
+    function allDraftSet() {
+      return draftTargets.every(v => typeof v === 'number' && v >= 1 && v <= 20);
+    }
+
+    function renderDraftDice() {
+      diceEls.forEach((d, idx) => {
+        const val = draftTargets[idx];
+        d.classList.remove('odd', 'even', 'rolling');
+        if (val == null) {
+          d.textContent = '-';
+          d.setAttribute('aria-label', 'Target ' + (idx + 1) + ', not set — tap to choose');
+        } else {
+          d.textContent = val;
+          d.classList.add(val % 2 === 0 ? 'even' : 'odd');
+          d.setAttribute('aria-label', 'Target ' + (idx + 1) + ', value ' + val + (targetsLocked ? '' : ' — tap to change'));
+        }
+        d.classList.toggle('selectable', !targetsLocked);
+        d.disabled = targetsLocked || rolling;
+      });
+      lockBtn.disabled = targetsLocked || rolling || !allDraftSet();
+      rollBtn.disabled = targetsLocked || rolling;
+    }
+
+    function openDiePicker(dieIndex) {
+      if (targetsLocked || rolling) return;
+
+      const current = draftTargets[dieIndex];
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Choose target ' + (dieIndex + 1));
+
+      let numsHtml = '<div class="die-picker-grid" role="group" aria-label="D20 values">';
+      for (let n = 1; n <= 20; n++) {
+        const parity = n % 2 === 0 ? 'even' : 'odd';
+        const selected = current === n ? ' is-selected' : '';
+        numsHtml +=
+          '<button type="button" class="die-picker-num ' + parity + selected + '" data-val="' + n + '"' +
+          ' aria-pressed="' + (current === n ? 'true' : 'false') + '">' + n + '</button>';
+      }
+      numsHtml += '</div>';
+
+      overlay.innerHTML =
+        '<div class="hm-dialog">' +
+          '<div class="hm-title">Choose Target #' + (dieIndex + 1) + '</div>' +
+          '<div class="hm-subtitle">Pick a number from 1 to 20</div>' +
+          numsHtml +
+          '<div class="hm-buttons">' +
+            '<button type="button" class="hm-btn hm-btn-cancel">Cancel</button>' +
+          '</div>' +
+        '</div>';
+
+      function close() { overlay.remove(); }
+
+      overlay.querySelector('.die-picker-grid').addEventListener('click', e => {
+        const btn = e.target.closest('.die-picker-num');
+        if (!btn) return;
+        const val = parseInt(btn.dataset.val, 10);
+        if (Number.isNaN(val)) return;
+        draftTargets[dieIndex] = val;
+        close();
+        renderDraftDice();
+      });
+
+      overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+      document.body.appendChild(overlay);
+      const focusBtn = overlay.querySelector('.die-picker-num.is-selected') || overlay.querySelector('.die-picker-num');
+      if (focusBtn) focusBtn.focus();
+    }
+
+    diceEls.forEach((d, idx) => {
+      d.addEventListener('click', () => openDiePicker(idx));
+    });
+
+    async function performRoll() {
+      if (targetsLocked || rolling) return;
+      rolling = true;
+      renderDraftDice();
+
+      diceEls.forEach(d => {
+        d.classList.add('rolling');
+        d.classList.remove('odd', 'even');
+      });
+
+      DaggerDieAudio.startDiceRoll();
+
+      for (let i = 0; i < 15; i++) {
+        diceEls.forEach(d => { d.textContent = rollD20(); });
+        await sleep(50);
+      }
+
+      for (let i = 0; i < 9; i++) draftTargets[i] = rollD20();
+
+      DaggerDieAudio.stopDiceRoll();
+      rolling = false;
+      renderDraftDice();
+      lockBtn.focus();
+    }
+
+    function lockTargets() {
+      if (targetsLocked || rolling || !allDraftSet()) return;
+
+      compState.targets = draftTargets.slice();
+      targetsLocked = true;
+      rolling = false;
+      showLockedCompetitionUI();
+      saveCompState();
+      regInput.focus();
+    }
+
+    function showLockedCompetitionUI() {
+      for (let i = 0; i < 9; i++) draftTargets[i] = compState.targets[i];
+      renderDraftDice();
+
+      rollBtn.textContent = 'Targets Locked';
+      lockBtn.textContent = 'Targets Locked';
+      lockBtn.disabled = true;
+      rollBtn.disabled = true;
+      if (diceHint) diceHint.textContent = 'Targets locked for this competition';
+
+      broadcastProjectorState();
+      broadcastLeaderboardState();
+
+      highlightTargets();
+      document.getElementById('board-area').style.display = '';
+      if (compState.phase === 'tiebreaker' || compState.finalized) {
+        regPanel.classList.remove('visible');
+      } else {
+        regPanel.classList.add('visible');
+      }
+      scorecardPanel.classList.add('visible');
+      finalizeWrap.classList.add('visible');
+      updateScorecardChrome();
+      renderScorecard();
+      updateBackupStatus();
+    }
+
+    rollBtn.addEventListener('click', performRoll);
+    lockBtn.addEventListener('click', lockTargets);
+    renderDraftDice();
+
+    // ─── Competition backup / restore ───
+    const COMP_STATE_KEY = 'daggerdie_compState';
+    const backupStatusEl = document.getElementById('backup-status');
+    const exportBackupBtn = document.getElementById('export-backup-btn');
+    const restoreBackupBtn = document.getElementById('restore-backup-btn');
+    const restoreFileInput = document.getElementById('restore-file-input');
+
+    function serializeCompState() {
+      return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        targets: compState.targets.slice(),
+        players: compState.players.map(p => ({
+          name: p.name,
+          hits: Array.isArray(p.hits) ? p.hits.slice() : new Array(9).fill(null),
+          locked: !!p.locked,
+          tbActive: !!p.tbActive,
+          tbHits: Array.isArray(p.tbHits) ? p.tbHits.slice() : null,
+          tbLocked: !!p.tbLocked,
+          tbHistory: Array.isArray(p.tbHistory) ? p.tbHistory.slice() : []
+        })),
+        finalized: !!compState.finalized,
+        phase: compState.phase === 'tiebreaker' ? 'tiebreaker' : 'main',
+        tbRound: Number(compState.tbRound) || 0
+      };
+    }
+
+    function saveCompState() {
+      if (!compState.targets.length) return;
+      try {
+        const payload = serializeCompState();
+        localStorage.setItem(COMP_STATE_KEY, JSON.stringify(payload));
+        updateBackupStatus(payload.savedAt);
+      } catch (e) {
+        if (backupStatusEl) {
+          backupStatusEl.textContent = 'Auto-save failed — export a backup file';
+          backupStatusEl.classList.remove('has-save');
+        }
+      }
+    }
+
+    function clearCompStateSave() {
+      try { localStorage.removeItem(COMP_STATE_KEY); } catch (e) {}
+      updateBackupStatus(null);
+    }
+
+    function readSavedCompState() {
+      try {
+        const raw = localStorage.getItem(COMP_STATE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function formatBackupTime(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function updateBackupStatus(savedAt) {
+      if (!backupStatusEl) return;
+      const iso = savedAt || (readSavedCompState() || {}).savedAt;
+      if (iso && compState.targets.length) {
+        backupStatusEl.textContent = 'Auto-saved ' + formatBackupTime(iso);
+        backupStatusEl.classList.add('has-save');
+      } else if (compState.targets.length) {
+        backupStatusEl.textContent = 'Not saved yet';
+        backupStatusEl.classList.remove('has-save');
+      } else {
+        backupStatusEl.textContent = '';
+        backupStatusEl.classList.remove('has-save');
+      }
+    }
+
+    function normalizeHitCell(v) {
+      if (v === true || v === false) return v;
+      return null;
+    }
+
+    function validateCompSnapshot(data) {
+      if (!data || typeof data !== 'object') return 'Backup file is empty or invalid.';
+      if (!Array.isArray(data.targets) || data.targets.length !== 9) {
+        return 'Backup must include 9 target numbers.';
+      }
+      if (!data.targets.every(t => typeof t === 'number' && t >= 1 && t <= 20)) {
+        return 'Target numbers must be between 1 and 20.';
+      }
+      if (!Array.isArray(data.players)) return 'Backup is missing player list.';
+      for (let i = 0; i < data.players.length; i++) {
+        const p = data.players[i];
+        if (!p || typeof p.name !== 'string' || !p.name.trim()) {
+          return 'Player ' + (i + 1) + ' is missing a name.';
+        }
+        if (!Array.isArray(p.hits) || p.hits.length !== 9) {
+          return 'Player "' + p.name + '" has invalid hit data.';
+        }
+      }
+      return null;
+    }
+
+    function applyCompSnapshot(data) {
+      const err = validateCompSnapshot(data);
+      if (err) throw new Error(err);
+
+      compState.targets = data.targets.map(Number);
+      compState.finalized = !!data.finalized;
+      compState.phase = data.phase === 'tiebreaker' ? 'tiebreaker' : 'main';
+      compState.tbRound = Number(data.tbRound) || 0;
+      compState.players = data.players.map(p => ({
+        name: String(p.name).trim().slice(0, 30),
+        hits: p.hits.map(normalizeHitCell),
+        locked: !!p.locked || !!data.finalized,
+        tbActive: !!p.tbActive,
+        tbHits: Array.isArray(p.tbHits) && p.tbHits.length === 9
+          ? p.tbHits.map(normalizeHitCell)
+          : null,
+        tbLocked: !!p.tbLocked,
+        tbHistory: Array.isArray(p.tbHistory)
+          ? p.tbHistory.filter(n => typeof n === 'number')
+          : []
+      }));
+
+      targetsLocked = true;
+      rolling = false;
+      showLockedCompetitionUI();
+
+      if (compState.finalized) {
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Game Finalized';
+      } else if (compState.phase === 'tiebreaker') {
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Tiebreaker in Progress…';
+      } else {
+        finalizeBtn.disabled = false;
+        finalizeBtn.textContent = 'Finalize Game';
+      }
+
+      saveCompState();
+    }
+
+    function exportCompBackup() {
+      if (!compState.targets.length) {
+        const saved = readSavedCompState();
+        if (!saved) {
+          alert('Nothing to export yet. Lock targets first, or restore a backup.');
+          return;
+        }
+        downloadCompBackup(saved);
+        return;
+      }
+      downloadCompBackup(serializeCompState());
+    }
+
+    function downloadCompBackup(payload) {
+      const stamp = (payload.savedAt || new Date().toISOString()).replace(/[:.]/g, '-').slice(0, 19);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'daggerdie-comp-backup-' + stamp + '.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 500);
+    }
+
+    function promptRestoreFile() {
+      if (compState.targets.length && compState.players.length && !compState.finalized) {
+        if (!confirm('Restore will replace the current competition (targets, players, and scores). Continue?')) {
+          return;
+        }
+      }
+      restoreFileInput.value = '';
+      restoreFileInput.click();
+    }
+
+    function restoreCompBackupFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result || ''));
+          applyCompSnapshot(data);
+          alert('Competition restored' +
+            (data.players && data.players.length ? ' — ' + data.players.length + ' player(s).' : '.'));
+        } catch (e) {
+          alert('Could not restore backup: ' + (e.message || 'invalid file'));
+        }
+      };
+      reader.onerror = () => alert('Could not read the backup file.');
+      reader.readAsText(file);
+    }
+
+    function offerResumeSavedCompetition() {
+      if (compState.targets.length) return;
+      const saved = readSavedCompState();
+      if (!saved) return;
+      const err = validateCompSnapshot(saved);
+      if (err) {
+        clearCompStateSave();
+        return;
+      }
+
+      const when = formatBackupTime(saved.savedAt) || 'earlier';
+      const count = Array.isArray(saved.players) ? saved.players.length : 0;
+      const phaseNote = saved.finalized
+        ? ' (finalized)'
+        : (saved.phase === 'tiebreaker' ? ' (tiebreaker)' : '');
+      const msg = 'A saved competition was found from ' + when +
+        ' with ' + count + ' player(s)' + phaseNote + '.\n\n' +
+        'Resume it now?\n\n' +
+        'OK = Resume\nCancel = Discard saved data and start fresh';
+      if (confirm(msg)) {
+        try {
+          applyCompSnapshot(saved);
+        } catch (e) {
+          alert('Could not resume saved competition: ' + (e.message || 'unknown error'));
+          clearCompStateSave();
+        }
+      } else {
+        clearCompStateSave();
+      }
+    }
+
+    exportBackupBtn.addEventListener('click', exportCompBackup);
+    restoreBackupBtn.addEventListener('click', promptRestoreFile);
+    restoreFileInput.addEventListener('change', () => {
+      const file = restoreFileInput.files && restoreFileInput.files[0];
+      restoreCompBackupFromFile(file);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) saveCompState();
+    });
+    setInterval(() => { if (targetsLocked && !rolling) saveCompState(); }, 30000);
+
+    const BOARD_MODE_KEY = 'daggerdie_boardMode';
+    const boardToggleBtn = document.getElementById('board-toggle-btn');
+    const boardToggleLabel = document.getElementById('board-toggle-label');
+    const dualBoards = document.getElementById('dual-boards');
+    const combinedBoard = document.getElementById('combined-board');
+    const targetsTitle = document.getElementById('targets-title');
+    let singleBoardMode = localStorage.getItem(BOARD_MODE_KEY) === 'single';
+
+    function applyBoardMode() {
+      if (singleBoardMode) {
+        dualBoards.style.display = 'none';
+        combinedBoard.style.display = '';
+        boardToggleLabel.textContent = '2 Boards';
+        targetsTitle.textContent = 'Target Board';
+      } else {
+        dualBoards.style.display = '';
+        combinedBoard.style.display = 'none';
+        boardToggleLabel.textContent = '1 Board';
+        targetsTitle.textContent = 'Target Boards';
+      }
+      if (compState.targets.length) highlightTargets();
+    }
+
+    boardToggleBtn.addEventListener('click', () => {
+      singleBoardMode = !singleBoardMode;
+      localStorage.setItem(BOARD_MODE_KEY, singleBoardMode ? 'single' : 'dual');
+      applyBoardMode();
+    });
+
+    applyBoardMode();
+
+    function highlightTargets() {
+      document.querySelectorAll('.highlight-zone').forEach(zone => {
+        zone.classList.remove('active');
+        const single = zone.getAttribute('data-number');
+        const multi = zone.getAttribute('data-numbers');
+        let nums = [];
+        if (single) nums.push(Number(single));
+        if (multi) nums = multi.split(',').map(Number);
+        if (compState.targets.some(t => nums.includes(t))) {
+          zone.classList.add('active');
+        }
+      });
+    }
+
+    function buildScorecardHeader() {
+      const trailing = compState.phase === 'tiebreaker'
+        ? ['Hits', 'Main', 'TB']
+        : ['Hits', 'Total'];
+
+      let rollRow = '<tr class="scorecard-roll-row"><th class="th-roll-spacer"></th>';
+      compState.targets.forEach((_, i) => {
+        rollRow += '<th class="th-roll-num">' + (i + 1) + '</th>';
+      });
+      trailing.forEach(() => { rollRow += '<th class="th-roll-spacer"></th>'; });
+      rollRow += '</tr>';
+
+      let targetRow = '<tr class="scorecard-target-row"><th class="th-label">Player</th>';
+      compState.targets.forEach(t => {
+        targetRow += '<th class="th-target-val">' + t + '</th>';
+      });
+      trailing.forEach(label => { targetRow += '<th class="th-label">' + label + '</th>'; });
+      targetRow += '</tr>';
+
+      scorecardHead.innerHTML = rollRow + targetRow;
+    }
+
+    joinBtn.addEventListener('click', addPlayer);
+    regInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+
+    function addPlayer() {
+      if (compState.phase !== 'main' || compState.finalized) return;
+      regError.textContent = '';
+      const name = regInput.value.trim();
+      if (!name) { regError.textContent = 'Please enter a name.'; return; }
+      if (name.length > 30) { regError.textContent = 'Name must be 30 characters or less.'; return; }
+      const nameLower = name.toLowerCase();
+      if (compState.players.some(p => p.name.toLowerCase() === nameLower)) {
+        regError.textContent = 'That name is already taken.';
+        return;
+      }
+
+      compState.players.push({
+        name,
+        hits: new Array(9).fill(null),
+        locked: false,
+        tbActive: false,
+        tbHits: null,
+        tbLocked: false,
+        tbHistory: []
+      });
+      regInput.value = '';
+      regInput.focus();
+      renderScorecard();
+      broadcastLeaderboardState();
+      saveCompState();
+    }
+
+    function getHitsTotal(hits) {
+      if (!hits) return 0;
+      return hits.reduce((sum, hit, i) => sum + (hit === true ? compState.targets[i] : 0), 0);
+    }
+
+    function getTotal(player) {
+      return getHitsTotal(player.hits);
+    }
+
+    function getActiveHits(player) {
+      if (compState.phase === 'tiebreaker' && player.tbActive) return player.tbHits;
+      return player.hits;
+    }
+
+    function rankingKey(player) {
+      return [getTotal(player)].concat(player.tbHistory || []);
+    }
+
+    function compareRankingKeys(aKey, bKey) {
+      const len = Math.max(aKey.length, bKey.length);
+      for (let i = 0; i < len; i++) {
+        const av = aKey[i];
+        const bv = bKey[i];
+        if (av == null && bv == null) continue;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        if (bv !== av) return bv - av;
+      }
+      return 0;
+    }
+
+    function playersTied(a, b) {
+      return compareRankingKeys(rankingKey(a), rankingKey(b)) === 0;
+    }
+
+    function getSortedPlayers() {
+      return compState.players.slice().sort((a, b) => {
+        const cmp = compareRankingKeys(rankingKey(a), rankingKey(b));
+        if (cmp !== 0) return cmp;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    function findTieGroups() {
+      const sorted = getSortedPlayers();
+      const groups = [];
+      let i = 0;
+      while (i < sorted.length) {
+        let j = i + 1;
+        while (j < sorted.length && playersTied(sorted[i], sorted[j])) j++;
+        if (j - i > 1) groups.push(sorted.slice(i, j));
+        i = j;
+      }
+      return groups;
+    }
+
+    function updateScorecardChrome() {
+      if (compState.phase === 'tiebreaker') {
+        scorecardTitle.textContent = 'Tiebreaker Round ' + compState.tbRound;
+        const groups = findTieGroups().filter(g => g.some(p => p.tbActive));
+        const parts = groups.map(g => {
+          const names = g.map(p => p.name).join(' & ');
+          return '<strong>' + escHtml(names) + '</strong> tied at ' + getTotal(g[0]);
+        });
+        tbBanner.innerHTML = parts.join('<br>') +
+          '<span class="tb-hint">Throw the same targets again. Higher score wins the place.</span>';
+        tbBanner.classList.add('visible');
+        finalizeBtn.disabled = true;
+        finalizeBtn.textContent = 'Tiebreaker in Progress…';
+      } else {
+        scorecardTitle.textContent = 'Scorecard';
+        tbBanner.classList.remove('visible');
+        tbBanner.innerHTML = '';
+        if (!compState.finalized) {
+          finalizeBtn.disabled = false;
+          finalizeBtn.textContent = 'Finalize Game';
+        }
+      }
+      buildScorecardHeader();
+    }
+
+    function renderScorecard() {
+      if (compState.players.length === 0) {
+        noPlayers.style.display = 'block';
+        scorecardBody.innerHTML = '';
+        return;
+      }
+      noPlayers.style.display = 'none';
+
+      const maxScore = Math.max(...compState.players.map(p => getTotal(p)));
+      const showTb = compState.phase === 'tiebreaker';
+      const displayPlayers = showTb
+        ? compState.players.filter(p => p.tbActive)
+        : compState.players;
+
+      let html = '';
+      displayPlayers.forEach(player => {
+        const pIdx = compState.players.indexOf(player);
+        const total = getTotal(player);
+        const isLeader = total > 0 && total === maxScore;
+        const inTb = showTb && player.tbActive;
+        const hits = inTb ? player.tbHits : player.hits;
+        const isLocked = compState.finalized ||
+          (inTb ? player.tbLocked : (player.locked || (showTb && !player.tbActive)));
+        const canOpen = !compState.finalized && (inTb || !showTb);
+
+        let rowClass = 'player-row';
+        if (inTb && !player.tbLocked) rowClass += ' row-tb';
+        else if (isLocked) rowClass += ' row-locked';
+        if (inTb && player.tbLocked) rowClass += ' row-tb-done';
+        if (compState.finalized) rowClass += ' row-finalized';
+
+        const scored = hits.some(h => h !== null);
+        let hint = '';
+        if (canOpen) {
+          if (inTb && player.tbLocked) hint = 'Tap to edit TB';
+          else if (inTb) hint = 'Tap to score TB';
+          else if (player.locked) hint = 'Tap to edit';
+          else if (scored) hint = 'Tap to edit';
+          else hint = 'Tap to score';
+        }
+
+        html += '<tr class="' + rowClass + '"' +
+          (canOpen ? ' data-player="' + pIdx + '" tabindex="0" role="button"' : '') + '>';
+        html += '<td class="player-name-cell">' + escHtml(player.name) +
+          (hint ? '<span class="score-hint">' + hint + '</span>' : '') + '</td>';
+        hits.forEach((hit, hIdx) => {
+          let stateClass = '';
+          let val = '';
+          if (hit === true) {
+            stateClass = ' hit';
+            val = compState.targets[hIdx];
+          } else if (hit === false) {
+            stateClass = ' miss';
+            val = '\u2715';
+          } else {
+            stateClass = ' pending';
+            val = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>';
+          }
+          html += '<td class="hit-cell' + stateClass + '">' + val + '</td>';
+        });
+        const hitCount = hits.filter(h => h === true).length;
+        html += '<td class="hits-cell">' + hitCount + '/9</td>';
+        if (showTb) {
+          html += '<td class="main-score-cell">' + total + '</td>';
+          html += '<td class="total-cell' + (inTb && getHitsTotal(player.tbHits) > 0 ? ' leader' : '') + '">' +
+            (inTb ? getHitsTotal(player.tbHits) : '—') + '</td>';
+        } else {
+          html += '<td class="total-cell' + (isLeader ? ' leader' : '') + '">' + total + '</td>';
+        }
+        html += '</tr>';
+      });
+      scorecardBody.innerHTML = html;
+    }
+
+    scorecardBody.addEventListener('click', e => {
+      const row = e.target.closest('tr.player-row[data-player]');
+      if (!row || compState.finalized) return;
+      const pIdx = parseInt(row.dataset.player, 10);
+      if (Number.isNaN(pIdx)) return;
+      showScoringModal(pIdx);
+    });
+
+    scorecardBody.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('tr.player-row[data-player]');
+      if (!row || compState.finalized) return;
+      e.preventDefault();
+      const pIdx = parseInt(row.dataset.player, 10);
+      if (Number.isNaN(pIdx)) return;
+      showScoringModal(pIdx);
+    });
+
+    function showScoringModal(pIdx) {
+      const player = compState.players[pIdx];
+      if (!player || compState.finalized) return;
+
+      const inTb = compState.phase === 'tiebreaker' && player.tbActive;
+      if (compState.phase === 'tiebreaker' && !player.tbActive) return;
+
+      const existing = inTb ? (player.tbHits || new Array(9).fill(null)) : player.hits;
+      // Tri-state: null = unmarked, true = hit (green), false = miss (red)
+      const draft = existing.map(h => (h === true ? true : h === false ? false : null));
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Score ' + player.name);
+
+      const title = inTb ? 'Tiebreaker Score' : 'Score Player';
+      const subtitle = 'Mark each throw — Hit turns green, Miss turns red. Unmarked count as miss on submit.';
+
+      function draftTotal() {
+        return draft.reduce((sum, hit, i) => sum + (hit === true ? compState.targets[i] : 0), 0);
+      }
+      function draftHits() {
+        return draft.filter(h => h === true).length;
+      }
+      function renderSummary() {
+        const el = overlay.querySelector('.hm-summary');
+        if (!el) return;
+        el.innerHTML =
+          'Hits: <strong>' + draftHits() + '/9</strong> &nbsp;·&nbsp; Total: <strong>' + draftTotal() + '</strong>';
+      }
+      function syncThrowRow(row, val) {
+        row.classList.toggle('is-hit', val === true);
+        row.classList.toggle('is-miss', val === false);
+        row.querySelectorAll('.score-throw-opt').forEach(opt => {
+          const active = (opt.dataset.val === 'hit' && val === true) ||
+            (opt.dataset.val === 'miss' && val === false);
+          opt.classList.toggle('is-active', active);
+          opt.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
+
+      let throwsHtml = '<div class="score-throws" role="group" aria-label="Throw results">';
+      compState.targets.forEach((t, i) => {
+        const val = draft[i];
+        const isHit = val === true;
+        const isMiss = val === false;
+        throwsHtml +=
+          '<div class="score-throw-row' + (isHit ? ' is-hit' : '') + (isMiss ? ' is-miss' : '') + '" data-idx="' + i + '">' +
+            '<span class="score-throw-num">#' + (i + 1) + '</span>' +
+            '<span class="score-throw-target">' + t + '</span>' +
+            '<div class="score-throw-toggle" role="group" aria-label="Throw ' + (i + 1) + ' result">' +
+              '<button type="button" class="score-throw-opt' + (isHit ? ' is-active' : '') + '"' +
+              ' data-val="hit" aria-pressed="' + (isHit ? 'true' : 'false') + '">Hit</button>' +
+              '<button type="button" class="score-throw-opt' + (isMiss ? ' is-active' : '') + '"' +
+              ' data-val="miss" aria-pressed="' + (isMiss ? 'true' : 'false') + '">Miss</button>' +
+            '</div>' +
+          '</div>';
+      });
+      throwsHtml += '</div>';
+
+      overlay.innerHTML =
+        '<div class="hm-dialog">' +
+          '<div class="hm-title">' + title + '</div>' +
+          '<div class="hm-subtitle"><strong style="color:#fff">' + escHtml(player.name) + '</strong><br>' + subtitle + '</div>' +
+          throwsHtml +
+          '<div class="hm-summary"></div>' +
+          '<div class="hm-buttons">' +
+            '<button type="button" class="hm-btn hm-btn-hit">Submit</button>' +
+            '<button type="button" class="hm-btn hm-btn-cancel">Cancel</button>' +
+          '</div>' +
+        '</div>';
+
+      renderSummary();
+
+      overlay.querySelector('.score-throws').addEventListener('click', e => {
+        const opt = e.target.closest('.score-throw-opt');
+        const row = e.target.closest('.score-throw-row');
+        if (!row) return;
+        const idx = parseInt(row.dataset.idx, 10);
+        if (Number.isNaN(idx)) return;
+        if (opt) {
+          const want = opt.dataset.val === 'hit' ? true : false;
+          draft[idx] = draft[idx] === want ? null : want;
+        } else {
+          // Row tap cycles: unmarked → hit → miss → unmarked
+          if (draft[idx] === null) draft[idx] = true;
+          else if (draft[idx] === true) draft[idx] = false;
+          else draft[idx] = null;
+        }
+        syncThrowRow(row, draft[idx]);
+        renderSummary();
+      });
+
+      function close() { overlay.remove(); }
+
+      overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+      overlay.querySelector('.hm-btn-hit').addEventListener('click', () => {
+        // Unmarked throws default to miss on submit
+        const result = draft.map(h => (h === true ? true : false));
+        if (inTb) {
+          const wasLocked = player.tbLocked;
+          player.tbHits = result;
+          player.tbLocked = true;
+          close();
+          renderScorecard();
+          broadcastLeaderboardState();
+          saveCompState();
+          if (!wasLocked) checkTiebreakerRoundComplete();
+        } else {
+          player.hits = result;
+          player.locked = true;
+          close();
+          renderScorecard();
+          broadcastProjectorState();
+          broadcastLeaderboardState();
+          saveCompState();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      overlay.querySelector('.hm-btn-hit').focus();
+    }
+
+    function checkTiebreakerRoundComplete() {
+      const active = compState.players.filter(p => p.tbActive);
+      if (!active.length || !active.every(p => p.tbLocked)) return;
+
+      active.forEach(p => {
+        p.tbHistory.push(getHitsTotal(p.tbHits));
+        p.tbActive = false;
+        p.tbHits = null;
+        p.tbLocked = false;
+      });
+
+      const remaining = findTieGroups();
+      if (remaining.length) {
+        startTiebreakerRound(remaining);
+      } else {
+        finishGame();
+      }
+    }
+
+    function startTiebreakerRound(groups) {
+      compState.phase = 'tiebreaker';
+      compState.tbRound += 1;
+      const tied = new Set();
+      groups.forEach(g => g.forEach(p => tied.add(p)));
+
+      compState.players.forEach(p => {
+        if (tied.has(p)) {
+          p.tbActive = true;
+          p.tbHits = new Array(9).fill(null);
+          p.tbLocked = false;
+        } else {
+          p.tbActive = false;
+          p.tbHits = null;
+          p.tbLocked = false;
+        }
+      });
+
+      regPanel.classList.remove('visible');
+      updateScorecardChrome();
+      renderScorecard();
+      broadcastLeaderboardState();
+      saveCompState();
+    }
+
+    function finishGame() {
+      compState.finalized = true;
+      compState.phase = 'main';
+      finalizeBtn.disabled = true;
+      finalizeBtn.textContent = 'Game Finalized';
+      regPanel.classList.remove('visible');
+      updateScorecardChrome();
+      renderScorecard();
+      broadcastLeaderboardState();
+      saveCompState();
+
+      const reportData = {
+        targets: compState.targets,
+        players: getSortedPlayers().map(p => ({
+          name: p.name,
+          hits: p.hits.map(h => h === true),
+          misses: p.hits.map(h => h === false),
+          total: getTotal(p),
+          tbHistory: (p.tbHistory || []).slice()
+        })),
+        tbRounds: compState.tbRound,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        sessionStorage.setItem('daggerdie_compReport', JSON.stringify(reportData));
+      } catch (err) {
+        alert('Could not save report data.');
+        return;
+      }
+      window.open('comp-report.html', '_blank');
+    }
+
+    finalizeBtn.addEventListener('click', () => {
+      if (compState.finalized || compState.phase === 'tiebreaker') return;
+      if (compState.players.length === 0) {
+        alert('No players have joined yet.');
+        return;
+      }
+
+      const ties = findTieGroups();
+      const msg = ties.length
+        ? 'Lock scores and start tiebreakers? Tied players will throw the same targets again.'
+        : 'Finalize the game? Scores will be locked and the report will open.';
+      if (!confirm(msg)) return;
+
+      compState.players.forEach(p => { p.locked = true; });
+      regPanel.classList.remove('visible');
+
+      if (ties.length) {
+        startTiebreakerRound(ties);
+      } else {
+        finishGame();
+      }
+    });
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    window.addEventListener('beforeunload', () => {
+      saveCompState();
+      try { if (projectorChannel) { projectorChannel.postMessage({ type: 'clear' }); projectorChannel.close(); } } catch (e) {}
+      try { if (leaderboardChannel) { leaderboardChannel.close(); } } catch (e) {}
+    });
+
+    // Resources modal (star button)
+    (function() {
+      const resourcesBtn = document.getElementById('resources-btn');
+      const resourcesModal = document.getElementById('resources-modal');
+      const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
+      const resourcesLeaderboardBtn = document.getElementById('resources-leaderboard-btn');
+      const resourcesExportBackupBtn = document.getElementById('resources-export-backup-btn');
+      const resourcesRestoreBackupBtn = document.getElementById('resources-restore-backup-btn');
+      const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
+
+      function openResourcesModal() {
+        resourcesModal.classList.add('open');
+        resourcesModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeResourcesModal() {
+        resourcesModal.classList.remove('open');
+        resourcesModal.setAttribute('aria-hidden', 'true');
+      }
+
+      resourcesBtn.addEventListener('click', e => { e.stopPropagation(); openResourcesModal(); });
+      resourcesModal.addEventListener('click', e => { if (e.target === resourcesModal) closeResourcesModal(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && resourcesModal.classList.contains('open')) closeResourcesModal(); });
+
+      resourcesProjectorBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        window.open('projector.html', 'DaggerDieProjector', 'width=534,height=534,menubar=no,toolbar=no,location=no,status=no');
+        setTimeout(broadcastProjectorState, 800);
+      });
+
+      resourcesLeaderboardBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        window.open('comp-leaderboard.html', 'DaggerDieLeaderboard', 'width=600,height=700,menubar=no,toolbar=no,location=no,status=no');
+        setTimeout(broadcastLeaderboardState, 800);
+      });
+
+      resourcesExportBackupBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        exportCompBackup();
+      });
+      resourcesRestoreBackupBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        promptRestoreFile();
+      });
+      const stencilChoiceModal = document.getElementById('stencil-choice-modal');
+      const stencilPrintBtn = document.getElementById('stencil-print-btn');
+      const stencilCutBtn = document.getElementById('stencil-cut-btn');
+
+      function openStencilChoiceModal() {
+        closeResourcesModal();
+        stencilChoiceModal.classList.add('open');
+        stencilChoiceModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeStencilChoiceModal() {
+        stencilChoiceModal.classList.remove('open');
+        stencilChoiceModal.setAttribute('aria-hidden', 'true');
+      }
+
+      stencilDownloadBtn.addEventListener('click', () => openStencilChoiceModal());
+      stencilChoiceModal.addEventListener('click', e => { if (e.target === stencilChoiceModal) closeStencilChoiceModal(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && stencilChoiceModal.classList.contains('open')) closeStencilChoiceModal(); });
+
+      stencilPrintBtn.addEventListener('click', () => {
+        closeStencilChoiceModal();
+        const pdfUrl = new URL('assets/PrintTarget.pdf', window.location.href).href;
+        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+      });
+      stencilCutBtn.addEventListener('click', () => {
+        closeStencilChoiceModal();
+        const svgUrl = new URL('assets/targetstencil.svg', window.location.href).href;
+        fetch(svgUrl).then(r => {
+          if (!r.ok) throw new Error('Fetch failed');
+          return r.blob();
+        }).then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'targetstencil.svg'; a.style.display = 'none';
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        }).catch(() => {
+          alert('Download failed. If you opened this page from your file system (file://), try running it through a local server instead.');
+        });
+      });
+    })();
+
+    offerResumeSavedCompetition();
+  </script>
+  <script src="m3-readme-modal.js"></script>
+</body>
+</html>
