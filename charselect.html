@@ -840,7 +840,7 @@
         const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
         const normalizeGender = window.DAGGERDIE_NORMALIZE_GENDER || (g => g === 'f' ? 'f' : 'm');
         const getAvatarMarkup = window.DAGGERDIE_CHARACTER_AVATAR_MARKUP || ((c, prefix, gender) => prefixSvgIds(c.svg, prefix));
-        const getImagePath = window.DAGGERDIE_CHARACTER_IMAGE_PATH || ((c, gender) => 'assets/hd%20avatars/' + normalizeGender(gender) + c.id + '.png');
+        const getImagePath = window.DAGGERDIE_CHARACTER_IMAGE_PATH || ((c, gender) => 'assets/HD%20Avatars/' + normalizeGender(gender) + c.id + '.png');
 
         function escapeAttr(str) {
             return String(str == null ? '' : str)
