@@ -197,9 +197,67 @@
     filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.5)) drop-shadow(-1px -1px 0 rgba(255,255,255,0.3)) drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
     letter-spacing: 2px;
   }
-  .game-tile p { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
-  .game-tile .btn { display: inline-block; padding: 15px 40px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; font-weight: bold; border-radius: 10px; font-size: 1.1rem; transition: all 0.3s; }
-  .game-tile:hover .btn { box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4); }
+  .game-tile p { color: rgba(255,255,255,0.8); margin-bottom: 16px; }
+  .game-tile .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #f8e7b0;
+    background:
+      linear-gradient(180deg, rgba(255, 226, 150, 0.28) 0%, rgba(212, 168, 75, 0.08) 26%, transparent 52%),
+      linear-gradient(180deg, #3a2c18 0%, #1c150e 52%, #100e0a 100%);
+    border: 1px solid #e2c36a;
+    border-radius: 3px;
+    box-shadow:
+      0 0 0 1px #2a1c0c,
+      0 0 0 2px #c9a04a,
+      0 2px 0 #1a1208,
+      0 4px 10px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 236, 180, 0.3),
+      inset 0 -6px 10px rgba(0, 0, 0, 0.32);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 8px rgba(212, 168, 75, 0.22);
+    transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+  .game-tile .btn::before,
+  .game-tile .btn::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    flex-shrink: 0;
+    transform: rotate(45deg);
+    border: 1px solid #e2c36a;
+    background: linear-gradient(135deg, #f0d78a 0%, #b8892e 100%);
+    box-shadow: 0 0 5px rgba(212, 168, 75, 0.35);
+  }
+  .game-tile:hover .btn {
+    color: #fff8dc;
+    border-color: #f6e4a8;
+    transform: translateY(-1px);
+    background:
+      linear-gradient(180deg, rgba(255, 232, 160, 0.42) 0%, rgba(212, 168, 75, 0.2) 32%, transparent 62%),
+      linear-gradient(180deg, #4a3820 0%, #261c10 52%, #16120c 100%);
+    box-shadow:
+      0 0 0 1px #2a1c0c,
+      0 0 0 2px #f0d78a,
+      0 3px 0 #1a1208,
+      0 0 16px rgba(212, 168, 75, 0.4),
+      0 6px 14px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 244, 200, 0.45),
+      inset 0 -6px 10px rgba(0, 0, 0, 0.24);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 10px rgba(254, 202, 87, 0.45);
+  }
+  .game-tile:hover .btn::before,
+  .game-tile:hover .btn::after {
+    background: linear-gradient(135deg, #fff4c8 0%, #e2c36a 100%);
+    box-shadow: 0 0 7px rgba(254, 202, 87, 0.6);
+  }
 
   .options-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px 25px; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 25px; }
   .options-toggle:hover { background: rgba(255,255,255,0.1); border-color: #48dbfb; }
@@ -413,7 +471,7 @@
         <div class="game-tile-icon"><img src="assets/DND.png" alt="Game Tracker" loading="lazy"></div>
         <h2>Prepare For Battle!</h2>
         <p>Roll Dice, Throw Knives, Deal Damage, Die Last.</p>
-        <span class="btn">Start Game →</span>
+        <span class="btn">Start Game</span>
       </a>
 
       <button class="options-toggle" id="options-toggle" aria-expanded="false" aria-controls="options-menu">
