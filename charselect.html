@@ -6,7 +6,7 @@
     <title>Dagger & Die - Select Players</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NDL380JPBQ"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -560,25 +560,72 @@
         }
 
         .btn {
-            padding: 15px 40px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
+            border-radius: 3px;
+            font-size: 0.72rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 600;
         }
         .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Cinzel', Georgia, serif;
+            letter-spacing: 1.2px;
+            color: #f8e7b0;
+            background:
+                linear-gradient(180deg, rgba(255, 226, 150, 0.28) 0%, rgba(212, 168, 75, 0.08) 26%, transparent 52%),
+                linear-gradient(180deg, #3a2c18 0%, #1c150e 52%, #100e0a 100%);
+            border: 1px solid #e2c36a;
+            box-shadow:
+                0 0 0 1px #2a1c0c,
+                0 0 0 2px #c9a04a,
+                0 2px 0 #1a1208,
+                0 4px 10px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 236, 180, 0.3),
+                inset 0 -6px 10px rgba(0, 0, 0, 0.32);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 8px rgba(212, 168, 75, 0.22);
+        }
+        .btn-primary::before,
+        .btn-primary::after {
+            content: '';
+            width: 5px;
+            height: 5px;
+            flex-shrink: 0;
+            transform: rotate(45deg);
+            border: 1px solid #e2c36a;
+            background: linear-gradient(135deg, #f0d78a 0%, #b8892e 100%);
+            box-shadow: 0 0 5px rgba(212, 168, 75, 0.35);
         }
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(238, 90, 36, 0.4);
+            color: #fff8dc;
+            border-color: #f6e4a8;
+            transform: translateY(-1px);
+            background:
+                linear-gradient(180deg, rgba(255, 232, 160, 0.42) 0%, rgba(212, 168, 75, 0.2) 32%, transparent 62%),
+                linear-gradient(180deg, #4a3820 0%, #261c10 52%, #16120c 100%);
+            box-shadow:
+                0 0 0 1px #2a1c0c,
+                0 0 0 2px #f0d78a,
+                0 3px 0 #1a1208,
+                0 0 16px rgba(212, 168, 75, 0.4),
+                0 6px 14px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 244, 200, 0.45),
+                inset 0 -6px 10px rgba(0, 0, 0, 0.24);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 10px rgba(254, 202, 87, 0.45);
+        }
+        .btn-primary:hover::before,
+        .btn-primary:hover::after {
+            background: linear-gradient(135deg, #fff4c8 0%, #e2c36a 100%);
+            box-shadow: 0 0 7px rgba(254, 202, 87, 0.6);
         }
         .btn-center {
-            display: block;
+            display: flex;
+            width: max-content;
             margin: 0 auto;
         }
 
