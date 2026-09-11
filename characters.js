@@ -1,6 +1,6 @@
 /**
  * Character avatars for Dagger & Die.
- * PNG portraits live at assets/hd avatars/{m|f}{id}.png.
+ * PNG portraits live at assets/HD Avatars/{m|f}{id}.png.
  * Use DAGGERDIE_CHARACTER_AVATAR_MARKUP(char, prefix, gender) when injecting.
  * Use DAGGERDIE_PREFIX_SVG_IDS(svg, prefix) when injecting SVG to avoid duplicate IDs.
  */
@@ -23,7 +23,7 @@
     }
     function getCharacterImagePath(char, gender) {
         if (!char || !char.id) return '';
-        return 'assets/hd%20avatars/' + normalizeGender(gender) + char.id + '.png';
+        return 'assets/HD%20Avatars/' + normalizeGender(gender) + char.id + '.png';
     }
     function getCharacterAvatarMarkup(char, prefix, gender) {
         if (!char) return '';
