@@ -323,10 +323,61 @@
             border-color: #d4a84b;
             box-shadow: 0 0 12px rgba(212, 168, 75, 0.4);
         }
-        .character-avatar-btn svg {
+        .character-avatar-btn svg,
+        .character-avatar-btn img {
             display: block;
             width: 100%;
             height: 100%;
+            object-fit: cover;
+        }
+        .avatar-fade-stack {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .avatar-fade-stack img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .avatar-fade-stack img.is-active {
+            opacity: 1;
+        }
+        .gender-toggle {
+            display: inline-flex;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.3);
+        }
+        .gender-toggle-btn {
+            width: 28px;
+            height: 26px;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .gender-toggle-btn + .gender-toggle-btn {
+            border-left: 1px solid rgba(255,255,255,0.2);
+        }
+        .gender-toggle-btn:hover {
+            color: rgba(255,255,255,0.9);
+        }
+        .gender-toggle-btn.is-active {
+            background: rgba(212, 168, 75, 0.28);
+            color: #f0d78c;
         }
         .character-picker-modal-overlay {
             display: none;
@@ -336,7 +387,7 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
         .character-picker-modal-overlay.open {
             display: flex;
@@ -344,67 +395,115 @@
         .character-picker-modal {
             background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
             border-radius: 24px;
-            padding: 24px;
+            padding: 28px 28px 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: calc(100vw - 40px);
-            max-height: 90vh;
+            width: min(720px, calc(100vw - 32px));
+            max-height: min(90vh, 860px);
             overflow-x: hidden;
             overflow-y: auto;
         }
         .character-picker-modal h3 {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
+            margin-bottom: 22px;
+            font-size: 1.25rem;
             color: rgba(255,255,255,0.9);
         }
         .character-picker-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-        @media (max-width: 600px) {
-            .character-picker-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 420px) {
-            .character-picker-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            gap: 16px;
         }
         .character-picker-option {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
+            gap: 8px;
+            padding: 14px 10px 12px;
             border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
+            border-radius: 16px;
             background: rgba(0,0,0,0.2);
-            cursor: pointer;
             transition: border-color 0.2s, background 0.2s, transform 0.2s;
         }
         .character-picker-option:hover {
             border-color: #d4a84b;
             background: rgba(212, 168, 75, 0.15);
-            transform: scale(1.02);
+        }
+        .character-picker-select {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
         }
         .character-picker-option .char-portrait {
-            width: 56px;
-            height: 56px;
-            margin-bottom: 6px;
-            border-radius: 6px;
+            width: 88px;
+            height: 88px;
+            margin-bottom: 8px;
+            border-radius: 50%;
             overflow: hidden;
             background: rgba(0,0,0,0.3);
         }
-        .character-picker-option .char-portrait svg {
+        .character-picker-option .char-portrait svg,
+        .character-picker-option .char-portrait img {
             display: block;
             width: 100%;
             height: 100%;
+            object-fit: cover;
         }
         .character-picker-option .char-name {
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             color: rgba(255,255,255,0.9);
             text-align: center;
+        }
+        @media (max-width: 700px) {
+            .character-picker-modal {
+                padding: 20px 16px 16px;
+            }
+            .character-picker-modal h3 {
+                margin-bottom: 16px;
+                font-size: 1.1rem;
+            }
+            .character-picker-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            .character-picker-option {
+                padding: 10px 8px;
+            }
+            .character-picker-option .char-portrait {
+                width: 72px;
+                height: 72px;
+            }
+        }
+        @media (max-width: 480px) {
+            .character-picker-modal-overlay {
+                padding: 12px;
+            }
+            .character-picker-modal {
+                width: calc(100vw - 24px);
+                padding: 16px 12px 12px;
+                border-radius: 18px;
+            }
+            .character-picker-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .character-picker-option .char-portrait {
+                width: 64px;
+                height: 64px;
+                margin-bottom: 6px;
+            }
+            .character-picker-option .char-name {
+                font-size: 0.75rem;
+            }
+            .gender-toggle-btn {
+                width: 24px;
+                height: 24px;
+            }
         }
 
         .bot-difficulty-modal-overlay {
@@ -739,34 +838,89 @@
         let currentTeamPlayerIndex = 0;
 
         const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
+        const normalizeGender = window.DAGGERDIE_NORMALIZE_GENDER || (g => g === 'f' ? 'f' : 'm');
+        const getAvatarMarkup = window.DAGGERDIE_CHARACTER_AVATAR_MARKUP || ((c, prefix, gender) => prefixSvgIds(c.svg, prefix));
+        const getImagePath = window.DAGGERDIE_CHARACTER_IMAGE_PATH || ((c, gender) => 'assets/hd%20avatars/' + normalizeGender(gender) + c.id + '.png');
 
-        function buildCharacterPickerGrid() {
-            characterPickerGrid.innerHTML = CHARACTERS.map((c, idx) => `
-                <button type="button" class="character-picker-option" data-character-id="${c.id}" title="${c.name}">
-                    <div class="char-portrait">${prefixSvgIds(c.svg, 'cs-grid-' + idx)}</div>
-                    <span class="char-name">${c.name}</span>
-                </button>
+        function escapeAttr(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;');
+        }
+
+        function getAvatarFadeStack(char, gender) {
+            const g = normalizeGender(gender);
+            const name = escapeAttr(char && char.name ? char.name : '');
+            return '<span class="avatar-fade-stack">' +
+                '<img data-gender="m" src="' + escapeAttr(getImagePath(char, 'm')) + '" alt="' + name + '" draggable="false"' + (g === 'm' ? ' class="is-active"' : '') + '>' +
+                '<img data-gender="f" src="' + escapeAttr(getImagePath(char, 'f')) + '" alt="' + name + '" draggable="false"' + (g === 'f' ? ' class="is-active"' : '') + '>' +
+                '</span>';
+        }
+
+        function genderToggleHtml(gender, label) {
+            const g = normalizeGender(gender);
+            const aria = escapeAttr(label || 'Avatar gender');
+            return '<div class="gender-toggle" role="group" aria-label="' + aria + '">' +
+                '<button type="button" class="gender-toggle-btn' + (g === 'm' ? ' is-active' : '') + '" data-gender="m" aria-pressed="' + (g === 'm' ? 'true' : 'false') + '">M</button>' +
+                '<button type="button" class="gender-toggle-btn' + (g === 'f' ? ' is-active' : '') + '" data-gender="f" aria-pressed="' + (g === 'f' ? 'true' : 'false') + '">F</button>' +
+                '</div>';
+        }
+
+        function setCardGender(card, gender) {
+            const g = normalizeGender(gender);
+            card.dataset.gender = g;
+            card.querySelectorAll('.gender-toggle-btn').forEach(btn => {
+                const on = btn.dataset.gender === g;
+                btn.classList.toggle('is-active', on);
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            const stack = card.querySelector('.avatar-fade-stack');
+            if (stack) {
+                stack.querySelectorAll('img').forEach(img => {
+                    img.classList.toggle('is-active', img.dataset.gender === g);
+                });
+            }
+        }
+
+        function applyCharacterToRow(row, char, gender) {
+            if (!row || !char) return;
+            const g = normalizeGender(gender);
+            row.dataset.characterId = char.id;
+            row.dataset.gender = g;
+            const avatarBtn = row.querySelector('.character-avatar-btn');
+            if (avatarBtn) {
+                avatarBtn.innerHTML = getAvatarMarkup(char, 'cs-p' + currentPickingPlayerIndex + '-' + char.id, g);
+                avatarBtn.title = char.name + ' – click to change';
+            }
+        }
+
+        function buildCharacterPickerGrid(gender) {
+            const startGender = normalizeGender(gender);
+            characterPickerGrid.innerHTML = CHARACTERS.map((c) => `
+                <div class="character-picker-option" data-character-id="${c.id}" data-gender="${startGender}">
+                    <button type="button" class="character-picker-select" title="${c.name}">
+                        <div class="char-portrait">${getAvatarFadeStack(c, startGender)}</div>
+                        <span class="char-name">${c.name}</span>
+                    </button>
+                    ${genderToggleHtml(startGender, c.name + ' gender')}
+                </div>
             `).join('');
-            characterPickerGrid.querySelectorAll('.character-picker-option').forEach(btn => {
-                btn.addEventListener('click', () => {
+            characterPickerGrid.querySelectorAll('.character-picker-option').forEach(card => {
+                card.querySelectorAll('.gender-toggle-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        setCardGender(card, btn.dataset.gender);
+                    });
+                });
+                card.querySelector('.character-picker-select').addEventListener('click', () => {
                     const row = playerSetup.querySelector(`.player-input[data-player="${currentPickingPlayerIndex}"]`);
-                    if (row) {
-                        const charId = btn.dataset.characterId;
-                        const char = CHARACTERS.find(x => x.id === charId);
-                        if (char) {
-                            row.dataset.characterId = charId;
-                            const avatarBtn = row.querySelector('.character-avatar-btn');
-                            if (avatarBtn) {
-                                avatarBtn.innerHTML = prefixSvgIds(char.svg, 'cs-p' + currentPickingPlayerIndex + '-' + charId);
-                                avatarBtn.title = char.name;
-                            }
-                        }
-                    }
+                    const char = CHARACTERS.find(x => x.id === card.dataset.characterId);
+                    applyCharacterToRow(row, char, card.dataset.gender);
                     characterPickerModal.classList.remove('open');
                 });
             });
         }
-        buildCharacterPickerGrid();
 
         characterPickerModal.addEventListener('click', (e) => {
             if (e.target === characterPickerModal) characterPickerModal.classList.remove('open');
@@ -885,6 +1039,7 @@
                 savedData.push({
                     name: input ? input.value : '',
                     characterId: row.dataset.characterId || '',
+                    gender: row.dataset.gender || 'm',
                     isBot: row.dataset.isBot || 'false',
                     botSkill: row.dataset.botSkill || '',
                     isBoss: row.dataset.isBoss || 'false',
@@ -907,6 +1062,7 @@
                 const fallbackChar = CHARACTERS.length ? CHARACTERS[i % CHARACTERS.length] : FALLBACK_CHAR;
                 const charId = (prev && prev.characterId) || fallbackChar.id;
                 const selectedChar = CHARACTERS.find(c => c.id === charId) || fallbackChar;
+                const gender = normalizeGender(prev && prev.gender);
                 const defaultBotSkill = (prev && prev.botSkill) || BOT_SKILLS[1].id;
                 const isBot = prev ? prev.isBot : 'false';
                 const isBoss = prev ? prev.isBoss : 'false';
@@ -916,6 +1072,7 @@
                 div.className = 'player-input';
                 div.dataset.player = String(i);
                 div.dataset.characterId = selectedChar.id;
+                div.dataset.gender = gender;
                 div.dataset.isBot = isBot;
                 div.dataset.isBoss = isBoss;
                 div.dataset.botSkill = defaultBotSkill;
@@ -937,7 +1094,7 @@
                     <span>P${i + 1}</span>
                     <input type="text" placeholder="Player ${i + 1} Name" data-player="${i}" maxlength="30">
                     <div class="character-selector-wrap" data-player="${i}">
-                        <button type="button" class="character-avatar-btn" title="${selectedChar.name} – click to change">${prefixSvgIds(selectedChar.svg, 'cs-p' + i + '-' + selectedChar.id)}</button>
+                        <button type="button" class="character-avatar-btn" title="${selectedChar.name} – click to change">${getAvatarMarkup(selectedChar, 'cs-p' + i + '-' + selectedChar.id, gender)}</button>
                         ${teamButtonHtml}
                         ${botButtonHtml}
                         ${bossButtonHtml}
@@ -950,6 +1107,7 @@
                 const avatarBtn = div.querySelector('.character-avatar-btn');
                 avatarBtn.addEventListener('click', () => {
                     currentPickingPlayerIndex = i;
+                    buildCharacterPickerGrid(div.dataset.gender);
                     characterPickerModal.classList.add('open');
                 });
                 if (showTeams) {
@@ -1086,6 +1244,7 @@
                 const name = input && input.value.trim() ? input.value.trim() : `Player ${idx + 1}`;
                 const fbc = CHARACTERS.length ? CHARACTERS[idx % CHARACTERS.length] : FALLBACK_CHAR;
                 const characterId = row.dataset.characterId || fbc.id;
+                const gender = normalizeGender(row.dataset.gender);
                 const char = CHARACTERS.find(c => c.id === characterId) || fbc;
                 const isBot = allowBots && (row.dataset.isBot === 'true');
                 const botSkill = (row.dataset.botSkill || 'novice');
@@ -1094,6 +1253,7 @@
                 payload.push({
                     name,
                     characterId,
+                    gender,
                     color: char ? char.color : '#8b7355',
                     isBot: isBot,
                     botSkill: isBot ? botSkill : undefined,
