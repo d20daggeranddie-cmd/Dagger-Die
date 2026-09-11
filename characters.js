@@ -1,6 +1,8 @@
 /**
- * Character avatars from dagger-die-avatars.html for Dagger & Die.
- * Use DAGGERDIE_PREFIX_SVG_IDS(svg, prefix) when injecting to avoid duplicate IDs.
+ * Character avatars for Dagger & Die.
+ * PNG portraits live at assets/hd avatars/{m|f}{id}.png.
+ * Use DAGGERDIE_CHARACTER_AVATAR_MARKUP(char, prefix, gender) when injecting.
+ * Use DAGGERDIE_PREFIX_SVG_IDS(svg, prefix) when injecting SVG to avoid duplicate IDs.
  */
 (function (global) {
     function prefixSvgIds(svgString, prefix) {
@@ -9,6 +11,26 @@
             .replace(/\bid="([^"]+)"/g, 'id="' + prefix + '-$1"')
             .replace(/url\(#([^)]+)\)/g, 'url(#' + prefix + '-$1)')
             .replace(/href="#([^"]+)"/g, 'href="#' + prefix + '-$1"');
+    }
+    function escapeAttr(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+    }
+    function normalizeGender(gender) {
+        return gender === 'f' ? 'f' : 'm';
+    }
+    function getCharacterImagePath(char, gender) {
+        if (!char || !char.id) return '';
+        return 'assets/hd%20avatars/' + normalizeGender(gender) + char.id + '.png';
+    }
+    function getCharacterAvatarMarkup(char, prefix, gender) {
+        if (!char) return '';
+        if (char.id) {
+            return '<img src="' + escapeAttr(getCharacterImagePath(char, gender)) + '" alt="' + escapeAttr(char.name || '') + '" draggable="false">';
+        }
+        return prefixSvgIds(char.svg, prefix);
     }
     const CHARACTERS = [
         { id: "knight", name: "Knight", color: "#8b7355", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -581,4 +603,7 @@
     global.DAGGERDIE_CHARACTERS = CHARACTERS;
     global.DAGGERDIE_CHARACTER_BY_ID = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
     global.DAGGERDIE_PREFIX_SVG_IDS = prefixSvgIds;
+    global.DAGGERDIE_CHARACTER_AVATAR_MARKUP = getCharacterAvatarMarkup;
+    global.DAGGERDIE_CHARACTER_IMAGE_PATH = getCharacterImagePath;
+    global.DAGGERDIE_NORMALIZE_GENDER = normalizeGender;
 })(typeof window !== 'undefined' ? window : this);
