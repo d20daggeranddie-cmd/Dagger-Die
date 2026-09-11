@@ -891,9 +891,9 @@
         .player-card {
             position: relative;
             background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 20px;
-            min-width: 150px;
+            border-radius: 18px;
+            padding: 22px 18px 18px;
+            min-width: 188px;
             text-align: center;
             transition: all 0.3s;
             border: 3px solid transparent;
@@ -1446,18 +1446,22 @@
         }
 
         .player-avatar {
-            width: 60px;
-            height: 60px;
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
-            margin: 0 auto 10px;
+            margin: 0 auto 12px;
         }
         .player-avatar.player-avatar-char {
             overflow: hidden;
         }
-        .player-avatar.player-avatar-char svg {
+        .player-avatar.player-avatar-char svg,
+        .player-avatar-char img {
             display: block;
             width: 100%;
             height: 100%;
+        }
+        .player-avatar-char img {
+            object-fit: cover;
         }
 
         .player-name {
@@ -2190,6 +2194,17 @@
             display: none !important;
         }
 
+        @media (max-width: 900px) {
+            .player-card {
+                min-width: 156px;
+                padding: 16px 14px;
+            }
+            .player-avatar {
+                width: 76px;
+                height: 76px;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 600px) {
             .container {
@@ -2211,18 +2226,27 @@
             }
 
             .players-panel {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 8px;
                 margin-bottom: 15px;
+                width: 100%;
             }
 
             .player-card {
-                padding: 10px;
-                min-width: 100px;
+                padding: 12px 6px;
+                min-width: 0;
+                width: auto;
+            }
+
+            .player-card.current {
+                transform: none;
             }
 
             .player-avatar {
-                width: 40px;
-                height: 40px;
+                width: 56px;
+                height: 56px;
+                margin-bottom: 8px;
             }
 
             .player-hp {
@@ -2315,13 +2339,13 @@
             }
 
             .player-card {
-                min-width: 80px;
-                padding: 8px;
+                min-width: 0;
+                padding: 10px 4px;
             }
 
             .player-avatar {
-                width: 30px;
-                height: 30px;
+                width: 48px;
+                height: 48px;
             }
 
             .player-name {
@@ -2956,6 +2980,7 @@
                         name: p.name,
                         color: p.color && p.color.hex ? p.color.hex : '#8b7355',
                         characterId: p.characterId || null,
+                        gender: p.gender === 'f' ? 'f' : 'm',
                         teamId: p.teamId || null,
                         turnOrder: turnOrder + 1,
                         hp: p.hp,
@@ -2980,6 +3005,21 @@
                     };
                 });
                 const impacts = pendingBrawlLeaderboardImpacts.splice(0);
+                const damageClaimed = !!(state.damageClaimedPhase || state.hasAttacked || state.confirmingHits);
+                const currentRolls = (state.hasRolled && state.currentRoll && state.currentRoll.length)
+                    ? state.currentRoll.map((roll, idx) => {
+                        const hit = (state.hits || []).find(h => h.idx === idx);
+                        let result = null;
+                        if ((state.droppedDiceIndices || []).includes(idx)) result = 'drop';
+                        else if (hit) result = 'hit';
+                        else if ((state.missedDiceIndices || []).includes(idx)) result = 'miss';
+                        return {
+                            roll,
+                            result,
+                            hp: hit ? getHitEffectiveRoll(hit) : null
+                        };
+                    })
+                    : [];
                 brawlLeaderboardChannel.postMessage({
                     type: 'leaderboard',
                     phase: state.phase,
@@ -2987,6 +3027,8 @@
                     partyMode: !!state.modParty,
                     bossMode: !!state.modBoss,
                     itemsEnabled: !!state.itemsEnabled,
+                    currentRolls,
+                    damageClaimed,
                     players,
                     impacts
                 });
@@ -3486,7 +3528,10 @@
             if (!Array.isArray(state.missedDiceIndices)) state.missedDiceIndices = [];
             if (typeof state.turnNumber !== 'number') state.turnNumber = 0;
             if (Array.isArray(state.players)) {
-                state.players.forEach(p => { p.isBoss = !!p.isBoss; });
+                state.players.forEach(p => {
+                    p.isBoss = !!p.isBoss;
+                    p.gender = p.gender === 'f' ? 'f' : 'm';
+                });
             }
             applySettingsForNewGame();
             clearHpFeedbackSnapshot();
@@ -3809,6 +3854,7 @@
                     name: p.name,
                     color: { name: p.characterId && CHAR_BY_ID[p.characterId] ? CHAR_BY_ID[p.characterId].name : 'Custom', hex },
                     characterId: p.characterId || null,
+                    gender: p.gender === 'f' ? 'f' : 'm',
                     hp: 0,
                     maxHp: 0,
                     turnOrderRoll: 0,
@@ -3862,16 +3908,17 @@
 
         function getPlayerAvatarHtml(p, opts) {
             if (!p) return '';
-            const size = (opts && opts.size) || 60;
+            const size = opts && opts.size;
             const baseClass = (opts && opts.className) || 'player-avatar';
+            const sizeStyle = size ? `width:${size}px;height:${size}px;` : '';
             const CHAR_BY_ID = window.DAGGERDIE_CHARACTER_BY_ID || {};
-            const prefixSvgIds = window.DAGGERDIE_PREFIX_SVG_IDS || (s => s);
+            const getAvatarMarkup = window.DAGGERDIE_CHARACTER_AVATAR_MARKUP || ((c, prefix, gender) => (window.DAGGERDIE_PREFIX_SVG_IDS || (s => s))(c.svg, prefix));
             const char = p.characterId && CHAR_BY_ID[p.characterId];
             if (char) {
-                const svg = prefixSvgIds(char.svg, 'game-p' + p.id);
-                return `<div class="${baseClass} player-avatar-char" style="width:${size}px;height:${size}px;flex-shrink:0;overflow:hidden;border-radius:50%;">${svg}</div>`;
+                const markup = getAvatarMarkup(char, 'game-p' + p.id, p.gender);
+                return `<div class="${baseClass} player-avatar-char" style="${sizeStyle}flex-shrink:0;overflow:hidden;border-radius:50%;">${markup}</div>`;
             }
-            return `<div class="${baseClass}" style="width:${size}px;height:${size}px;background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
+            return `<div class="${baseClass}" style="${sizeStyle}background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
         }
 
         function getBossBadgeHtml(p) {
@@ -4351,6 +4398,7 @@
             current.totalRolled = (current.totalRolled || 0) + state.currentRoll.reduce((s, v) => s + v, 0);
             current.totalThrows = (current.totalThrows || 0) + 3;
             showHitRecorder();
+            broadcastBrawlLeaderboardState();
         }
 
         rollDiceBtn.addEventListener('click', () => performDiceRoll());
@@ -5268,6 +5316,7 @@
             attackPrompt.classList.add('hidden');
             endTurnBtn.classList.add('hidden');
             state.hasAttacked = true;
+            broadcastBrawlLeaderboardState();
             showTurnSummaryModal(titleHtml, bodyHtml, () => {
                 if (getCurrentPlayer().isBot || state.autoAdvanceAfterDamage) {
                     nextTurn();
