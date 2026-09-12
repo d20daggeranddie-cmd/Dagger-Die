@@ -84,14 +84,14 @@ Items are earned by landing a critical (all 3 hits in a single turn). A D12 is r
 |---|------|------|--------|--------|
 | 1 | Scroll | HEALING | Self | Heal +15 HP |
 | 2 | Feather | REGEN | Self | Regen +15 HP (5/turn over 3 turns) |
-| 3 | Glowing Orb | RESURRECT | Eliminated | Resurrect 1 eliminated player with 20 HP |
-| 4 | Metal Fragment | DEFENSE | Self | Shield — block the next incoming hit (damage becomes 0, then shield is consumed) |
+| 3 | Glowing Orb | RESURRECT | Eliminated | Resurrect 1 player with 40% of max HP |
+| 4 | Metal Fragment | DEFENSE | Self | Shield — immune to next attack |
 | 5 | Tiger's Eye | BUFF | Self | Focus +5 DP to next attack |
 | 6 | Toy Rocket | UTILITY | Self | Aim — call a rolled zone; if hit, +3 DP |
 | 7 | Monkey Paw | LETHAL | Opponent | Cursed — halve target's current HP |
 | 8 | Freeze | DEBUFF | Opponent | Freeze — target skips next turn |
 | 9 | Potion | DEBUFF | Opponent | Poison -15 HP (5/turn over 3 turns) |
-| 10 | Ticket | UTILITY | Self | Next 3 knife drops this turn cost no HP |
+| 10 | Ticket | UTILITY | Self | Three free drops this turn |
 | 11 | Red Rose | HEALING | Self | Recover all HP lost to drops |
 | 12 | Medkit | CLEANSE | Self | Clear Status — remove all status effects |
 
