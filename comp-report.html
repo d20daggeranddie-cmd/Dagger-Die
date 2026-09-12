@@ -17,7 +17,6 @@
     line-height: 1.6;
   }
 
-  /* Simplified RPG background */
   .bg-base { position: fixed; inset: 0; z-index: 0;
     background: radial-gradient(ellipse 120% 80% at 50% 110%, #1a1040 0%, transparent 60%),
       radial-gradient(ellipse 80% 60% at 20% 80%, #0d1a3a 0%, transparent 50%),
@@ -30,7 +29,7 @@
   }
 
   .main-content { position: relative; z-index: 10; min-height: 100vh; }
-  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
 
   header { text-align: center; margin-bottom: 32px; }
   h1 {
@@ -54,10 +53,20 @@
     font-size: 1.1rem; color: #feca57; font-weight: 600;
     margin-bottom: 16px; text-align: center;
   }
+  .panel-note {
+    text-align: center; color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 14px;
+  }
 
-  /* Targets dice display */
   .targets-row {
     display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .die-slot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .die-slot-num {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em;
+    color: rgba(254, 202, 87, 0.9); line-height: 1;
   }
   .die-badge {
     width: 52px; height: 52px;
@@ -70,7 +79,19 @@
   .die-badge.odd { color: #ff6b6b; border-color: #ff6b6b; }
   .die-badge.even { color: #48dbfb; border-color: #48dbfb; }
 
-  /* Leaderboard */
+  .result-list { display: flex; flex-direction: column; gap: 10px; }
+  .result-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .result-row.place-1 { border-color: rgba(254, 202, 87, 0.4); }
+  .result-row.place-2 { border-color: rgba(192, 192, 192, 0.35); }
+  .result-row.place-3 { border-color: rgba(205, 127, 50, 0.4); }
+  .result-place { font-family: 'Cinzel', Georgia, serif; font-weight: 600; min-width: 70px; }
+  .result-names { flex: 1; color: #fff; }
+  .result-score { font-weight: bold; color: #feca57; }
+
   .leaderboard { width: 100%; border-collapse: separate; border-spacing: 0; }
   .leaderboard th, .leaderboard td {
     padding: 12px 16px; text-align: left;
@@ -85,25 +106,27 @@
   .leaderboard .rank-1 td { color: #feca57; font-weight: bold; }
   .leaderboard .rank-2 td { color: #c0c0c0; }
   .leaderboard .rank-3 td { color: #cd7f32; }
-  .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 50px; text-align: center; }
+  .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 72px; text-align: center; white-space: nowrap; }
   .leaderboard .score-cell { font-weight: bold; font-size: 1.1rem; }
   .leaderboard .tb-note { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: normal; }
 
-  .tb-rounds-list {
-    display: flex; flex-direction: column; gap: 12px;
+  .tie-label {
+    display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 4px;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; vertical-align: middle;
+    background: rgba(254, 202, 87, 0.2); color: #feca57; border: 1px solid rgba(254, 202, 87, 0.45);
   }
-  .tb-round-row {
-    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline;
-    padding: 10px 12px; border-radius: 10px;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  }
-  .tb-round-label {
-    font-family: 'Cinzel', Georgia, serif; color: #feca57; font-size: 0.85rem; min-width: 90px;
-  }
-  .tb-player-score { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
-  .tb-player-score strong { color: #fff; }
 
-  /* Scorecard recap */
+  .tb-round-block {
+    margin-bottom: 18px; padding: 12px;
+    border-radius: 12px; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .tb-round-block:last-child { margin-bottom: 0; }
+  .tb-round-heading {
+    font-family: 'Cinzel', Georgia, serif; color: #feca57; font-size: 0.95rem; margin-bottom: 8px;
+  }
+  .tb-round-entrants { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+
   .recap-table { width: 100%; border-collapse: separate; border-spacing: 0; }
   .recap-table th, .recap-table td {
     padding: 8px 6px; text-align: center; font-size: 0.85rem;
@@ -111,16 +134,36 @@
   }
   .recap-table th {
     font-family: 'Cinzel', Georgia, serif;
-    color: #feca57; font-size: 0.8rem; font-weight: 600;
-    border-bottom: 2px solid rgba(254, 202, 87, 0.3);
+    color: #feca57; font-size: 0.75rem; font-weight: 600;
   }
+  .recap-table .th-roll { border-bottom: none; color: rgba(254, 202, 87, 0.7); font-size: 0.7rem; }
+  .recap-table .th-target { border-bottom: 2px solid rgba(254, 202, 87, 0.3); }
   .recap-table th:first-child, .recap-table td:first-child { text-align: left; }
   .recap-table .hit-mark { color: #2ecc71; font-weight: bold; }
   .recap-table .miss-mark { color: #e74c3c; font-weight: bold; }
   .recap-table .unscored { color: rgba(255,255,255,0.2); }
   .recap-table .total-col { font-weight: bold; color: #feca57; }
 
-  /* Stats summary */
+  .player-cards { display: flex; flex-direction: column; gap: 14px; }
+  .player-card {
+    border-radius: 12px; padding: 14px 16px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-left: 4px solid rgba(254, 202, 87, 0.55);
+  }
+  .player-card.rank-1 { border-left-color: #feca57; }
+  .player-card.rank-2 { border-left-color: #c0c0c0; }
+  .player-card.rank-3 { border-left-color: #cd7f32; }
+  .player-card-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .player-card-name { font-size: 1.05rem; color: #e8e8e8; font-weight: 600; }
+  .player-card-place { color: #feca57; font-family: 'Cinzel', Georgia, serif; font-size: 0.9rem; }
+  .player-stats { width: 100%; font-size: 0.9rem; }
+  .player-stats td { padding: 3px 0; border: none; }
+  .player-stats td:first-child { color: rgba(255,255,255,0.55); width: 42%; }
+  .player-stats td:last-child { color: #e8e8e8; }
+
   .stats-grid {
     display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
   }
@@ -131,7 +174,6 @@
   .stat-item .label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
   .stat-item .value { font-size: 1.3rem; font-weight: bold; color: #feca57; }
 
-  /* Print button */
   .print-wrap { text-align: center; margin-top: 32px; }
   .btn-print {
     display: inline-block; padding: 12px 36px; border: none; border-radius: 10px;
@@ -152,7 +194,7 @@
     .main-content { z-index: auto; }
     .panel { background: none; border: 1px solid #ccc; }
     .panel-title, .report-subtitle, h1 { color: #333; text-shadow: none; }
-    .leaderboard th, .recap-table th, .stat-item .value { color: #333; }
+    .leaderboard th, .recap-table th, .stat-item .value, .result-score, .player-card-place { color: #333; }
     .leaderboard td, .recap-table td { color: #000; }
     .die-badge { background: #eee; border-color: #999; }
     .die-badge.odd { color: #c0392b; border-color: #c0392b; }
@@ -161,9 +203,10 @@
     .recap-table .miss-mark { color: #c0392b; }
     .recap-table .unscored { color: #ccc; }
     .recap-table .total-col { color: #333; }
-    .stat-item { background: none; border-color: #ccc; }
-    .stat-item .label { color: #666; }
+    .stat-item, .player-card, .result-row, .tb-round-block { background: none; border-color: #ccc; }
+    .stat-item .label, .panel-note, .tb-round-entrants { color: #666; }
     .stat-item .value { color: #333; }
+    .tie-label { color: #333; border-color: #999; background: #eee; }
     .print-wrap { display: none; }
     .report-date { color: #666; }
     footer { color: #999; border-color: #ccc; }
@@ -174,6 +217,7 @@
     .report-subtitle { font-size: 1rem; }
     .die-badge { width: 42px; height: 42px; font-size: 1.2rem; }
     .recap-table th, .recap-table td { padding: 6px 3px; font-size: 0.75rem; }
+    .leaderboard th, .leaderboard td { padding: 8px 8px; }
   }
 </style>
 </head>
@@ -183,87 +227,161 @@
 
   <main class="main-content">
     <div class="container" id="report-container">
-      <!-- Populated by JS -->
     </div>
   </main>
 
+  <script src="comp-ranking.js"></script>
   <script>
     const container = document.getElementById('report-container');
-    let data;
+    const RANK_MEDALS = { 1: '\u{1F947}', 2: '\u{1F948}', 3: '\u{1F949}' };
 
-    try {
-      const raw = sessionStorage.getItem('daggerdie_compReport');
-      if (raw) data = JSON.parse(raw);
-    } catch (e) { /* ignore */ }
+    function escHtml(str) {
+      const el = document.createElement('div');
+      el.textContent = str == null ? '' : String(str);
+      return el.innerHTML;
+    }
 
-    if (!data || !data.targets || !data.players) {
-      container.innerHTML = '<div class="no-data"><h2>No Report Data</h2><p>No competition data found. <a href="compmode.html">Start a competition</a> first.</p></div>';
-    } else {
-      renderReport(data);
+    function loadReportData() {
+      const keys = ['daggerdie_compReport'];
+      const stores = [sessionStorage, localStorage];
+      for (let s = 0; s < stores.length; s++) {
+        for (let k = 0; k < keys.length; k++) {
+          try {
+            const raw = stores[s].getItem(keys[k]);
+            if (!raw) continue;
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.targets && parsed.players) return parsed;
+          } catch (e) { /* ignore */ }
+        }
+      }
+      return null;
+    }
+
+    function ordinal(n) {
+      const v = n % 100;
+      if (v >= 11 && v <= 13) return n + 'th';
+      switch (n % 10) {
+        case 1: return n + 'st';
+        case 2: return n + 'nd';
+        case 3: return n + 'rd';
+        default: return n + 'th';
+      }
+    }
+
+    function hitCount(p) {
+      return (p.hits || []).filter(Boolean).length;
+    }
+
+    function missCount(p) {
+      if (Array.isArray(p.misses) && p.misses.length) return p.misses.filter(Boolean).length;
+      return (p.hits || []).filter(h => h === false).length;
+    }
+
+    function placeLabel(p) {
+      const base = ordinal(p.rank);
+      if (p.tied) return 'Tied for ' + base;
+      if (p.rank === 1) return 'Winner';
+      return base + ' place';
+    }
+
+    function rankDisplay(p) {
+      const earnedPodium = p.total > 0 && p.rank <= 3;
+      const mark = earnedPodium ? RANK_MEDALS[p.rank] : p.rank;
+      return mark + (p.tied ? '<span class="tie-label">TIE</span>' : '');
+    }
+
+    function namesList(players) {
+      return players.map(p => escHtml(p.name)).join(' &amp; ');
+    }
+
+    function renderScorecardTable(targets, rows) {
+      let html = '<div style="overflow-x:auto;"><table class="recap-table"><thead>';
+      html += '<tr><th class="th-roll"></th>';
+      targets.forEach((_, i) => { html += '<th class="th-roll">' + (i + 1) + '</th>'; });
+      html += '<th class="th-roll"></th></tr>';
+      html += '<tr><th class="th-target">Player</th>';
+      targets.forEach(t => { html += '<th class="th-target">' + t + '</th>'; });
+      html += '<th class="th-target">Total</th></tr></thead><tbody>';
+      rows.forEach(row => {
+        html += '<tr><td>' + escHtml(row.name) + '</td>';
+        const hits = row.hits;
+        const misses = row.misses;
+        if (!hits) {
+          targets.forEach(() => { html += '<td class="unscored">&mdash;</td>'; });
+        } else {
+          hits.forEach((hit, i) => {
+            if (hit) html += '<td class="hit-mark">' + targets[i] + '</td>';
+            else if (misses && misses[i]) html += '<td class="miss-mark">\u2715</td>';
+            else html += '<td class="unscored">&mdash;</td>';
+          });
+        }
+        html += '<td class="total-col">' + row.total + '</td></tr>';
+      });
+      html += '</tbody></table></div>';
+      return html;
     }
 
     function renderReport(d) {
-      const ts = new Date(d.timestamp);
+      const ranked = DaggerDieCompRanking.assignRanks(d.players || []);
+      const ts = d.timestamp ? new Date(d.timestamp) : new Date();
       const dateStr = ts.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const timeStr = ts.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-
-      const sorted = d.players.slice().sort((a, b) => {
-        if (b.total !== a.total) return b.total - a.total;
-        const ah = a.tbHistory || [];
-        const bh = b.tbHistory || [];
-        const len = Math.max(ah.length, bh.length);
-        for (let i = 0; i < len; i++) {
-          const av = ah[i];
-          const bv = bh[i];
-          if (av == null && bv == null) continue;
-          if (av == null) return 1;
-          if (bv == null) return -1;
-          if (bv !== av) return bv - av;
-        }
-        return String(a.name).localeCompare(String(b.name));
-      });
       const maxPossible = d.targets.reduce((a, b) => a + b, 0);
-      const totalHits = d.players.reduce((s, p) => s + p.hits.filter(Boolean).length, 0);
-      const totalPossible = d.players.length * 9;
-      const totals = d.players.map(p => p.total);
-      const avg = d.players.length ? Math.round(totals.reduce((a, b) => a + b, 0) / d.players.length) : 0;
-      const hadTiebreakers = sorted.some(p => (p.tbHistory || []).length > 0);
+      const totalHits = ranked.reduce((s, p) => s + hitCount(p), 0);
+      const totalPossible = ranked.length * 9;
+      const totals = ranked.map(p => p.total);
+      const avg = ranked.length ? Math.round(totals.reduce((a, b) => a + b, 0) / ranked.length) : 0;
+      const hadTiebreakers = ranked.some(p => (p.tbHistory || []).length > 0 || (p.tbThrows || []).length > 0);
+      const sharedPlaces = ranked.filter(p => p.tied).length;
+      const maxTbRounds = Math.max(0, d.tbRounds || 0, ...ranked.map(p => (p.tbThrows || p.tbHistory || []).length));
 
       let html = '';
-
-      // Header
       html += '<header>';
       html += '<h1>Dagger & Die</h1>';
       html += '<p class="report-subtitle">Competition Report</p>';
       html += '<p class="report-date">' + escHtml(dateStr) + ' at ' + escHtml(timeStr) + '</p>';
       html += '</header>';
 
-      // Targets
+      const podiumRanks = [1, 2, 3].filter(r => ranked.some(p => p.rank === r && p.total > 0));
+      if (podiumRanks.length) {
+        html += '<div class="panel">';
+        html += '<h3 class="panel-title">Final Result</h3>';
+        html += '<div class="result-list">';
+        podiumRanks.forEach(r => {
+          const group = ranked.filter(p => p.rank === r);
+          const tied = group.length > 1;
+          html += '<div class="result-row place-' + r + '">';
+          html += '<span class="result-place">' + RANK_MEDALS[r] + ' ' + (tied ? 'Tied ' + ordinal(r) : ordinal(r)) + '</span>';
+          html += '<span class="result-names">' + namesList(group) + (tied ? ' <span class="tie-label">TIE</span>' : '') + '</span>';
+          html += '<span class="result-score">' + group[0].total + '</span>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
       html += '<div class="panel">';
       html += '<h3 class="panel-title">Rolled Targets</h3>';
       html += '<div class="targets-row">';
-      d.targets.forEach(t => {
-        html += '<div class="die-badge ' + (t % 2 === 0 ? 'even' : 'odd') + '">' + t + '</div>';
+      d.targets.forEach((t, i) => {
+        html += '<div class="die-slot"><span class="die-slot-num">' + (i + 1) + '</span>';
+        html += '<div class="die-badge ' + (t % 2 === 0 ? 'even' : 'odd') + '">' + t + '</div></div>';
       });
       html += '</div>';
-      html += '<p style="text-align:center; margin-top:12px; color:rgba(255,255,255,0.5); font-size:0.85rem;">Max possible score: ' + maxPossible + '</p>';
+      html += '<p class="panel-note" style="margin:12px 0 0;">Max possible score: ' + maxPossible + '</p>';
       html += '</div>';
 
-      // Leaderboard
       html += '<div class="panel">';
-      html += '<h3 class="panel-title">Leaderboard</h3>';
+      html += '<h3 class="panel-title">Final Standings</h3>';
+      html += '<p class="panel-note">Ranks share a place after score and tiebreaker history. Names are listed A–Z only when still tied.</p>';
       html += '<table class="leaderboard"><thead><tr><th style="text-align:center">#</th><th>Player</th><th>Score</th><th>Hits</th><th>Hit Rate</th></tr></thead><tbody>';
-      sorted.forEach((p, i) => {
-        const rank = i + 1;
-        const hits = p.hits.filter(Boolean).length;
+      ranked.forEach(p => {
+        const hits = hitCount(p);
         const rateStr = Math.round((hits / 9) * 100) + '%';
-        const rankClass = rank <= 3 ? ' rank-' + rank : '';
+        const rankClass = (p.total > 0 && p.rank <= 3) ? ' rank-' + p.rank : '';
         const tb = p.tbHistory || [];
-        const tbNote = tb.length
-          ? '<div class="tb-note">TB: ' + tb.join(' → ') + '</div>'
-          : '';
+        const tbNote = tb.length ? '<div class="tb-note">TB: ' + tb.join(' \u2192 ') + '</div>' : '';
         html += '<tr class="' + rankClass + '">';
-        html += '<td class="rank-cell">' + rank + '</td>';
+        html += '<td class="rank-cell">' + rankDisplay(p) + '</td>';
         html += '<td>' + escHtml(p.name) + tbNote + '</td>';
         html += '<td class="score-cell">' + p.total + '</td>';
         html += '<td>' + hits + '/9</td>';
@@ -272,74 +390,105 @@
       });
       html += '</tbody></table></div>';
 
-      // Tiebreaker recap
+      html += '<div class="panel">';
+      html += '<h3 class="panel-title">Main Round Scorecard</h3>';
+      html += renderScorecardTable(d.targets, ranked.map(p => ({
+        name: p.name,
+        hits: p.hits,
+        misses: p.misses,
+        total: p.total
+      })));
+      html += '</div>';
+
       if (hadTiebreakers) {
-        const maxRounds = Math.max(...sorted.map(p => (p.tbHistory || []).length));
         html += '<div class="panel">';
         html += '<h3 class="panel-title">Tiebreakers</h3>';
-        html += '<p style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:14px;">Same targets, re-thrown until places were decided</p>';
-        html += '<div class="tb-rounds-list">';
-        for (let r = 0; r < maxRounds; r++) {
-          const entrants = sorted.filter(p => p.tbHistory && p.tbHistory[r] != null);
-          html += '<div class="tb-round-row">';
-          html += '<span class="tb-round-label">Round ' + (r + 1) + '</span>';
-          entrants.forEach(p => {
-            html += '<span class="tb-player-score"><strong>' + escHtml(p.name) + '</strong>: ' + p.tbHistory[r] + '</span>';
+        html += '<p class="panel-note">Same 9 targets, re-thrown until podium places were decided. 4th and below can remain tied.</p>';
+        for (let r = 0; r < maxTbRounds; r++) {
+          const entrants = ranked.filter(p => {
+            const throws = p.tbThrows && p.tbThrows[r];
+            const hist = p.tbHistory && p.tbHistory[r];
+            return (throws && throws.total != null) || hist != null;
           });
+          if (!entrants.length) continue;
+          html += '<div class="tb-round-block">';
+          html += '<div class="tb-round-heading">Round ' + (r + 1) + '</div>';
+          html += '<div class="tb-round-entrants">' + namesList(entrants) + '</div>';
+          const hasGrid = entrants.some(p => p.tbThrows && p.tbThrows[r] && p.tbThrows[r].hits);
+          if (hasGrid) {
+            html += renderScorecardTable(d.targets, entrants.map(p => {
+              const round = (p.tbThrows && p.tbThrows[r]) || {};
+              return {
+                name: p.name,
+                hits: round.hits,
+                misses: round.misses,
+                total: round.total != null ? round.total : (p.tbHistory[r] || 0)
+              };
+            }));
+          } else {
+            html += '<div class="tb-round-entrants">';
+            entrants.forEach(p => {
+              const total = (p.tbThrows && p.tbThrows[r] && p.tbThrows[r].total != null)
+                ? p.tbThrows[r].total
+                : p.tbHistory[r];
+              html += '<div><strong>' + escHtml(p.name) + '</strong>: ' + total + '</div>';
+            });
+            html += '</div>';
+          }
           html += '</div>';
         }
-        html += '</div></div>';
+        html += '</div>';
       }
 
-      // Scorecard recap
       html += '<div class="panel">';
-      html += '<h3 class="panel-title">Full Scorecard</h3>';
-      html += '<div style="overflow-x:auto;">';
-      html += '<table class="recap-table"><thead><tr><th>Player</th>';
-      d.targets.forEach(t => { html += '<th>' + t + '</th>'; });
-      html += '<th>Total</th></tr></thead><tbody>';
-      sorted.forEach(p => {
-        html += '<tr><td>' + escHtml(p.name) + '</td>';
-        p.hits.forEach((hit, i) => {
-          const missed = p.misses && p.misses[i];
-          if (hit) {
-            html += '<td class="hit-mark">' + d.targets[i] + '</td>';
-          } else if (missed) {
-            html += '<td class="miss-mark">\u2715</td>';
-          } else {
-            html += '<td class="unscored">&mdash;</td>';
-          }
-        });
-        html += '<td class="total-col">' + p.total + '</td></tr>';
+      html += '<h3 class="panel-title">Player Breakdown</h3>';
+      html += '<div class="player-cards">';
+      ranked.forEach(p => {
+        const hits = hitCount(p);
+        const misses = missCount(p);
+        const unmarked = 9 - hits - misses;
+        const rankClass = (p.total > 0 && p.rank <= 3) ? ' rank-' + p.rank : '';
+        const tb = p.tbHistory || [];
+        html += '<div class="player-card' + rankClass + '">';
+        html += '<div class="player-card-head">';
+        html += '<div class="player-card-name">' + rankDisplay(p) + ' ' + escHtml(p.name) + '</div>';
+        html += '<div class="player-card-place">' + escHtml(placeLabel(p)) + '</div>';
+        html += '</div>';
+        html += '<table class="player-stats">';
+        html += '<tr><td>Main score</td><td>' + p.total + ' / ' + maxPossible + '</td></tr>';
+        html += '<tr><td>Hits / misses</td><td>' + hits + ' hit, ' + misses + ' miss' + (unmarked > 0 ? ', ' + unmarked + ' unmarked' : '') + '</td></tr>';
+        html += '<tr><td>Hit rate</td><td>' + Math.round((hits / 9) * 100) + '%</td></tr>';
+        html += '<tr><td>Tiebreakers</td><td>' + (tb.length ? tb.length + ' round' + (tb.length === 1 ? '' : 's') + ' \u2014 ' + tb.join(' \u2192 ') : 'None') + '</td></tr>';
+        html += '</table></div>';
       });
-      html += '</tbody></table></div></div>';
+      html += '</div></div>';
 
-      // Stats summary
       html += '<div class="panel">';
       html += '<h3 class="panel-title">Statistics</h3>';
       html += '<div class="stats-grid">';
-      html += '<div class="stat-item"><div class="label">Players</div><div class="value">' + d.players.length + '</div></div>';
-      html += '<div class="stat-item"><div class="label">High Score</div><div class="value">' + (d.players.length ? Math.max(...totals) : 0) + '</div></div>';
-      html += '<div class="stat-item"><div class="label">Low Score</div><div class="value">' + (d.players.length ? Math.min(...totals) : 0) + '</div></div>';
+      html += '<div class="stat-item"><div class="label">Players</div><div class="value">' + ranked.length + '</div></div>';
+      html += '<div class="stat-item"><div class="label">High Score</div><div class="value">' + (ranked.length ? Math.max.apply(null, totals) : 0) + '</div></div>';
+      html += '<div class="stat-item"><div class="label">Low Score</div><div class="value">' + (ranked.length ? Math.min.apply(null, totals) : 0) + '</div></div>';
       html += '<div class="stat-item"><div class="label">Average</div><div class="value">' + avg + '</div></div>';
       html += '<div class="stat-item"><div class="label">Overall Hit Rate</div><div class="value">' + (totalPossible ? Math.round((totalHits / totalPossible) * 100) : 0) + '%</div></div>';
       html += '<div class="stat-item"><div class="label">Max Possible</div><div class="value">' + maxPossible + '</div></div>';
       if (hadTiebreakers) {
-        html += '<div class="stat-item"><div class="label">TB Rounds</div><div class="value">' + (d.tbRounds || maxRounds) + '</div></div>';
+        html += '<div class="stat-item"><div class="label">TB Rounds</div><div class="value">' + maxTbRounds + '</div></div>';
       }
+      html += '<div class="stat-item"><div class="label">Shared Places</div><div class="value">' + sharedPlaces + '</div></div>';
       html += '</div></div>';
 
-      // Print + footer
       html += '<div class="print-wrap"><button class="btn-print" onclick="window.print()">Print Report</button></div>';
       html += '<footer><p>Game concept and development by Jeff White</p><p>Webapp by Aaron Shour @ M3</p></footer>';
 
       container.innerHTML = html;
     }
 
-    function escHtml(str) {
-      const d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
+    const data = loadReportData();
+    if (!data) {
+      container.innerHTML = '<div class="no-data"><h2>No Report Data</h2><p>No competition data found. <a href="compmode.html">Start a competition</a> first.</p></div>';
+    } else {
+      renderReport(data);
     }
   </script>
 </body>
