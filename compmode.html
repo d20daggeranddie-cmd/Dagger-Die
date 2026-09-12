@@ -553,6 +553,24 @@
   .hm-btn-hit:hover { box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
   .hm-btn-cancel { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); }
   .hm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
+  .hm-btn-sm { padding: 8px 14px; font-size: 0.8rem; }
+  .hm-btn-danger { background: linear-gradient(45deg, #e74c3c, #c0392b); color: #fff; }
+  .hm-btn-danger:hover { box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4); transform: translateY(-2px); }
+  .hm-dialog-wide { max-width: 460px; max-height: 85vh; overflow-y: auto; }
+  .incomplete-list {
+    list-style: none; text-align: left; margin: 4px 0 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 50vh; overflow-y: auto;
+  }
+  .incomplete-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+  }
+  .incomplete-item-name {
+    flex: 1 1 auto; min-width: 0; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   .hm-summary { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin: 12px 0 14px; line-height: 1.5; }
   .hm-summary strong { color: #feca57; }
   .hm-rename-input {
@@ -1599,6 +1617,90 @@
       return { name: result.name };
     }
 
+    function isScorecardComplete(player) {
+      return !!(player && player.locked);
+    }
+
+    function getIncompletePlayers() {
+      return compState.players
+        .map((player, index) => ({ player, index }))
+        .filter(({ player }) => !isScorecardComplete(player));
+    }
+
+    function removePlayer(pIdx) {
+      if (compState.finalized || compState.phase === 'tiebreaker') return false;
+      if (!compState.players[pIdx]) return false;
+      compState.players.splice(pIdx, 1);
+      renderScorecard();
+      updateScorecardChrome();
+      broadcastLeaderboardState();
+      saveCompState();
+      return true;
+    }
+
+    function showIncompleteScorecardsModal() {
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Incomplete scorecards');
+
+      function close() { overlay.remove(); }
+
+      function renderBody() {
+        const incomplete = getIncompletePlayers();
+        const listHtml = incomplete.length
+          ? '<ul class="incomplete-list">' + incomplete.map(({ player, index }) =>
+              '<li class="incomplete-item">' +
+                '<span class="incomplete-item-name">' + escHtml(player.name) + '</span>' +
+                '<button type="button" class="hm-btn hm-btn-sm hm-btn-hit" data-score="' + index + '">Score</button>' +
+                '<button type="button" class="hm-btn hm-btn-sm hm-btn-danger" data-remove="' + index + '">Remove</button>' +
+              '</li>'
+            ).join('') + '</ul>'
+          : '';
+
+        overlay.innerHTML =
+          '<div class="hm-dialog hm-dialog-wide">' +
+            '<div class="hm-title">Scorecards Incomplete</div>' +
+            '<div class="hm-subtitle">' +
+              (incomplete.length
+                ? 'Every player needs a completed scorecard before you can finalize. Complete their scores or remove them from the game.'
+                : 'All remaining scorecards are complete. You can finalize the game.') +
+            '</div>' +
+            listHtml +
+            '<div class="hm-buttons">' +
+              '<button type="button" class="hm-btn hm-btn-cancel">OK</button>' +
+            '</div>' +
+          '</div>';
+
+        overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+        overlay.querySelectorAll('[data-score]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pIdx = parseInt(btn.dataset.score, 10);
+            close();
+            if (!Number.isNaN(pIdx)) showScoringModal(pIdx);
+          });
+        });
+        overlay.querySelectorAll('[data-remove]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pIdx = parseInt(btn.dataset.remove, 10);
+            if (Number.isNaN(pIdx)) return;
+            if (!compState.players[pIdx]) return;
+            removePlayer(pIdx);
+            if (!getIncompletePlayers().length) close();
+            else renderBody();
+          });
+        });
+      }
+
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+      document.body.appendChild(overlay);
+      renderBody();
+      const focusBtn = overlay.querySelector('[data-score]') || overlay.querySelector('.hm-btn-cancel');
+      if (focusBtn) focusBtn.focus();
+    }
+
     function addPlayer() {
       if (compState.phase !== 'main' || compState.finalized) return;
       regError.textContent = '';
@@ -2217,6 +2319,12 @@
       }
       if (compState.players.length === 0) {
         alert('No players have joined yet.');
+        return;
+      }
+
+      const incomplete = getIncompletePlayers();
+      if (incomplete.length) {
+        showIncompleteScorecardsModal();
         return;
       }
 
