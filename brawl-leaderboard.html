@@ -796,6 +796,7 @@
 
     function getPlayerRollsHtml(p, data) {
       if (!p.isCurrent) return '';
+      if (data.currentRollOwnerId != null && p.id !== data.currentRollOwnerId) return '';
       const rolls = data.currentRolls || [];
       if (!rolls.length) return '';
       const claimed = !!data.damageClaimed;
