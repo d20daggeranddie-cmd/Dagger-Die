@@ -291,6 +291,11 @@
             box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
         }
 
+        .player-input.error-same-team .team-avatar-btn {
+            border: 2px solid #e74c3c;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+        }
+
         .setup-error {
             background: rgba(231, 76, 60, 0.2);
             border: 2px solid #e74c3c;
@@ -688,9 +693,15 @@
         }
         .team-picker-modal h3 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             font-size: 1.1rem;
             color: rgba(255,255,255,0.9);
+        }
+        .team-picker-hint {
+            text-align: center;
+            margin: 0 0 16px;
+            font-size: 0.85rem;
+            opacity: 0.75;
         }
         .team-picker-grid {
             display: grid;
@@ -846,6 +857,7 @@
     <div class="team-picker-modal-overlay" id="team-picker-modal" role="dialog" aria-label="Pick team">
         <div class="team-picker-modal">
             <h3>Join a Party</h3>
+            <p class="team-picker-hint">At least two different teams are required.</p>
             <div class="team-picker-grid" id="team-picker-grid"></div>
         </div>
     </div>
@@ -858,6 +870,7 @@
     <script src="teams.js"></script>
     <script>
         const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
+        const GAME_STATE_KEY = 'daggerdie_gameState';
         const BOTS_ENABLED_KEY = 'daggerdie_botsEnabled';
         const MOD_PARTY_KEY = 'daggerdie_modParty';
         const MOD_BOSS_KEY = 'daggerdie_modBoss';
@@ -1068,6 +1081,7 @@
                         }
                     }
                     teamPickerModal.classList.remove('open');
+                    checkDuplicateNames();
                 });
             });
         }
@@ -1197,11 +1211,40 @@
                 input.addEventListener('input', checkDuplicateNames);
             });
             startGameBtn.style.display = 'block';
+            checkDuplicateNames();
+        }
+
+        const SAME_TEAM_ERROR = 'At least two different teams are required. All players cannot be on the same team.';
+
+        function allPlayersOnSameTeam() {
+            if (!partyEnabled() || !TEAMS.length) return false;
+            const teamIds = [];
+            playerSetup.querySelectorAll('.player-input').forEach(row => {
+                if (row.dataset.teamId) teamIds.push(row.dataset.teamId);
+            });
+            return new Set(teamIds).size < 2;
+        }
+
+        function applySameTeamHighlight(on) {
+            playerSetup.querySelectorAll('.player-input').forEach(el => {
+                el.classList.toggle('error-same-team', on);
+            });
+        }
+
+        function showSetupErrorMessages(messages) {
+            const errorEl = document.getElementById('setup-error');
+            if (!errorEl) return;
+            if (messages.length) {
+                errorEl.textContent = messages.join(' ');
+                errorEl.classList.remove('hidden');
+            } else {
+                errorEl.classList.add('hidden');
+                errorEl.textContent = '';
+            }
         }
 
         function checkDuplicateNames() {
             const inputs = playerSetup.querySelectorAll('input[type="text"]');
-            const errorEl = document.getElementById('setup-error');
             document.querySelectorAll('.player-input').forEach(el => el.classList.remove('error-duplicate'));
             const names = [];
             for (let idx = 0; idx < inputs.length; idx++) {
@@ -1214,18 +1257,19 @@
                 nameCount[key] = (nameCount[key] || 0) + 1;
             });
             const duplicates = new Set(Object.entries(nameCount).filter(([, c]) => c > 1).map(([k]) => k));
+            const messages = [];
             if (duplicates.size > 0) {
                 inputs.forEach((input, idx) => {
                     if (duplicates.has(names[idx].toLowerCase())) {
                         input.closest('.player-input').classList.add('error-duplicate');
                     }
                 });
-                errorEl.textContent = `Names must be unique: ${[...duplicates].join(', ')} appears more than once.`;
-                errorEl.classList.remove('hidden');
-            } else {
-                errorEl.classList.add('hidden');
-                errorEl.textContent = '';
+                messages.push(`Names must be unique: ${[...duplicates].join(', ')} appears more than once.`);
             }
+            const sameTeam = allPlayersOnSameTeam();
+            applySameTeamHighlight(sameTeam);
+            if (sameTeam) messages.push(SAME_TEAM_ERROR);
+            showSetupErrorMessages(messages);
         }
 
         const NAME_MIN_LEN = 2;
@@ -1281,6 +1325,14 @@
             if (duplicateNames.size > 0) {
                 errors.push(`Names must be unique: ${[...duplicateNames].join(', ')} appears more than once.`);
             }
+            const sameTeam = allPlayersOnSameTeam();
+            applySameTeamHighlight(sameTeam);
+            if (sameTeam) {
+                errors.push(SAME_TEAM_ERROR);
+                if (!firstInvalidInput) {
+                    firstInvalidInput = playerSetup.querySelector('.team-avatar-btn');
+                }
+            }
             if (errors.length > 0) {
                 errorEl.textContent = errors.join(' ');
                 errorEl.classList.remove('hidden');
@@ -1292,8 +1344,30 @@
             return true;
         }
 
+        function readSavedBrawl() {
+            try {
+                const raw = localStorage.getItem(GAME_STATE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!data || !Array.isArray(data.players) || data.players.length < 2) return null;
+                if (data.phase !== 'playing' && data.phase !== 'turnOrder') return null;
+                return data;
+            } catch (e) {
+                return null;
+            }
+        }
+
         startGameBtn.addEventListener('click', () => {
             if (!validatePlayerNames()) return;
+
+            const savedMatch = readSavedBrawl();
+            if (savedMatch) {
+                const names = savedMatch.players.map(p => p.name).filter(Boolean).join(', ');
+                const msg = 'Start a new game?\n\nThis replaces the saved match'
+                    + (names ? ' (' + names + ')' : '')
+                    + '.\nThere is no undo.\n\nOK = Start new game\nCancel = Keep the saved match';
+                if (!confirm(msg)) return;
+            }
 
             const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
             const payload = [];
