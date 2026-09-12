@@ -182,6 +182,11 @@
 
   .game-tile { display: block; text-decoration: none; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; margin-bottom: 50px; text-align: center; border: 3px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
   .game-tile:hover { background: rgba(255,255,255,0.15); border-color: #feca57; box-shadow: 0 0 30px rgba(254, 202, 87, 0.3); transform: translateY(-4px); }
+  .game-tile-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .game-tile .btn { text-decoration: none; }
+  .game-tile .btn.hidden,
+  .resume-match-detail.hidden { display: none; }
+  .resume-match-detail { color: rgba(46, 204, 113, 0.9); font-size: 0.92rem; margin: -8px 0 16px; }
   .game-tile-icon { font-size: 4rem; margin-bottom: 15px; line-height: 1; display: flex; justify-content: center; }
   .game-tile-icon img { width: 6.25rem; height: 6.25rem; object-fit: contain; }
   .game-tile h2 {
@@ -203,6 +208,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    text-decoration: none;
     padding: 8px 16px;
     font-family: 'Cinzel', Georgia, serif;
     font-size: 0.72rem;
@@ -467,12 +473,16 @@
         <p class="tagline">Precision knife throwing in a retro turn based RPG format</p>
       </header>
 
-      <a href="charselect.html" class="game-tile">
+      <div class="game-tile" id="brawl-tile">
         <div class="game-tile-icon"><img src="assets/DND.png" alt="Game Tracker" loading="lazy"></div>
         <h2>Prepare For Battle!</h2>
         <p>Roll Dice, Throw Knives, Deal Damage, Die Last.</p>
-        <span class="btn">Start Game</span>
-      </a>
+        <p class="resume-match-detail hidden" id="resume-match-detail"></p>
+        <div class="game-tile-actions">
+          <a href="game.html" class="btn hidden" id="resume-match-btn">Resume Match</a>
+          <a href="charselect.html" class="btn" id="start-new-game-btn">Start Game</a>
+        </div>
+      </div>
 
       <button class="options-toggle" id="options-toggle" aria-expanded="false" aria-controls="options-menu">
         Options
@@ -559,12 +569,12 @@
             <input type="checkbox" id="mod-party-cb" aria-describedby="mod-party-hint">
             <label for="mod-party-cb">Party</label>
           </div>
-          <p id="mod-party-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Players choose teams on the character select screen. Last team standing wins.</p>
+          <p id="mod-party-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Players choose teams on the character select screen. Last team standing wins. At least two different teams are required. Must be set here — it cannot be changed in-game.</p>
           <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="mod-boss-cb" aria-describedby="mod-boss-hint">
             <label for="mod-boss-cb">Boss Mode</label>
           </div>
-          <p id="mod-boss-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Mark which players are bosses on the character select screen. Bosses use a separate HP value from everyone else.</p>
+          <p id="mod-boss-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Mark which players are bosses on the character select screen. Bosses use a separate HP value. Killing every boss wins the match for the party; wiping the party wins it for the boss.</p>
           <div class="custom-hp-row" id="boss-hp-row">
             <label for="boss-hp-input">Boss HP (20–999)</label>
             <input type="number" id="boss-hp-input" min="20" max="999" placeholder="e.g. 100" disabled>
@@ -960,6 +970,53 @@
       });
 
       logo.addEventListener('click', () => { clearTimeout(autoTimer); dismiss(); });
+    })();
+  </script>
+  <script>
+    (function() {
+      const GAME_STATE_KEY = 'daggerdie_gameState';
+      const PLAYERS_SETUP_KEY = 'daggerdie_playersSetup';
+      const resumeBtn = document.getElementById('resume-match-btn');
+      const resumeDetail = document.getElementById('resume-match-detail');
+      if (!resumeBtn || !resumeDetail) return;
+
+      function formatSavedAt(iso) {
+        if (!iso) return '';
+        try {
+          const d = new Date(iso);
+          if (Number.isNaN(d.getTime())) return '';
+          return d.toLocaleString(undefined, {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+          });
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function readSavedBrawl() {
+        try {
+          const raw = localStorage.getItem(GAME_STATE_KEY);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (!data || !Array.isArray(data.players) || data.players.length < 2) return null;
+          if (data.phase !== 'playing' && data.phase !== 'turnOrder') return null;
+          return data;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      const saved = readSavedBrawl();
+      if (!saved) return;
+
+      const names = saved.players.map(p => p.name).filter(Boolean).join(', ');
+      const when = formatSavedAt(saved.savedAt);
+      resumeDetail.textContent = (names || 'Match in progress') + (when ? ' — saved ' + when : '');
+      resumeDetail.classList.remove('hidden');
+      resumeBtn.classList.remove('hidden');
+      resumeBtn.addEventListener('click', () => {
+        try { sessionStorage.removeItem(PLAYERS_SETUP_KEY); } catch (e) {}
+      });
     })();
   </script>
 </body>
