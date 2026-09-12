@@ -327,6 +327,12 @@
   }
   .btn-finalize { background: linear-gradient(45deg, #feca57, #d4a84b); color: #1a1040; }
   .btn-finalize:hover { box-shadow: 0 5px 20px rgba(254, 202, 87, 0.4); transform: translateY(-2px); }
+  .btn-view-report {
+    display: none; margin: 12px auto 0;
+    background: linear-gradient(45deg, #48dbfb, #0abde3); color: #0a0c18;
+  }
+  .btn-view-report.visible { display: block; }
+  .btn-view-report:hover { box-shadow: 0 5px 20px rgba(72, 219, 251, 0.35); transform: translateY(-2px); }
   .btn-center { display: block; margin: 0 auto; }
 
   /* ─── Target Board ─── */
@@ -457,7 +463,7 @@
   }
   .scorecard-table tbody td:first-child {
     text-align: left; font-weight: 600; color: rgba(255,255,255,0.95);
-    white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 200px;
   }
   .scorecard-table tr.player-row {
     cursor: pointer; transition: background 0.15s;
@@ -477,6 +483,24 @@
   .scorecard-table .player-name-cell {
     position: relative;
   }
+  .scorecard-table .player-name-main {
+    display: flex; align-items: center; gap: 6px; min-width: 0;
+  }
+  .scorecard-table .player-name-text {
+    overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  .scorecard-table .rename-btn {
+    flex: 0 0 auto; width: 28px; height: 28px; padding: 0;
+    border: none; border-radius: 7px; cursor: pointer;
+    background: rgba(254, 202, 87, 0.12); color: #feca57;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .scorecard-table .rename-btn:hover,
+  .scorecard-table .rename-btn:focus {
+    outline: none; background: rgba(254, 202, 87, 0.3);
+  }
+  .scorecard-table .rename-btn svg { display: block; }
   .scorecard-table .player-name-cell .score-hint {
     display: block; font-size: 0.7rem; font-weight: 400;
     color: rgba(254, 202, 87, 0.65); margin-top: 2px;
@@ -531,6 +555,17 @@
   .hm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
   .hm-summary { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin: 12px 0 14px; line-height: 1.5; }
   .hm-summary strong { color: #feca57; }
+  .hm-rename-input {
+    width: 100%; min-width: 0; margin: 8px 0 0; text-align: center;
+  }
+  .hm-name-input {
+    width: 100%; padding: 8px 12px; margin: 6px 0 4px;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.3); color: #fff;
+    font-size: 1rem; font-weight: 700; text-align: center;
+  }
+  .hm-name-input:focus { outline: none; border-color: #feca57; }
+  .hm-name-error { min-height: 1.2em; margin: 0 0 4px; }
   .score-throws {
     display: flex; flex-direction: column; gap: 4px;
     margin-bottom: 0;
@@ -599,6 +634,10 @@
   }
   .tb-banner.visible { display: block; }
   .tb-banner strong { color: #feca57; }
+  .tb-banner.ready {
+    background: linear-gradient(45deg, rgba(72,219,251,0.12), rgba(254,202,87,0.14));
+    border-color: rgba(72, 219, 251, 0.4);
+  }
   .tb-banner .tb-hint {
     display: block; margin-top: 4px;
     font-size: 0.8rem; color: rgba(255,255,255,0.55);
@@ -620,6 +659,8 @@
     transition: all 0.2s;
   }
   .backup-bar .btn-backup:hover { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(254,202,87,0.45); }
+  .backup-bar .btn-backup-danger { border-color: rgba(231, 76, 60, 0.45); color: rgba(255, 180, 170, 0.95); }
+  .backup-bar .btn-backup-danger:hover { background: rgba(231, 76, 60, 0.18); border-color: rgba(231, 76, 60, 0.7); color: #fff; }
   .backup-status {
     width: 100%; text-align: center; font-size: 0.75rem;
     color: rgba(255,255,255,0.45); margin-top: 4px; min-height: 1.1em;
@@ -774,6 +815,10 @@
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Restore competition backup
             </button>
+            <button type="button" id="resources-new-competition-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              New competition
+            </button>
           </div>
         </div>
       </div>
@@ -922,15 +967,17 @@
           <thead id="scorecard-head"></thead>
           <tbody id="scorecard-body"></tbody>
         </table>
-        <div class="no-players" id="no-players">No players yet. Register above, then tap a player to score.</div>
+        <div class="no-players" id="no-players">No players yet. Register above, then tap a player to score. Use the pencil to fix a name.</div>
       </div>
 
       <!-- Finalize -->
       <div class="finalize-wrap" id="finalize-wrap">
         <button class="btn btn-finalize" id="finalize-btn">Finalize Game</button>
+        <button type="button" class="btn btn-finalize btn-view-report" id="view-report-btn">View Report</button>
         <div class="backup-bar">
           <button type="button" class="btn-backup" id="export-backup-btn" title="Download a JSON backup of targets, players, and scores">Export Backup</button>
           <button type="button" class="btn-backup" id="restore-backup-btn" title="Restore from a previously exported backup file">Restore Backup</button>
+          <button type="button" class="btn-backup btn-backup-danger" id="new-competition-btn" title="Discard the saved competition and start over">New Competition</button>
           <div class="backup-status" id="backup-status"></div>
         </div>
         <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
@@ -948,6 +995,7 @@
     data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
   <script src="rpg-bg-canvas.js"></script>
   <script src="audio.js"></script>
+  <script src="comp-ranking.js"></script>
   <script>
     const compState = {
       targets: [],
@@ -972,6 +1020,7 @@
     const tbBanner = document.getElementById('tb-banner');
     const finalizeWrap = document.getElementById('finalize-wrap');
     const finalizeBtn = document.getElementById('finalize-btn');
+    const viewReportBtn = document.getElementById('view-report-btn');
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
 
     function syncSoundToggleUi() {
@@ -1003,6 +1052,7 @@
           finalized: compState.finalized,
           phase: compState.phase,
           tbRound: compState.tbRound,
+          tbReady: isTbRoundReady(),
           players: getSortedPlayers().map(p => {
             const activeHits = getActiveHits(p);
             const hitCount = activeHits.filter(h => h === true).length;
@@ -1010,7 +1060,7 @@
             let status = 'registered';
             if (compState.finalized) status = 'locked';
             else if (compState.phase === 'tiebreaker' && p.tbActive) {
-              status = p.tbLocked ? 'scored' : 'tiebreaker';
+              status = p.tbLocked ? (isTbRoundReady() ? 'review' : 'scored') : 'tiebreaker';
             } else if (p.locked || (compState.phase === 'tiebreaker' && !p.tbActive)) {
               status = 'scored';
             } else if (scored) {
@@ -1201,7 +1251,7 @@
 
     function serializeCompState() {
       return {
-        version: 1,
+        version: 2,
         savedAt: new Date().toISOString(),
         targets: compState.targets.slice(),
         players: compState.players.map(p => ({
@@ -1211,7 +1261,12 @@
           tbActive: !!p.tbActive,
           tbHits: Array.isArray(p.tbHits) ? p.tbHits.slice() : null,
           tbLocked: !!p.tbLocked,
-          tbHistory: Array.isArray(p.tbHistory) ? p.tbHistory.slice() : []
+          tbHistory: Array.isArray(p.tbHistory) ? p.tbHistory.slice() : [],
+          tbThrows: Array.isArray(p.tbThrows) ? p.tbThrows.map(r => ({
+            hits: r && Array.isArray(r.hits) ? r.hits.slice() : null,
+            misses: r && Array.isArray(r.misses) ? r.misses.slice() : null,
+            total: r && typeof r.total === 'number' ? r.total : 0
+          })) : []
         })),
         finalized: !!compState.finalized,
         phase: compState.phase === 'tiebreaker' ? 'tiebreaker' : 'main',
@@ -1219,8 +1274,10 @@
       };
     }
 
+    let suppressCompSave = false;
+
     function saveCompState() {
-      if (!compState.targets.length) return;
+      if (suppressCompSave || !compState.targets.length) return;
       try {
         const payload = serializeCompState();
         localStorage.setItem(COMP_STATE_KEY, JSON.stringify(payload));
@@ -1321,7 +1378,8 @@
         tbLocked: !!p.tbLocked,
         tbHistory: Array.isArray(p.tbHistory)
           ? p.tbHistory.filter(n => typeof n === 'number')
-          : []
+          : [],
+        tbThrows: normalizeTbThrows(p)
       }));
 
       targetsLocked = true;
@@ -1331,12 +1389,7 @@
       if (compState.finalized) {
         finalizeBtn.disabled = true;
         finalizeBtn.textContent = 'Game Finalized';
-      } else if (compState.phase === 'tiebreaker') {
-        finalizeBtn.disabled = true;
-        finalizeBtn.textContent = 'Tiebreaker in Progress…';
-      } else {
-        finalizeBtn.disabled = false;
-        finalizeBtn.textContent = 'Finalize Game';
+        setViewReportVisible(true);
       }
 
       saveCompState();
@@ -1398,39 +1451,47 @@
       reader.readAsText(file);
     }
 
-    function offerResumeSavedCompetition() {
+    function resumeSavedCompetition() {
       if (compState.targets.length) return;
       const saved = readSavedCompState();
       if (!saved) return;
       const err = validateCompSnapshot(saved);
-      if (err) {
-        clearCompStateSave();
+      if (err) return;
+
+      try {
+        applyCompSnapshot(saved);
+      } catch (e) {
+        alert('Could not resume saved competition: ' + (e.message || 'unknown error') +
+          '\n\nThe save is still in this browser. Use Export Backup to keep a copy.');
+      }
+    }
+
+    function promptNewCompetition() {
+      const saved = readSavedCompState();
+      const hasGame = !!compState.targets.length || !!saved;
+      if (!hasGame) {
+        alert('No saved competition to discard.');
         return;
       }
 
-      const when = formatBackupTime(saved.savedAt) || 'earlier';
-      const count = Array.isArray(saved.players) ? saved.players.length : 0;
-      const phaseNote = saved.finalized
-        ? ' (finalized)'
-        : (saved.phase === 'tiebreaker' ? ' (tiebreaker)' : '');
-      const msg = 'A saved competition was found from ' + when +
-        ' with ' + count + ' player(s)' + phaseNote + '.\n\n' +
-        'Resume it now?\n\n' +
-        'OK = Resume\nCancel = Discard saved data and start fresh';
-      if (confirm(msg)) {
-        try {
-          applyCompSnapshot(saved);
-        } catch (e) {
-          alert('Could not resume saved competition: ' + (e.message || 'unknown error'));
-          clearCompStateSave();
-        }
-      } else {
-        clearCompStateSave();
-      }
+      const count = compState.players.length ||
+        (saved && Array.isArray(saved.players) ? saved.players.length : 0);
+      const msg = 'Start a new competition?\n\n' +
+        'This removes the current saved game from this browser' +
+        (count ? ' (' + count + ' player(s))' : '') +
+        '.\nThere is no undo.\n\n' +
+        'Export a backup first if you might need it.\n\n' +
+        'OK = Discard and start fresh\nCancel = Keep the current competition';
+      if (!confirm(msg)) return;
+
+      suppressCompSave = true;
+      clearCompStateSave();
+      window.location.reload();
     }
 
     exportBackupBtn.addEventListener('click', exportCompBackup);
     restoreBackupBtn.addEventListener('click', promptRestoreFile);
+    document.getElementById('new-competition-btn').addEventListener('click', promptNewCompetition);
     restoreFileInput.addEventListener('change', () => {
       const file = restoreFileInput.files && restoreFileInput.files[0];
       restoreCompBackupFromFile(file);
@@ -1511,32 +1572,106 @@
     joinBtn.addEventListener('click', addPlayer);
     regInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
 
+    function validatePlayerName(raw, excludeIdx) {
+      const name = (raw || '').trim();
+      if (!name) return { error: 'Please enter a name.' };
+      if (name.length > 30) return { error: 'Name must be 30 characters or less.' };
+      const nameLower = name.toLowerCase();
+      const taken = compState.players.some((p, i) => {
+        if (excludeIdx != null && i === excludeIdx) return false;
+        return p.name.toLowerCase() === nameLower;
+      });
+      if (taken) return { error: 'That name is already taken.' };
+      return { name };
+    }
+
+    function applyPlayerName(pIdx, rawName) {
+      if (compState.finalized) return { error: 'The game is finalized.' };
+      const player = compState.players[pIdx];
+      if (!player) return { error: 'Player not found.' };
+      const result = validatePlayerName(rawName, pIdx);
+      if (result.error) return result;
+      if (player.name === result.name) return { name: result.name, unchanged: true };
+      player.name = result.name;
+      renderScorecard();
+      broadcastLeaderboardState();
+      saveCompState();
+      return { name: result.name };
+    }
+
     function addPlayer() {
       if (compState.phase !== 'main' || compState.finalized) return;
       regError.textContent = '';
-      const name = regInput.value.trim();
-      if (!name) { regError.textContent = 'Please enter a name.'; return; }
-      if (name.length > 30) { regError.textContent = 'Name must be 30 characters or less.'; return; }
-      const nameLower = name.toLowerCase();
-      if (compState.players.some(p => p.name.toLowerCase() === nameLower)) {
-        regError.textContent = 'That name is already taken.';
-        return;
-      }
+      const result = validatePlayerName(regInput.value);
+      if (result.error) { regError.textContent = result.error; return; }
 
       compState.players.push({
-        name,
+        name: result.name,
         hits: new Array(9).fill(null),
         locked: false,
         tbActive: false,
         tbHits: null,
         tbLocked: false,
-        tbHistory: []
+        tbHistory: [],
+        tbThrows: []
       });
       regInput.value = '';
       regInput.focus();
       renderScorecard();
       broadcastLeaderboardState();
       saveCompState();
+    }
+
+    const RENAME_ICON =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+
+    function showRenameModal(pIdx) {
+      const player = compState.players[pIdx];
+      if (!player || compState.finalized) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hm-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Edit player name');
+
+      overlay.innerHTML =
+        '<div class="hm-dialog">' +
+          '<div class="hm-title">Edit Name</div>' +
+          '<div class="hm-subtitle">Fix a typo. Scores stay the same.</div>' +
+          '<input type="text" class="reg-input hm-rename-input" maxlength="30" autocomplete="off" value="' +
+            escHtml(player.name) + '">' +
+          '<div class="reg-error hm-rename-error"></div>' +
+          '<div class="hm-buttons">' +
+            '<button type="button" class="hm-btn hm-btn-hit">Save</button>' +
+            '<button type="button" class="hm-btn hm-btn-cancel">Cancel</button>' +
+          '</div>' +
+        '</div>';
+
+      const input = overlay.querySelector('.hm-rename-input');
+      const errEl = overlay.querySelector('.hm-rename-error');
+
+      function close() { overlay.remove(); }
+
+      function save() {
+        errEl.textContent = '';
+        const result = applyPlayerName(pIdx, input.value);
+        if (result.error) { errEl.textContent = result.error; input.focus(); return; }
+        close();
+      }
+
+      overlay.querySelector('.hm-btn-hit').addEventListener('click', save);
+      overlay.querySelector('.hm-btn-cancel').addEventListener('click', close);
+      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+      overlay.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+        if (e.key === 'Enter') { e.preventDefault(); save(); }
+      });
+
+      document.body.appendChild(overlay);
+      input.focus();
+      input.select();
     }
 
     function getHitsTotal(hits) {
@@ -1554,67 +1689,187 @@
     }
 
     function rankingKey(player) {
-      return [getTotal(player)].concat(player.tbHistory || []);
+      return DaggerDieCompRanking.rankingKey(player, getTotal);
     }
 
     function compareRankingKeys(aKey, bKey) {
-      const len = Math.max(aKey.length, bKey.length);
-      for (let i = 0; i < len; i++) {
-        const av = aKey[i];
-        const bv = bKey[i];
-        if (av == null && bv == null) continue;
-        if (av == null) return 1;
-        if (bv == null) return -1;
-        if (bv !== av) return bv - av;
-      }
-      return 0;
+      return DaggerDieCompRanking.compareRankingKeys(aKey, bKey);
     }
 
     function playersTied(a, b) {
-      return compareRankingKeys(rankingKey(a), rankingKey(b)) === 0;
+      return DaggerDieCompRanking.playersTied(a, b, getTotal);
     }
 
     function getSortedPlayers() {
-      return compState.players.slice().sort((a, b) => {
-        const cmp = compareRankingKeys(rankingKey(a), rankingKey(b));
-        if (cmp !== 0) return cmp;
-        return a.name.localeCompare(b.name);
-      });
+      return DaggerDieCompRanking.sortPlayers(compState.players, getTotal);
     }
 
-    function findTieGroups() {
-      const sorted = getSortedPlayers();
+    function setViewReportVisible(on) {
+      if (!viewReportBtn) return;
+      viewReportBtn.classList.toggle('visible', !!on);
+    }
+
+    function snapshotTbThrows(hits) {
+      const cells = Array.isArray(hits) ? hits : [];
+      return {
+        hits: cells.map(h => h === true),
+        misses: cells.map(h => h === false),
+        total: getHitsTotal(cells)
+      };
+    }
+
+    function normalizeTbThrows(p) {
+      if (Array.isArray(p.tbThrows)) {
+        return p.tbThrows.map(round => {
+          if (!round || typeof round !== 'object') return null;
+          const total = typeof round.total === 'number' ? round.total : 0;
+          const hits = Array.isArray(round.hits) && round.hits.length === 9
+            ? round.hits.map(h => h === true)
+            : null;
+          const misses = Array.isArray(round.misses) && round.misses.length === 9
+            ? round.misses.map(h => h === true)
+            : null;
+          return { hits, misses, total };
+        }).filter(Boolean);
+      }
+      if (Array.isArray(p.tbHistory)) {
+        return p.tbHistory.filter(n => typeof n === 'number').map(total => ({
+          hits: null, misses: null, total
+        }));
+      }
+      return [];
+    }
+
+    function buildReportData() {
+      const players = DaggerDieCompRanking.assignRanks(compState.players.map(p => ({
+        name: p.name,
+        hits: (p.hits || []).map(h => h === true),
+        misses: (p.hits || []).map(h => h === false),
+        total: getTotal(p),
+        tbHistory: (p.tbHistory || []).slice(),
+        tbThrows: (p.tbThrows && p.tbThrows.length)
+          ? p.tbThrows.map(r => ({
+              hits: r.hits ? r.hits.slice() : null,
+              misses: r.misses ? r.misses.slice() : null,
+              total: r.total
+            }))
+          : normalizeTbThrows(p)
+      })));
+      return {
+        version: 2,
+        targets: compState.targets.slice(),
+        players: players,
+        tbRounds: compState.tbRound,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    function persistReportData(reportData) {
+      const raw = JSON.stringify(reportData);
+      sessionStorage.setItem('daggerdie_compReport', raw);
+      try { localStorage.setItem('daggerdie_compReport', raw); } catch (e) { /* quota */ }
+    }
+
+    function openCompetitionReport() {
+      if (!compState.finalized || !compState.players.length) {
+        alert('Finalize the game first to open the report.');
+        return;
+      }
+      let reportData;
+      try {
+        reportData = buildReportData();
+        persistReportData(reportData);
+      } catch (err) {
+        alert('Could not save report data.');
+        return;
+      }
+      const w = window.open('comp-report.html', '_blank');
+      if (!w) {
+        alert('Popup blocked. Open comp-report.html from this same browser, or allow popups and tap View Report again.');
+      }
+    }
+
+    function findTieGroups(getKey) {
+      const sorted = getKey
+        ? compState.players.slice().sort((a, b) => {
+            const cmp = compareRankingKeys(getKey(a), getKey(b));
+            if (cmp !== 0) return cmp;
+            return String(a.name || '').localeCompare(String(b.name || ''));
+          })
+        : getSortedPlayers();
       const groups = [];
       let i = 0;
       while (i < sorted.length) {
         let j = i + 1;
-        while (j < sorted.length && playersTied(sorted[i], sorted[j])) j++;
-        if (j - i > 1) groups.push(sorted.slice(i, j));
+        while (j < sorted.length && compareRankingKeys(
+          (getKey || rankingKey)(sorted[i]),
+          (getKey || rankingKey)(sorted[j])
+        ) === 0) j++;
+        // Competition rank is i+1. Only podium ties (1st–3rd) need breaking;
+        // ties at 4th and below share the place.
+        if (j - i > 1 && (i + 1) <= 3) groups.push(sorted.slice(i, j));
         i = j;
       }
       return groups;
     }
 
+    function pendingTbRankingKey(player) {
+      const key = rankingKey(player);
+      if (compState.phase === 'tiebreaker' && player.tbActive && Array.isArray(player.tbHits)) {
+        return key.concat(getHitsTotal(player.tbHits));
+      }
+      return key;
+    }
+
+    function findPendingTieGroups() {
+      return findTieGroups(pendingTbRankingKey);
+    }
+
+    function isTbRoundReady() {
+      if (compState.phase !== 'tiebreaker') return false;
+      const active = compState.players.filter(p => p.tbActive);
+      return active.length > 0 && active.every(p => p.tbLocked);
+    }
+
     function updateScorecardChrome() {
       if (compState.phase === 'tiebreaker') {
-        scorecardTitle.textContent = 'Tiebreaker Round ' + compState.tbRound;
+        const ready = isTbRoundReady();
+        scorecardTitle.textContent = ready
+          ? 'Tiebreaker Round ' + compState.tbRound + ' — Review'
+          : 'Tiebreaker Round ' + compState.tbRound;
         const groups = findTieGroups().filter(g => g.some(p => p.tbActive));
         const parts = groups.map(g => {
           const names = g.map(p => p.name).join(' & ');
           return '<strong>' + escHtml(names) + '</strong> tied at ' + getTotal(g[0]);
         });
+        const active = compState.players.filter(p => p.tbActive);
+        let hint = 'Throw the same targets again. Higher score wins the place.';
+        if (ready) {
+          const scores = active.map(p =>
+            escHtml(p.name) + ' ' + getHitsTotal(p.tbHits)
+          ).join(' · ');
+          const stillTied = findPendingTieGroups().length > 0;
+          hint = scores + '<br>' + (stillTied
+            ? 'Still tied. Confirm to start another round, or tap a row to edit.'
+            : 'Review scores, then confirm to finalize. Tap a row to edit.');
+        }
         tbBanner.innerHTML = parts.join('<br>') +
-          '<span class="tb-hint">Throw the same targets again. Higher score wins the place.</span>';
+          '<span class="tb-hint">' + hint + '</span>';
         tbBanner.classList.add('visible');
-        finalizeBtn.disabled = true;
-        finalizeBtn.textContent = 'Tiebreaker in Progress…';
+        tbBanner.classList.toggle('ready', ready);
+        finalizeBtn.disabled = !ready;
+        finalizeBtn.textContent = ready ? 'Confirm Tiebreaker' : 'Tiebreaker in Progress…';
+        setViewReportVisible(false);
       } else {
         scorecardTitle.textContent = 'Scorecard';
-        tbBanner.classList.remove('visible');
+        tbBanner.classList.remove('visible', 'ready');
         tbBanner.innerHTML = '';
         if (!compState.finalized) {
           finalizeBtn.disabled = false;
           finalizeBtn.textContent = 'Finalize Game';
+          setViewReportVisible(false);
+        } else {
+          setViewReportVisible(true);
         }
       }
       buildScorecardHeader();
@@ -1663,7 +1918,13 @@
 
         html += '<tr class="' + rowClass + '"' +
           (canOpen ? ' data-player="' + pIdx + '" tabindex="0" role="button"' : '') + '>';
-        html += '<td class="player-name-cell">' + escHtml(player.name) +
+        html += '<td class="player-name-cell"><div class="player-name-main">' +
+          '<span class="player-name-text">' + escHtml(player.name) + '</span>' +
+          (compState.finalized ? '' :
+            '<button type="button" class="rename-btn" data-rename="' + pIdx +
+            '" title="Edit name" aria-label="Edit name for ' + escHtml(player.name) + '">' +
+            RENAME_ICON + '</button>') +
+          '</div>' +
           (hint ? '<span class="score-hint">' + hint + '</span>' : '') + '</td>';
         hits.forEach((hit, hIdx) => {
           let stateClass = '';
@@ -1695,6 +1956,14 @@
     }
 
     scorecardBody.addEventListener('click', e => {
+      const renameBtn = e.target.closest('[data-rename]');
+      if (renameBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const pIdx = parseInt(renameBtn.dataset.rename, 10);
+        if (!Number.isNaN(pIdx)) showRenameModal(pIdx);
+        return;
+      }
       const row = e.target.closest('tr.player-row[data-player]');
       if (!row || compState.finalized) return;
       const pIdx = parseInt(row.dataset.player, 10);
@@ -1703,6 +1972,7 @@
     });
 
     scorecardBody.addEventListener('keydown', e => {
+      if (e.target.closest('[data-rename]')) return;
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const row = e.target.closest('tr.player-row[data-player]');
       if (!row || compState.finalized) return;
@@ -1777,7 +2047,12 @@
       overlay.innerHTML =
         '<div class="hm-dialog">' +
           '<div class="hm-title">' + title + '</div>' +
-          '<div class="hm-subtitle"><strong style="color:#fff">' + escHtml(player.name) + '</strong><br>' + subtitle + '</div>' +
+          '<div class="hm-subtitle">' +
+            '<input type="text" class="hm-name-input" maxlength="30" autocomplete="off" aria-label="Player name" value="' +
+              escHtml(player.name) + '">' +
+            '<div class="reg-error hm-name-error"></div>' +
+            subtitle +
+          '</div>' +
           throwsHtml +
           '<div class="hm-summary"></div>' +
           '<div class="hm-buttons">' +
@@ -1787,6 +2062,30 @@
         '</div>';
 
       renderSummary();
+
+      const nameInput = overlay.querySelector('.hm-name-input');
+      const nameError = overlay.querySelector('.hm-name-error');
+
+      function saveNameFromModal(opts) {
+        const refocus = opts && opts.refocus;
+        nameError.textContent = '';
+        const named = applyPlayerName(pIdx, nameInput.value);
+        if (named.error) {
+          nameError.textContent = named.error;
+          if (refocus) nameInput.focus();
+          return false;
+        }
+        nameInput.value = named.name;
+        overlay.setAttribute('aria-label', 'Score ' + named.name);
+        return true;
+      }
+
+      nameInput.addEventListener('blur', () => { saveNameFromModal(); });
+      nameInput.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        saveNameFromModal({ refocus: true });
+      });
 
       overlay.querySelector('.score-throws').addEventListener('click', e => {
         const opt = e.target.closest('.score-throw-opt');
@@ -1814,17 +2113,17 @@
       overlay.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
       overlay.querySelector('.hm-btn-hit').addEventListener('click', () => {
+        if (!saveNameFromModal({ refocus: true })) return;
         // Unmarked throws default to miss on submit
         const result = draft.map(h => (h === true ? true : false));
         if (inTb) {
-          const wasLocked = player.tbLocked;
           player.tbHits = result;
           player.tbLocked = true;
           close();
+          updateScorecardChrome();
           renderScorecard();
           broadcastLeaderboardState();
           saveCompState();
-          if (!wasLocked) checkTiebreakerRoundComplete();
         } else {
           player.hits = result;
           player.locked = true;
@@ -1840,18 +2139,28 @@
       overlay.querySelector('.hm-btn-hit').focus();
     }
 
-    function checkTiebreakerRoundComplete() {
+    function commitTiebreakerRound() {
       const active = compState.players.filter(p => p.tbActive);
-      if (!active.length || !active.every(p => p.tbLocked)) return;
-
       active.forEach(p => {
-        p.tbHistory.push(getHitsTotal(p.tbHits));
+        const round = snapshotTbThrows(p.tbHits);
+        if (!Array.isArray(p.tbThrows)) p.tbThrows = [];
+        p.tbThrows.push(round);
+        p.tbHistory.push(round.total);
         p.tbActive = false;
         p.tbHits = null;
         p.tbLocked = false;
       });
+    }
 
-      const remaining = findTieGroups();
+    function confirmTiebreakerRound() {
+      if (compState.finalized || !isTbRoundReady()) return;
+      const remaining = findPendingTieGroups();
+      const msg = remaining.length
+        ? 'These scores are still tied. Confirm and start another tiebreaker round? Cancel to keep editing.'
+        : 'Confirm these tiebreaker scores and finalize the game?';
+      if (!confirm(msg)) return;
+
+      commitTiebreakerRound();
       if (remaining.length) {
         startTiebreakerRound(remaining);
       } else {
@@ -1889,36 +2198,23 @@
       compState.phase = 'main';
       finalizeBtn.disabled = true;
       finalizeBtn.textContent = 'Game Finalized';
+      setViewReportVisible(true);
       regPanel.classList.remove('visible');
       updateScorecardChrome();
       renderScorecard();
       broadcastLeaderboardState();
       saveCompState();
-
-      const reportData = {
-        targets: compState.targets,
-        players: getSortedPlayers().map(p => ({
-          name: p.name,
-          hits: p.hits.map(h => h === true),
-          misses: p.hits.map(h => h === false),
-          total: getTotal(p),
-          tbHistory: (p.tbHistory || []).slice()
-        })),
-        tbRounds: compState.tbRound,
-        timestamp: new Date().toISOString()
-      };
-
-      try {
-        sessionStorage.setItem('daggerdie_compReport', JSON.stringify(reportData));
-      } catch (err) {
-        alert('Could not save report data.');
-        return;
-      }
-      window.open('comp-report.html', '_blank');
+      openCompetitionReport();
     }
 
+    if (viewReportBtn) viewReportBtn.addEventListener('click', openCompetitionReport);
+
     finalizeBtn.addEventListener('click', () => {
-      if (compState.finalized || compState.phase === 'tiebreaker') return;
+      if (compState.finalized) return;
+      if (compState.phase === 'tiebreaker') {
+        confirmTiebreakerRound();
+        return;
+      }
       if (compState.players.length === 0) {
         alert('No players have joined yet.');
         return;
@@ -1926,7 +2222,7 @@
 
       const ties = findTieGroups();
       const msg = ties.length
-        ? 'Lock scores and start tiebreakers? Tied players will throw the same targets again.'
+        ? 'Lock scores and start tiebreakers? Players tied for a podium place will throw the same targets again.'
         : 'Finalize the game? Scores will be locked and the report will open.';
       if (!confirm(msg)) return;
 
@@ -1960,6 +2256,7 @@
       const resourcesLeaderboardBtn = document.getElementById('resources-leaderboard-btn');
       const resourcesExportBackupBtn = document.getElementById('resources-export-backup-btn');
       const resourcesRestoreBackupBtn = document.getElementById('resources-restore-backup-btn');
+      const resourcesNewCompetitionBtn = document.getElementById('resources-new-competition-btn');
       const stencilDownloadBtn = document.getElementById('resources-download-stencil-btn');
 
       function openResourcesModal() {
@@ -1994,6 +2291,10 @@
       resourcesRestoreBackupBtn.addEventListener('click', () => {
         closeResourcesModal();
         promptRestoreFile();
+      });
+      resourcesNewCompetitionBtn.addEventListener('click', () => {
+        closeResourcesModal();
+        promptNewCompetition();
       });
       const stencilChoiceModal = document.getElementById('stencil-choice-modal');
       const stencilPrintBtn = document.getElementById('stencil-print-btn');
@@ -2036,7 +2337,7 @@
       });
     })();
 
-    offerResumeSavedCompetition();
+    resumeSavedCompetition();
   </script>
   <script src="m3-readme-modal.js"></script>
 </body>
