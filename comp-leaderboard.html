@@ -146,7 +146,12 @@
   .leaderboard .rank-1 td { color: #feca57; font-weight: bold; }
   .leaderboard .rank-2 td { color: #c0c0c0; }
   .leaderboard .rank-3 td { color: #cd7f32; }
-  .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 50px; text-align: center; }
+  .leaderboard .rank-cell { font-size: 1.3rem; font-weight: bold; width: 72px; text-align: center; white-space: nowrap; }
+  .tie-label {
+    display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 4px;
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; vertical-align: middle;
+    background: rgba(254, 202, 87, 0.2); color: #feca57; border: 1px solid rgba(254, 202, 87, 0.45);
+  }
   .leaderboard .score-cell { font-weight: bold; font-size: 1.1rem; text-align: right; }
   .leaderboard .hits-cell { text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6); }
   .leaderboard .name-cell { font-size: 1rem; }
@@ -169,6 +174,9 @@
   }
   .leaderboard .badge-tiebreaker {
     background: rgba(254,202,87,0.2); color: #feca57; border: 1px solid rgba(254,202,87,0.45);
+  }
+  .leaderboard .badge-review {
+    background: rgba(72,219,251,0.15); color: #48dbfb; border: 1px solid rgba(72,219,251,0.4);
   }
 
   .tb-live-banner {
@@ -322,6 +330,7 @@
     data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
     data-rune-container="idxRuneContainer" data-rune-class="idx-bg-rune"></script>
   <script src="rpg-bg-canvas.js"></script>
+  <script src="comp-ranking.js"></script>
   <script>
     const channel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('daggerdie-leaderboard') : null;
     const statusDot = document.getElementById('status-dot');
@@ -362,49 +371,28 @@
       noData.style.display = 'none';
       leaderboard.style.display = '';
 
-      // Players arrive pre-sorted from the game when possible; re-sort by score + TB history
-      const sorted = players.map((p, i) => ({ ...p, idx: i }))
-        .sort((a, b) => {
-          if (b.total !== a.total) return b.total - a.total;
-          const ah = a.tbHistory || [];
-          const bh = b.tbHistory || [];
-          const len = Math.max(ah.length, bh.length);
-          for (let r = 0; r < len; r++) {
-            const av = ah[r];
-            const bv = bh[r];
-            if (av == null && bv == null) continue;
-            if (av == null) return 1;
-            if (bv == null) return -1;
-            if (bv !== av) return bv - av;
-          }
-          return a.name.localeCompare(b.name);
-        });
-
-      let rank = 0;
-      let prevKey = '';
+      const sorted = DaggerDieCompRanking.assignRanks(players);
       let html = '';
       const inTb = data.phase === 'tiebreaker';
-      sorted.forEach((p, i) => {
-        const key = String(p.total) + '|' + (p.tbHistory || []).join(',');
-        if (key !== prevKey) { rank = i + 1; prevKey = key; }
-        // After ties are broken (finalized), use unique places
-        const displayRank = data.finalized ? (i + 1) : rank;
-        const earnedPodium = p.total > 0 && displayRank <= 3;
-        const rankClass = earnedPodium ? ' rank-' + displayRank : '';
-        const display = earnedPodium ? RANK_MEDALS[displayRank] : (data.finalized ? displayRank : (i + 1));
+      sorted.forEach(p => {
+        const earnedPodium = p.total > 0 && p.rank <= 3;
+        const rankClass = earnedPodium ? ' rank-' + p.rank : '';
+        const display = (earnedPodium ? RANK_MEDALS[p.rank] : p.rank) +
+          (p.tied ? '<span class="tie-label">TIE</span>' : '');
         const STATUS_LABELS = {
           registered: 'Registered',
           throwing: 'Throwing',
           scored: 'Scored',
           locked: 'Locked',
-          tiebreaker: 'Tiebreaker'
+          tiebreaker: 'Tiebreaker',
+          review: 'Review'
         };
         const st = p.status || 'registered';
         const statusBadge = '<span class="status-badge badge-' + st + '">' + (STATUS_LABELS[st] || st) + '</span>';
         const scoreLabel = (inTb && p.tbTotal != null)
           ? (p.total + ' <span style="color:rgba(255,255,255,0.45);font-weight:normal;font-size:0.8rem;">(TB ' + p.tbTotal + ')</span>')
           : String(p.total);
-        const hitsLabel = inTb && st === 'tiebreaker'
+        const hitsLabel = inTb && (st === 'tiebreaker' || st === 'review' || st === 'scored')
           ? (p.hits + '/9 TB')
           : (p.hits + '/9');
 
@@ -435,9 +423,13 @@
             statusText.textContent = 'Game finalized';
           } else if (msg.phase === 'tiebreaker') {
             finalizedBanner.classList.remove('visible');
-            tbLiveBanner.textContent = 'Tiebreaker Round ' + (msg.tbRound || 1) + ' — same targets';
+            tbLiveBanner.textContent = msg.tbReady
+              ? 'Tiebreaker Round ' + (msg.tbRound || 1) + ' — review scores'
+              : 'Tiebreaker Round ' + (msg.tbRound || 1) + ' — same targets';
             tbLiveBanner.classList.add('visible');
-            statusText.textContent = 'Tiebreaker in progress';
+            statusText.textContent = msg.tbReady
+              ? 'Reviewing tiebreaker'
+              : 'Tiebreaker in progress';
           } else {
             finalizedBanner.classList.remove('visible');
             tbLiveBanner.classList.remove('visible');
