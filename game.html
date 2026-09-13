@@ -619,6 +619,27 @@
             color: rgba(255,255,255,0.95);
             font-size: 1.12rem;
         }
+        .player-stats-team {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .player-stats-team-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .player-stats-team-icon img,
+        .player-stats-team-icon svg {
+            display: block;
+            width: 40px;
+            height: 40px;
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: contain;
+        }
 
         .player-stats-section {
             margin-bottom: 24px;
@@ -3109,6 +3130,7 @@
                 <div class="player-stats-meta">
                     <div id="player-stats-hp" class="player-stats-row"></div>
                     <div id="player-stats-role" class="player-stats-row"></div>
+                    <div id="player-stats-team" class="player-stats-row player-stats-team" style="display: none;"></div>
                     <div id="player-stats-turn-order" class="player-stats-row"></div>
                     <div id="player-stats-status" class="player-stats-row"></div>
                     <div id="player-stats-hit-drop" class="player-stats-row"></div>
@@ -5997,6 +6019,18 @@
                 } else {
                     playerStatsRole.style.display = 'none';
                     playerStatsRole.textContent = '';
+                }
+            }
+            const playerStatsTeam = document.getElementById('player-stats-team');
+            if (playerStatsTeam) {
+                const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
+                const team = player.teamId ? TEAM_BY_ID[player.teamId] : null;
+                if (team) {
+                    playerStatsTeam.style.display = '';
+                    playerStatsTeam.innerHTML = '<span class="player-stats-team-icon">' + teamGraphic(team, 'stats-tb' + player.id) + '</span><span>Team: ' + escapeHtml(team.name) + '</span>';
+                } else {
+                    playerStatsTeam.style.display = 'none';
+                    playerStatsTeam.innerHTML = '';
                 }
             }
             playerStatsTurnOrder.textContent = `Turn order: #${state.players.indexOf(player) + 1}`;
