@@ -337,13 +337,7 @@
         }
 
         #items-overlay-toggle-btn.is-available {
-            display: inline-flex;
-            width: auto;
-            padding: 0 12px;
-            gap: 6px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
+            display: flex;
         }
 
         #items-overlay-toggle-btn.items-overlay-on {
@@ -354,88 +348,6 @@
         #items-overlay-toggle-btn.items-overlay-on:hover {
             background: rgba(254, 202, 87, 0.45);
             color: #feca57;
-        }
-
-        .current-player-items {
-            display: none;
-            margin: 0 0 16px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(254,202,87,0.28);
-        }
-
-        .current-player-items.visible {
-            display: block;
-        }
-
-        .current-player-items-heading {
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            margin-bottom: 10px;
-            color: #feca57;
-        }
-
-        .current-player-items-empty {
-            color: rgba(255,255,255,0.65);
-            font-size: 0.9rem;
-        }
-
-        .current-player-items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .current-player-items-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.28);
-            border: 2px solid color-mix(in srgb, var(--accent, #feca57) 45%, rgba(255,255,255,0.18));
-        }
-
-        .current-player-items-card.locked {
-            opacity: 0.7;
-        }
-
-        .current-player-items-icon {
-            flex: 0 0 auto;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.35);
-        }
-
-        .current-player-items-icon svg {
-            width: 36px;
-            height: 36px;
-            image-rendering: pixelated;
-        }
-
-        .current-player-items-name {
-            font-size: 1rem;
-            font-weight: 800;
-        }
-
-        .current-player-items-effect {
-            color: #8feaff;
-            font-size: 0.9rem;
-            margin-top: 2px;
-        }
-
-        .current-player-items-type {
-            margin-top: 3px;
-            font-size: 0.7rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.65);
         }
 
         .settings-modal-overlay {
@@ -456,11 +368,11 @@
         .settings-modal {
             background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
             border-radius: 20px;
-            padding: 28px;
+            padding: 34px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 380px;
+            max-width: 460px;
             width: 100%;
-            max-height: 75vh;
+            max-height: 80vh;
             overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -472,7 +384,7 @@
 
         .settings-modal h3 {
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            font-size: 1.55rem;
             color: #feca57;
         }
 
@@ -480,7 +392,7 @@
             display: block;
             margin-bottom: 8px;
             color: rgba(255,255,255,0.9);
-            font-size: 0.95rem;
+            font-size: 1.08rem;
         }
 
         .settings-modal input[type="number"] {
@@ -500,7 +412,7 @@
         }
 
         .settings-modal .setting-hint {
-            font-size: 0.85rem;
+            font-size: 0.98rem;
             color: rgba(255,255,255,0.6);
             margin-bottom: 20px;
         }
@@ -593,15 +505,15 @@
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 16px;
             box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240, 192, 64, 0.2);
-            padding: 28px;
-            min-width: 280px;
+            padding: 34px;
+            min-width: 340px;
             max-width: 90vw;
             transform: scale(0.95);
             transition: transform 0.3s ease;
         }
         .resources-modal-overlay.open .resources-modal { transform: scale(1); }
         .resources-modal h3 {
-            font-size: 1.25rem;
+            font-size: 1.45rem;
             color: #feca57;
             margin-bottom: 20px;
             text-align: center;
@@ -617,7 +529,7 @@
             border-radius: 10px;
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.95);
-            font-size: 0.95rem;
+            font-size: 1.08rem;
             text-align: left;
             cursor: pointer;
             transition: background 0.2s, border-color 0.2s;
@@ -652,21 +564,21 @@
         .player-stats-modal {
             background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
             border-radius: 20px;
-            padding: 28px;
+            padding: 34px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 380px;
+            max-width: 460px;
             width: 100%;
         }
 
         .player-stats-modal h3 {
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            font-size: 1.55rem;
             color: #feca57;
             text-align: center;
         }
 
         .player-stats-modal h4 {
-            font-size: 1rem;
+            font-size: 1.18rem;
             color: #48dbfb;
             margin-bottom: 10px;
         }
@@ -674,18 +586,28 @@
         .player-stats-header {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 14px;
             margin-bottom: 24px;
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .player-stats-avatar {
-            width: 64px;
-            height: 64px;
+            width: 156px;
+            height: 156px;
             border-radius: 50%;
             flex-shrink: 0;
             overflow: hidden;
+        }
+
+        .player-stats-avatar > * {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .player-stats-avatar svg {
+            width: 100%;
+            height: 100%;
         }
 
         .player-stats-meta {
@@ -695,7 +617,7 @@
         .player-stats-row {
             margin-bottom: 6px;
             color: rgba(255,255,255,0.95);
-            font-size: 1rem;
+            font-size: 1.12rem;
         }
 
         .player-stats-section {
@@ -704,10 +626,18 @@
 
         .player-stats-section .setting-hint {
             margin-bottom: 12px;
+            font-size: 0.98rem;
         }
 
-        .player-stats-modal .btn {
+        .player-stats-modal .btn,
+        .game-ledger-modal .btn {
             width: 100%;
+            font-size: 0.92rem;
+            padding: 12px 20px;
+        }
+        .settings-modal .btn:not(.btn-target-icon) {
+            font-size: 0.92rem;
+            padding: 12px 20px;
         }
         #attack-confirm-modal-content,
         #critical-item-modal-content,
@@ -719,13 +649,13 @@
         }
         #leave-match-detail {
             color: rgba(255,255,255,0.8);
-            font-size: 0.95rem;
+            font-size: 1.08rem;
             margin-bottom: 18px;
             line-height: 1.45;
             text-align: center;
         }
         #dice-incomplete-modal-content {
-            max-width: 340px;
+            max-width: 420px;
             text-align: center;
             border: 2px solid rgba(212, 168, 75, 0.4);
             box-shadow:
@@ -734,7 +664,7 @@
                 inset 0 1px 0 rgba(255,255,255,0.08);
             background: linear-gradient(180deg, #1a2440 0%, #12192e 50%, #0e1225 100%);
             border-radius: 24px;
-            padding: 28px;
+            padding: 34px;
             animation: summary-pop-in 0.3s ease-out;
         }
         #dice-incomplete-modal-content h3 {
@@ -743,12 +673,12 @@
         }
         #dice-incomplete-detail {
             color: rgba(255,255,255,0.8);
-            font-size: 0.95rem;
+            font-size: 1.08rem;
             margin-bottom: 18px;
             line-height: 1.45;
         }
         #throw-result-modal-content {
-            max-width: 340px;
+            max-width: 420px;
             padding: 0;
             border: 2px solid rgba(212, 168, 75, 0.4);
             box-shadow:
@@ -768,7 +698,7 @@
         }
         .throw-result-roll {
             font-family: 'Cinzel Decorative', 'Times New Roman', serif;
-            font-size: 3.25rem;
+            font-size: 3.6rem;
             font-weight: 700;
             text-align: center;
             color: #feca57;
@@ -789,8 +719,8 @@
         .throw-result-actions .btn {
             width: 100%;
             margin-top: 0;
-            padding: 12px 24px;
-            font-size: 1rem;
+            padding: 14px 24px;
+            font-size: 1.12rem;
             border-radius: 12px;
             border: 1.5px solid transparent;
             text-transform: uppercase;
@@ -840,7 +770,7 @@
             to { opacity: 1; }
         }
         #turn-summary-modal-content {
-            max-width: 520px;
+            max-width: 600px;
             padding: 0;
             border: 2px solid rgba(212, 168, 75, 0.4);
             box-shadow:
@@ -870,14 +800,14 @@
             border: 1px solid rgba(212, 168, 75, 0.45);
             background: rgba(212, 168, 75, 0.12);
             color: #d4a84b;
-            font-size: 0.75rem;
+            font-size: 0.88rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             font-weight: 700;
         }
         #turn-summary-body h3 {
             font-family: 'Cinzel Decorative', 'Times New Roman', serif;
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             color: #feca57;
             text-shadow: 0 0 20px rgba(254, 202, 87, 0.3), 0 2px 4px rgba(0,0,0,0.5);
             margin: 0;
@@ -893,7 +823,7 @@
             border: 1px solid rgba(255, 107, 107, 0.25);
         }
         .turn-summary-hit {
-            font-size: 1.15rem;
+            font-size: 1.28rem;
             padding: 6px 0;
             color: rgba(255,255,255,0.9);
             border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -905,11 +835,11 @@
             margin-top: 16px;
             padding-top: 16px;
             border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 1.2rem;
+            font-size: 1.32rem;
             color: rgba(255,255,255,0.75);
         }
         .turn-summary-total strong {
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #ff6b6b;
             text-shadow: 0 0 16px rgba(255, 107, 107, 0.4);
         }
@@ -917,7 +847,7 @@
             padding: 10px 0;
         }
         .turn-summary-no-damage p {
-            font-size: 1.1rem;
+            font-size: 1.22rem;
             margin-top: 6px;
             color: rgba(255,255,255,0.6);
         }
@@ -946,35 +876,72 @@
             border: 1px solid rgba(255,255,255,0.12);
         }
         .critical-item-roll {
-            font-size: 0.78rem;
+            font-size: 0.92rem;
             color: rgba(255,255,255,0.75);
             letter-spacing: 0.04em;
         }
         .critical-item-name {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: 800;
         }
         .critical-item-effect {
             color: #8feaff;
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
         }
         .critical-item-type {
-            font-size: 0.72rem;
+            font-size: 0.85rem;
             opacity: 0.75;
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
 
         /* Inventory swap modal */
+        .item-swap-found-label {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(254, 202, 87, 0.85);
+            text-align: center;
+            margin: 4px 0 0;
+        }
+        #item-swap-new-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(254, 202, 87, 0.08);
+            border: 1px solid rgba(254, 202, 87, 0.35);
+            pointer-events: none;
+            user-select: none;
+        }
+        .item-swap-section-label {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.55);
+            text-align: center;
+            margin: 4px 0 0;
+        }
+        #item-swap-modal-content {
+            max-width: 640px;
+        }
+        #item-swap-modal-content h3 {
+            margin-bottom: 8px;
+        }
         .item-swap-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: nowrap;
             gap: 10px;
-            margin: 16px 0;
+            margin: 10px 0 16px;
         }
         .item-swap-card {
             display: flex;
+            flex: 1 1 0;
+            min-width: 0;
             flex-direction: column;
             align-items: center;
             gap: 6px;
@@ -990,16 +957,15 @@
             box-shadow: 0 0 12px rgba(231,76,60,0.4);
             transform: scale(1.03);
         }
-        .item-swap-card.swap-new-item {
-            border-color: rgba(254,202,87,0.5);
-            background: rgba(254,202,87,0.08);
-        }
-        .item-swap-card .swap-item-icon { width: 48px; height: 48px; }
+        .item-swap-card .swap-item-icon { width: 56px; height: 56px; }
         .item-swap-card .swap-item-icon svg { width: 100%; height: 100%; }
-        .item-swap-card .swap-item-name { font-size: 0.85rem; font-weight: 700; text-align: center; }
-        .item-swap-card .swap-item-effect { font-size: 0.72rem; color: rgba(255,255,255,0.7); text-align: center; }
-        .item-swap-card .swap-item-slot-label { font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em; }
-        .item-swap-hint { font-size: 0.85rem; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; }
+        .item-swap-card .swap-item-name { font-size: 1rem; font-weight: 700; text-align: center; }
+        .item-swap-card .swap-item-effect { font-size: 0.85rem; color: rgba(255,255,255,0.7); text-align: center; }
+        .item-swap-card .swap-item-slot-label { font-size: 0.75rem; color: #ff8f8f; text-transform: uppercase; letter-spacing: 0.05em; }
+        .item-swap-hint { font-size: 1rem; color: rgba(255,255,255,0.7); text-align: center; margin: 0 0 4px; line-height: 1.4; }
+        #item-swap-keep-btn {
+            margin-top: 0;
+        }
 
         /* Critical hit onscreen reaction */
         .critical-reaction {
@@ -1370,44 +1336,96 @@
 
         .player-stats-inventory-slots {
             display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
         }
         .player-stats-inventory-slots .inv-slot {
-            width: 48px;
-            height: 48px;
+            width: 100%;
+            min-height: 56px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
+            border-radius: 10px;
             background: rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
+            justify-content: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            text-align: left;
+            cursor: default;
         }
         .player-stats-inventory-slots .inv-slot.has-item {
             border-color: rgba(254,202,87,0.6);
+            cursor: pointer;
         }
         .player-stats-inventory-slots .inv-slot.has-item:hover {
             border-color: #feca57;
             box-shadow: 0 0 12px rgba(254,202,87,0.5);
         }
+        .player-stats-inventory-slots .inv-slot-icon {
+            flex: 0 0 auto;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .player-stats-inventory-slots .inv-slot svg {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             image-rendering: pixelated;
         }
+        .player-stats-inventory-slots .inv-slot-meta {
+            min-width: 0;
+            flex: 1;
+        }
+        .player-stats-inventory-slots .inv-slot-name {
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+        .player-stats-inventory-slots .inv-slot-effect {
+            color: #8feaff;
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+        .player-stats-inventory-slots .inv-slot-type {
+            margin-top: 3px;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.65);
+        }
+        .player-stats-inventory-slots .inv-slot-empty {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.98rem;
+        }
         .item-use-icon-wrap {
-            width: 64px;
-            height: 64px;
+            width: 76px;
+            height: 76px;
         }
         .item-use-icon-wrap svg {
             width: 100%;
             height: 100%;
             image-rendering: pixelated;
         }
+        #item-use-modal-content {
+            max-width: 480px;
+            max-height: min(92vh, 920px);
+            overflow-y: auto;
+        }
+        .item-target-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .item-target-grid-hint {
+            margin: 0 0 2px;
+            text-align: center;
+            color: #8feaff;
+            font-size: 0.95rem;
+            line-height: 1.35;
+        }
         .item-target-card-btn {
+            position: relative;
             width: 100%;
             text-align: left;
             padding: 10px 12px;
@@ -1416,21 +1434,27 @@
             background: rgba(255,255,255,0.08);
             color: #fff;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
         .item-target-card-btn:hover {
-            border-color: rgba(72, 219, 251, 0.6);
+            border-color: rgba(72, 219, 251, 0.7);
             background: rgba(72, 219, 251, 0.12);
-            transform: translateY(-1px);
         }
         .item-target-card-btn.self-target {
-            border-color: rgba(254, 202, 87, 0.7);
-            box-shadow: 0 0 10px rgba(254, 202, 87, 0.25);
+            border-color: #feca57;
+            background: rgba(254, 202, 87, 0.1);
+            animation: item-self-card-pulse 1.7s ease-in-out infinite;
+        }
+        .item-target-card-btn.self-target:hover {
+            border-color: #feca57;
+            background: rgba(254, 202, 87, 0.16);
         }
         .item-target-card-inner {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            width: 100%;
+            min-width: 0;
         }
         .item-target-card-meta {
             display: flex;
@@ -1439,12 +1463,48 @@
             min-width: 0;
             flex: 1;
         }
+        .item-target-avatar-wrap {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            flex-shrink: 0;
+            border-radius: 50%;
+        }
+        .item-target-avatar-wrap .player-avatar {
+            width: 52px;
+            height: 52px;
+            margin: 0;
+        }
+        .item-target-avatar-wrap.is-self {
+            animation: item-self-avatar-pulse 1.5s ease-in-out infinite;
+        }
+        .item-target-you-badge {
+            position: absolute;
+            left: 50%;
+            bottom: -7px;
+            transform: translateX(-50%);
+            background: #feca57;
+            color: #1a1a2e;
+            font-weight: 800;
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 999px;
+            line-height: 1.2;
+            box-shadow: 0 0 10px rgba(254, 202, 87, 0.45);
+        }
         .item-target-card-name {
             font-weight: 700;
-            line-height: 1.1;
+            line-height: 1.15;
+            font-size: 1.08rem;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .item-target-card-hp {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             opacity: 0.95;
         }
         .item-target-hp-bar {
@@ -1463,8 +1523,36 @@
             flex-wrap: wrap;
             gap: 4px;
         }
+        @keyframes item-self-card-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(254, 202, 87, 0.22); }
+            50% { box-shadow: 0 0 22px 4px rgba(254, 202, 87, 0.55); }
+        }
+        @keyframes item-self-avatar-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 3px #feca57, 0 0 10px rgba(254, 202, 87, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 6px #feca57, 0 0 18px rgba(254, 202, 87, 0.8);
+                transform: scale(1.06);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .item-target-card-btn.self-target,
+            .item-target-avatar-wrap.is-self {
+                animation: none;
+            }
+            .item-target-avatar-wrap.is-self {
+                box-shadow: 0 0 0 4px #feca57, 0 0 16px rgba(254, 202, 87, 0.55);
+            }
+        }
+        @media (max-width: 600px) {
+            #item-use-modal-content {
+                padding: 22px 16px;
+            }
+        }
         .item-target-status-chip {
-            font-size: 0.68rem;
+            font-size: 0.8rem;
             line-height: 1;
             padding: 3px 6px;
             border-radius: 999px;
@@ -1566,6 +1654,24 @@
         }
         .dice-slot .hit-toggle.result-pop {
             animation: resultChipIn 0.22s ease-out;
+        }
+        .bulk-result-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 4px;
+        }
+        .bulk-result-actions .btn {
+            min-width: 76px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1.5px solid transparent;
+            letter-spacing: 0.06em;
+        }
+        .bulk-result-actions .btn.selected {
+            box-shadow: 0 0 0 2px rgba(254, 202, 87, 0.85), 0 0 16px rgba(254, 202, 87, 0.25);
         }
         @keyframes resultChipIn {
             0% { opacity: 0; transform: scale(0.7); }
@@ -2246,18 +2352,18 @@
         .game-ledger-modal {
             background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
             border-radius: 20px;
-            padding: 28px;
+            padding: 34px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 480px;
+            max-width: 580px;
             width: 100%;
-            max-height: 75vh;
+            max-height: 80vh;
             display: flex;
             flex-direction: column;
         }
 
         .game-ledger-modal h3 {
             margin-bottom: 16px;
-            font-size: 1.3rem;
+            font-size: 1.55rem;
             color: #feca57;
             text-align: center;
             flex-shrink: 0;
@@ -2280,9 +2386,9 @@
         }
 
         .log-entry {
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            font-size: 0.85rem;
+            font-size: 1rem;
             display: flex;
             align-items: flex-start;
             gap: 6px;
@@ -2307,7 +2413,7 @@
         }
 
         .log-hp-tag {
-            font-size: 0.73rem;
+            font-size: 0.85rem;
             padding: 2px 7px;
             border-radius: 4px;
             background: rgba(255,255,255,0.06);
@@ -2318,7 +2424,7 @@
 
         .log-turn-tag {
             flex-shrink: 0;
-            font-size: 0.68rem;
+            font-size: 0.8rem;
             font-weight: 700;
             letter-spacing: 0.04em;
             color: #feca57;
@@ -2659,7 +2765,6 @@
                             <path d="M9 8V6a3 3 0 0 1 6 0v2"></path>
                             <line x1="9" y1="13" x2="15" y2="13"></line>
                         </svg>
-                        <span>Items</span>
                     </button>
                     <button type="button" class="settings-gear-btn sound-toggle-btn" id="sound-toggle-btn" aria-label="Mute sound effects" aria-pressed="true" title="Sound effects on">
                         <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2681,8 +2786,6 @@
                     </button>
                 </div>
             </div>
-
-            <div class="current-player-items" id="current-player-items"></div>
 
             <div class="players-panel" id="players-panel"></div>
 
@@ -2883,6 +2986,11 @@
                 <div id="boss-players-list"></div>
             </div>
             <div class="option-row">
+                <input type="checkbox" id="mod-friendly-fire-cb" aria-describedby="mod-friendly-fire-hint" disabled>
+                <label for="mod-friendly-fire-cb">Friendly Fire</label>
+            </div>
+            <p id="mod-friendly-fire-hint" class="setting-hint">Available when Party or Boss Mode is on. When enabled, players can damage allies (teammates, other party members, or other bosses). Off by default.</p>
+            <div class="option-row">
                 <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-hint">
                 <label for="items-enabled-cb">Items</label>
             </div>
@@ -2936,7 +3044,7 @@
             <div class="player-stats-section" id="player-stats-inventory-section" style="display: none;">
                 <h4>Inventory</h4>
                 <div id="player-stats-inventory" class="player-stats-inventory-slots"></div>
-                <p id="player-stats-inventory-hint" class="setting-hint" style="margin-top: 8px; font-size: 0.85rem;"></p>
+                <p id="player-stats-inventory-hint" class="setting-hint" style="margin-top: 8px; font-size: 0.98rem;"></p>
             </div>
             <div class="player-stats-section">
                 <h4>Drops</h4>
@@ -2952,7 +3060,7 @@
         <div class="player-stats-modal" id="item-use-modal-content">
             <h3 id="item-use-title">Use Item</h3>
             <div id="item-use-detail" style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px;"></div>
-            <div id="item-use-targets" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="item-use-targets" class="item-target-list"></div>
             <button type="button" class="btn btn-secondary" id="item-use-cancel-btn" style="margin-top: 12px;">Cancel</button>
         </div>
     </div>
@@ -3029,10 +3137,13 @@
     <div class="player-stats-modal-overlay" id="item-swap-modal" role="dialog" aria-label="Inventory full">
         <div class="player-stats-modal" id="item-swap-modal-content">
             <div class="modal-eyebrow">Inventory Full</div>
-            <h3 style="color: #feca57;">Choose an Item to Drop</h3>
+            <h3 style="color: #feca57;">Replace an Item?</h3>
+            <p class="item-swap-found-label">You found</p>
             <div id="item-swap-new-item"></div>
-            <p class="item-swap-hint">Tap an item to <strong>drop</strong> it and keep the other three.</p>
+            <p class="item-swap-hint">Tap one of <strong>your items</strong> below to drop it and take this instead.</p>
+            <div class="item-swap-section-label">Your inventory</div>
             <div id="item-swap-grid" class="item-swap-grid"></div>
+            <button type="button" class="btn btn-secondary" id="item-swap-keep-btn">Keep my items</button>
         </div>
     </div>
 
@@ -3137,6 +3248,7 @@
             modVampire: false,
             modParty: false,
             modBoss: false,
+            modFriendlyFire: false,
             itemsEnabled: false,
             itemsStartWithRandom: false,
             bottomlessBackpack: false,
@@ -3283,6 +3395,7 @@
         const modVampireCb = document.getElementById('mod-vampire-cb');
         const modPartyCb = document.getElementById('mod-party-cb');
         const modBossCb = document.getElementById('mod-boss-cb');
+        const modFriendlyFireCb = document.getElementById('mod-friendly-fire-cb');
         const bossHpInput = document.getElementById('boss-hp-input');
         const bossPlayersRow = document.getElementById('boss-players-row');
         const bossPlayersList = document.getElementById('boss-players-list');
@@ -3299,51 +3412,6 @@
         const persistentSettingsCb = document.getElementById('persistent-settings-cb');
         const settingsReadOnlyHint = document.getElementById('settings-readonly-hint');
 
-        function getHeldItemsForPlayer(player) {
-            const ITEM_BY_ID = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID : {};
-            const inv = (player && player.inventory) || [null, null, null];
-            const lock = (player && player.inventoryLocked) || [false, false, false];
-            const held = [];
-            for (let i = 0; i < 3; i++) {
-                const item = ITEM_BY_ID[inv[i]];
-                if (item) held.push({ item, locked: !!lock[i] });
-            }
-            return held;
-        }
-
-        function updateCurrentPlayerItemsPanel() {
-            const el = document.getElementById('current-player-items');
-            if (!el) return;
-            const show = !!(state.itemsEnabled && itemsOverlayVisible && state.phase === 'playing');
-            el.classList.toggle('visible', show);
-            if (!show) {
-                el.innerHTML = '';
-                return;
-            }
-            const current = getCurrentPlayer();
-            const held = current ? getHeldItemsForPlayer(current) : [];
-            const name = current ? escapeHtml(current.name) : '';
-            const color = current && current.color && current.color.hex ? current.color.hex : '#feca57';
-            let html = '<div class="current-player-items-heading"><span style="color:' + color + '">' + name + '</span>\'s Items</div>';
-            if (!held.length) {
-                html += '<div class="current-player-items-empty">No items</div>';
-            } else {
-                html += '<div class="current-player-items-list">' + held.map(({ item, locked }) => {
-                    return '<div class="current-player-items-card' + (locked ? ' locked' : '') + '" style="--accent:' + item.accent + '">' +
-                        '<div class="current-player-items-icon">' + item.svg + '</div>' +
-                        '<div>' +
-                            '<div class="current-player-items-name" style="color:' + item.accent + '">' + escapeHtml(item.name) + '</div>' +
-                            '<div class="current-player-items-effect">' + escapeHtml(item.effect) + '</div>' +
-                            '<div class="current-player-items-type">' + escapeHtml(item.type) +
-                                (locked ? ' · usable next turn' : '') +
-                            '</div>' +
-                        '</div>' +
-                    '</div>';
-                }).join('') + '</div>';
-            }
-            el.innerHTML = html;
-        }
-
         function syncItemsOverlayToggleUi() {
             if (!state.itemsEnabled) itemsOverlayVisible = false;
             if (!itemsOverlayToggleBtn) return;
@@ -3356,7 +3424,6 @@
             itemsOverlayToggleBtn.title = itemsOverlayVisible
                 ? 'Leaderboard item descriptions on'
                 : 'Show current player\'s items on the leaderboard';
-            updateCurrentPlayerItemsPanel();
         }
 
         if (itemsOverlayToggleBtn) {
@@ -3396,12 +3463,25 @@
         modBuffOnCriticalCb.addEventListener('change', applySettingsFromModal);
         modNerfOnMissCb.addEventListener('change', applySettingsFromModal);
         modVampireCb.addEventListener('change', applySettingsFromModal);
+        function isFriendlyFireSettingAvailable() {
+            const partyOn = !!(state.modParty || (modPartyCb && modPartyCb.checked));
+            const bossOn = !!(modBossCb && modBossCb.checked);
+            return partyOn || bossOn;
+        }
+
+        function syncFriendlyFireUi() {
+            if (!modFriendlyFireCb) return;
+            modFriendlyFireCb.disabled = !isFriendlyFireSettingAvailable();
+        }
+
+        if (modFriendlyFireCb) modFriendlyFireCb.addEventListener('change', applySettingsFromModal);
         if (modBossCb) modBossCb.addEventListener('change', () => {
             if (bossHpInput) {
                 bossHpInput.disabled = !modBossCb.checked || state.hasScoreBeenEntered;
                 if (modBossCb.checked && !bossHpInput.value.trim()) bossHpInput.value = '100';
             }
             populateBossPlayersList();
+            syncFriendlyFireUi();
             applySettingsFromModal();
         });
         if (bossHpInput) bossHpInput.addEventListener('blur', applySettingsFromModal);
@@ -3455,6 +3535,12 @@
                 bossHpInput.disabled = readOnly || !(modBossCb && modBossCb.checked);
             }
             populateBossPlayersList();
+            if (modFriendlyFireCb) {
+                modFriendlyFireCb.checked = state.players.length > 0
+                    ? !!state.modFriendlyFire
+                    : (localStorage.getItem(MOD_FRIENDLY_FIRE_KEY) === 'true');
+            }
+            syncFriendlyFireUi();
             if (itemsEnabledCb) itemsEnabledCb.checked = readOnly ? state.itemsEnabled : (localStorage.getItem(ITEMS_ENABLED_KEY) === 'true');
             if (itemsStartWithRandomCb) {
                 const startVal = readOnly ? state.itemsStartWithRandom : (itemsEnabledCb?.checked && localStorage.getItem(ITEMS_START_WITH_RANDOM_KEY) === 'true');
@@ -3496,6 +3582,7 @@
             localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked));
             localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked));
             if (modBossCb) localStorage.setItem(MOD_BOSS_KEY, String(modBossCb.checked));
+            if (modFriendlyFireCb) localStorage.setItem(MOD_FRIENDLY_FIRE_KEY, String(modFriendlyFireCb.checked));
             if (modBossCb && modBossCb.checked && bossHpInput) {
                 const bossVal = bossHpInput.value.trim();
                 const bossN = bossVal === '' ? 100 : parseInt(bossVal, 10);
@@ -3567,6 +3654,7 @@
             state.modNerfOnMiss = modNerfOnMissCb.checked;
             state.modVampire = modVampireCb.checked;
             state.modBoss = modBossCb ? modBossCb.checked : false;
+            state.modFriendlyFire = modFriendlyFireCb ? !!modFriendlyFireCb.checked : false;
             if (bossPlayersList) {
                 bossPlayersList.querySelectorAll('input[data-player-id]').forEach(cb => {
                     const id = parseInt(cb.dataset.playerId, 10);
@@ -3597,12 +3685,14 @@
                     if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
                 }
             }
+            if (state.damageClaimedPhase) { disableTargetSelection(); enableTargetSelection(); }
             localStorage.setItem(PERSISTENT_SETTINGS_KEY, String(persistentSettingsCb.checked));
             if (persistentSettingsCb.checked) {
                 localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(state.modBuffOnCritical));
                 localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(state.modNerfOnMiss));
                 localStorage.setItem(MOD_VAMPIRE_KEY, String(state.modVampire));
                 localStorage.setItem(MOD_BOSS_KEY, String(state.modBoss));
+                localStorage.setItem(MOD_FRIENDLY_FIRE_KEY, String(state.modFriendlyFire));
                 if (state.modBoss && bossHpInput) {
                     const bossVal = bossHpInput.value.trim();
                     const bossN = bossVal === '' ? 100 : parseInt(bossVal, 10);
@@ -3621,6 +3711,7 @@
                 localStorage.removeItem(MOD_NERF_ON_MISS_KEY);
                 localStorage.removeItem(MOD_VAMPIRE_KEY);
                 localStorage.removeItem(MOD_BOSS_KEY);
+                localStorage.removeItem(MOD_FRIENDLY_FIRE_KEY);
                 localStorage.removeItem(BOSS_HP_KEY);
                 localStorage.removeItem(USE_CUSTOM_HP_KEY);
                 localStorage.removeItem(CUSTOM_HP_KEY);
@@ -3766,6 +3857,7 @@
         const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
         const MOD_PARTY_KEY = 'daggerdie_modParty';
         const MOD_BOSS_KEY = 'daggerdie_modBoss';
+        const MOD_FRIENDLY_FIRE_KEY = 'daggerdie_modFriendlyFire';
         const BOSS_HP_KEY = 'daggerdie_bossHp';
         const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
         const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
@@ -3782,6 +3874,7 @@
             state.modVampire = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
             state.modParty = localStorage.getItem(MOD_PARTY_KEY) === 'true';
             state.modBoss = localStorage.getItem(MOD_BOSS_KEY) === 'true';
+            state.modFriendlyFire = localStorage.getItem(MOD_FRIENDLY_FIRE_KEY) === 'true';
             state.itemsEnabled = localStorage.getItem(ITEMS_ENABLED_KEY) === 'true';
             itemsOverlayVisible = false;
             syncItemsOverlayToggleUi();
@@ -3818,6 +3911,7 @@
             Object.assign(state, snapshot);
             if (!Array.isArray(state.missedDiceIndices)) state.missedDiceIndices = [];
             if (typeof state.turnNumber !== 'number') state.turnNumber = 0;
+            if (typeof state.modFriendlyFire !== 'boolean') state.modFriendlyFire = false;
             if (Array.isArray(state.players)) {
                 state.players.forEach(p => {
                     p.isBoss = !!p.isBoss;
@@ -4637,7 +4731,6 @@
                 previousHpByPlayerId[p.id] = p.hp;
             });
             broadcastBrawlLeaderboardState();
-            updateCurrentPlayerItemsPanel();
         }
 
         function capitalizeBotSkill(s) {
@@ -4649,7 +4742,6 @@
             const n = state.turnNumber || 1;
             currentPlayerNameEl.textContent = current ? `${n} — ${current.name}` : '-';
             currentPlayerNameEl.style.color = current ? current.color.hex : '';
-            updateCurrentPlayerItemsPanel();
         }
 
         async function performDiceRoll() {
@@ -4862,6 +4954,17 @@
                 confirmBtn.setAttribute('aria-disabled', resolved ? 'false' : 'true');
                 confirmBtn.title = resolved ? '' : 'Record Hit, Miss, or Drop for every die first';
             }
+            const rolls = state.currentRoll || [];
+            const allHit = rolls.length > 0 && rolls.every((_, i) => getDieResult(i) === 'hit');
+            const allMiss = rolls.length > 0 && rolls.every((_, i) => getDieResult(i) === 'miss');
+            const allDrop = rolls.length > 0 && rolls.every((_, i) => getDieResult(i) === 'drop');
+            const critBtn = document.getElementById('bulk-crit-btn');
+            const whiffBtn = document.getElementById('bulk-whiff-btn');
+            const dropsBtn = document.getElementById('bulk-drops-btn');
+            if (critBtn) critBtn.classList.toggle('selected', allHit);
+            if (whiffBtn) whiffBtn.classList.toggle('selected', allMiss);
+            if (dropsBtn) dropsBtn.classList.toggle('selected', allDrop);
+
             const resolveHint = hitInfo.querySelector('.dice-resolve-hint');
             if (resolveHint) {
                 const remaining = (state.currentRoll || []).filter((_, i) => !getDieResult(i)).length;
@@ -5022,6 +5125,11 @@
                         </div>
                     `).join('')}
                 </div>
+                <div class="bulk-result-actions">
+                    <button type="button" class="btn throw-result-hit" id="bulk-crit-btn" title="Mark all dice as hits" aria-label="Crit: mark all dice as hits">Crit</button>
+                    <button type="button" class="btn throw-result-miss" id="bulk-whiff-btn" title="Mark all dice as misses" aria-label="Whiff: mark all dice as misses">Whiff</button>
+                    <button type="button" class="btn throw-result-drop" id="bulk-drops-btn" title="Mark all dice as drops" aria-label="Drops: mark all dice as drops">Drops</button>
+                </div>
                 <p class="dice-resolve-hint" style="margin: 8px 0 0; font-size: 0.82rem; opacity: 0.8; text-align: center;">Tap each die to record Hit, Miss, or Drop</p>
                 <div class="confirm-hits-wrap" style="margin-top: 12px;${state.skipDamageConfirm ? ' display:none;' : ''}">
                     <button class="btn btn-primary confirm-incomplete" id="confirm-hits-btn" title="Record Hit, Miss, or Drop for every die first" aria-disabled="true">Confirm</button>
@@ -5048,6 +5156,12 @@
             if (confirmBtn) {
                 confirmBtn.addEventListener('click', () => confirmHitResults());
             }
+            const critBtn = document.getElementById('bulk-crit-btn');
+            const whiffBtn = document.getElementById('bulk-whiff-btn');
+            const dropsBtn = document.getElementById('bulk-drops-btn');
+            if (critBtn) critBtn.addEventListener('click', () => applyAllDieResults('hit'));
+            if (whiffBtn) whiffBtn.addEventListener('click', () => applyAllDieResults('miss'));
+            if (dropsBtn) dropsBtn.addEventListener('click', () => applyAllDieResults('drop'));
         }
 
         const criticalItemModal = document.getElementById('critical-item-modal');
@@ -5082,20 +5196,21 @@
         const itemSwapModal = document.getElementById('item-swap-modal');
         const itemSwapGrid = document.getElementById('item-swap-grid');
         const itemSwapNewItem = document.getElementById('item-swap-new-item');
+        const itemSwapKeepBtn = document.getElementById('item-swap-keep-btn');
         let itemSwapCallback = null;
+        let itemSwapPending = null;
 
         function showItemSwapModal(player, newItem, d12Roll, onComplete) {
             const inv = player.inventory || [null, null, null];
             const lock = player.inventoryLocked || [false, false, false];
+            itemSwapPending = { player, newItem, inv };
 
             itemSwapNewItem.innerHTML = `
-                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:4px;">
-                    <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
-                    <div class="item-use-icon-wrap" style="--accent:${newItem.accent}">${newItem.svg}</div>
-                    <div class="critical-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</div>
-                    <div class="critical-item-effect">${newItem.effect}</div>
-                    <div class="critical-item-type">${newItem.type}</div>
-                </div>`;
+                <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
+                <div class="item-use-icon-wrap" style="--accent:${newItem.accent}">${newItem.svg}</div>
+                <div class="critical-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</div>
+                <div class="critical-item-effect">${newItem.effect}</div>
+                <div class="critical-item-type">${newItem.type}</div>`;
 
             const cards = [];
             for (let i = 0; i < 3; i++) {
@@ -5103,37 +5218,26 @@
                 const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
                 if (!item) continue;
                 cards.push(`
-                    <button type="button" class="item-swap-card" data-swap-action="drop-slot" data-slot="${i}">
-                        <span class="swap-item-slot-label">Slot ${i + 1}${lock[i] ? ' (locked)' : ''}</span>
+                    <button type="button" class="item-swap-card" data-slot="${i}">
+                        <span class="swap-item-slot-label">Drop${lock[i] ? ' (locked)' : ''}</span>
                         <div class="swap-item-icon" style="--accent:${item.accent}">${item.svg}</div>
                         <span class="swap-item-name" style="color:var(--accent,${item.accent});">${item.name}</span>
                         <span class="swap-item-effect">${item.effect}</span>
                     </button>`);
             }
-            cards.push(`
-                <button type="button" class="item-swap-card swap-new-item" data-swap-action="discard-new">
-                    <span class="swap-item-slot-label">New item</span>
-                    <div class="swap-item-icon" style="--accent:${newItem.accent}">${newItem.svg}</div>
-                    <span class="swap-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</span>
-                    <span class="swap-item-effect">${newItem.effect}</span>
-                </button>`);
             itemSwapGrid.innerHTML = cards.join('');
 
             itemSwapCallback = onComplete;
             itemSwapGrid.querySelectorAll('.item-swap-card').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const action = btn.dataset.swapAction;
-                    if (action === 'discard-new') {
-                        addLogEntry(`${player.name} discarded ${newItem.name} (inventory full).`, 'info');
-                    } else {
-                        const slot = parseInt(btn.dataset.slot, 10);
-                        const droppedId = inv[slot];
-                        const droppedItem = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[droppedId] : null;
-                        player.inventory[slot] = newItem.id;
-                        player.inventoryLocked[slot] = true;
-                        trackItemAcquired(player, newItem.id);
-                        addLogEntry(`${player.name} swapped ${droppedItem ? droppedItem.name : 'an item'} for ${newItem.name}!`, 'info');
-                    }
+                    if (!itemSwapPending) return;
+                    const slot = parseInt(btn.dataset.slot, 10);
+                    const droppedId = itemSwapPending.inv[slot];
+                    const droppedItem = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[droppedId] : null;
+                    itemSwapPending.player.inventory[slot] = itemSwapPending.newItem.id;
+                    itemSwapPending.player.inventoryLocked[slot] = true;
+                    trackItemAcquired(itemSwapPending.player, itemSwapPending.newItem.id);
+                    addLogEntry(`${itemSwapPending.player.name} swapped ${droppedItem ? droppedItem.name : 'an item'} for ${itemSwapPending.newItem.name}!`, 'info');
                     closeItemSwapModal();
                 });
             });
@@ -5143,12 +5247,19 @@
 
         function closeItemSwapModal() {
             itemSwapModal.classList.remove('open');
+            itemSwapPending = null;
             if (itemSwapCallback) {
                 const cb = itemSwapCallback;
                 itemSwapCallback = null;
                 cb();
             }
         }
+
+        itemSwapKeepBtn.addEventListener('click', () => {
+            if (!itemSwapPending) return;
+            addLogEntry(`${itemSwapPending.player.name} discarded ${itemSwapPending.newItem.name} (inventory full).`, 'info');
+            closeItemSwapModal();
+        });
 
         function botAutoSwapItem(player, newItem) {
             const inv = player.inventory || [null, null, null];
@@ -5195,6 +5306,22 @@
             if ((state.hits || []).some(h => h.idx === idx)) return 'hit';
             if ((state.missedDiceIndices || []).includes(idx)) return 'miss';
             return null;
+        }
+
+        function applyAllDieResults(result) {
+            if (!state.hasRolled || state.damageClaimedPhase || state.confirmingHits) return;
+            const rolls = state.currentRoll;
+            if (!rolls || !rolls.length) return;
+            const player = getCurrentPlayer();
+            if (!player || player.eliminated) return;
+            const playerId = player.id;
+            for (let i = 0; i < rolls.length; i++) {
+                if (state.damageClaimedPhase || state.confirmingHits || !state.hasRolled) return;
+                if (state.currentRoll !== rolls) return;
+                const current = getCurrentPlayer();
+                if (!current || current.id !== playerId || current.eliminated) return;
+                applyDieResult(i, result);
+            }
         }
 
         function applyDieResult(idx, result) {
@@ -5286,13 +5413,13 @@
         let attackConfirmCallback = null;
 
         function showAttackConfirmModal(hitValue, targetName, effectiveDamage, modLabel, onConfirm) {
-            attackConfirmTitle.innerHTML = `Deal <span style="font-size:1.4rem;">${hitValue}</span> to ${targetName}?`;
+            attackConfirmTitle.innerHTML = `Deal <span style="font-size:1.6rem;">${hitValue}</span> to ${targetName}?`;
             if (effectiveDamage !== hitValue && modLabel) {
                 const cleanLabel = modLabel.replace(/^, /, '');
                 attackConfirmDetail.innerHTML = `
-                    <div style="background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); border-radius: 10px; padding: 10px 14px; margin: 10px 0 4px; text-align: center;">
-                        <span style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; opacity: 0.7;">${cleanLabel} active</span>
-                        <div style="font-size: 1.3rem; font-weight: bold; color: #ff6b6b; margin-top: 2px;">Actual Damage: ${effectiveDamage}</div>
+                    <div style="background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); border-radius: 10px; padding: 12px 16px; margin: 10px 0 4px; text-align: center;">
+                        <span style="text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.08em; opacity: 0.7;">${cleanLabel} active</span>
+                        <div style="font-size: 1.45rem; font-weight: bold; color: #ff6b6b; margin-top: 2px;">Actual Damage: ${effectiveDamage}</div>
                     </div>`;
             } else {
                 attackConfirmDetail.innerHTML = '';
@@ -5380,18 +5507,44 @@
             return { damage, modNote, modLabel };
         }
 
+        function playersAreAllies(a, b) {
+            if (!a || !b || a.id === b.id) return false;
+            if (isBossVictoryMode() && !!a.isBoss === !!b.isBoss) return true;
+            if (state.modParty && a.teamId && b.teamId && a.teamId === b.teamId) return true;
+            return false;
+        }
+
+        function isFriendlyFireOn() {
+            return !!(state.modFriendlyFire && (state.modParty || state.modBoss));
+        }
+
+        function canDealDamageTo(attacker, target) {
+            if (!attacker || !target || target.eliminated || attacker.id === target.id) return false;
+            if (isFriendlyFireOn()) return true;
+            return !playersAreAllies(attacker, target);
+        }
+
+        function getHostileTargets(attacker) {
+            return state.players.filter(p => !p.eliminated && p.id !== attacker.id && !playersAreAllies(attacker, p));
+        }
+
+        function getAttackTargets(attacker) {
+            const hostiles = getHostileTargets(attacker);
+            if (hostiles.length > 0) return hostiles;
+            if (isFriendlyFireOn()) {
+                return state.players.filter(p => !p.eliminated && p.id !== attacker.id);
+            }
+            return [];
+        }
+
         function autoDealDamageAndFinish() {
             const currentPlayer = getCurrentPlayer();
             state.damageDealtThisTurn = true;
             for (let i = 0; i < state.hits.length; i++) {
-                const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
-                if (aliveOpponents.length === 0) break;
+                const targetPool = getAttackTargets(currentPlayer);
+                if (targetPool.length === 0) break;
                 const currentHit = state.hits[i];
                 const currentHitValue = getHitEffectiveRoll(currentHit);
-                const enemies = (state.modParty && currentPlayer.teamId)
-                    ? aliveOpponents.filter(p => p.teamId !== currentPlayer.teamId)
-                    : aliveOpponents;
-                const targetPool = enemies.length > 0 ? enemies : aliveOpponents;
                 const targetPlayer = targetPool[Math.floor(Math.random() * targetPool.length)];
                 const { damage, modNote, modLabel } = getEffectiveDamage(currentHitValue, targetPlayer, currentPlayer, currentHitValue);
                 state.attackAssignments.push({ playerId: targetPlayer.id, roll: currentHitValue, damage });
@@ -5434,8 +5587,8 @@
                 return;
             }
 
-            const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
-            if (aliveOpponents.length === 0) {
+            const attackTargets = getAttackTargets(currentPlayer);
+            if (attackTargets.length === 0) {
                 finishAttackPhase();
                 return;
             }
@@ -5501,7 +5654,7 @@
                 const playerId = parseInt(card.dataset.player);
                 const player = state.players.find(p => p.id === playerId);
 
-                if (!player.eliminated && player.id !== current.id) {
+                if (canDealDamageTo(current, player)) {
                     card.classList.add('targetable');
                     card.addEventListener('click', handleAttack);
                 }
@@ -5521,6 +5674,7 @@
             const targetPlayer = state.players.find(p => p.id === playerId);
             if (!targetPlayer || targetPlayer.eliminated) return;
             const currentPlayer = getCurrentPlayer();
+            if (!canDealDamageTo(currentPlayer, targetPlayer)) return;
             const selectedHitIdx = state.selectedHitIdx;
             if (selectedHitIdx === null || !state.remainingHitIndices.includes(selectedHitIdx)) return;
             const currentHit = state.hits[selectedHitIdx];
@@ -5571,8 +5725,8 @@
                 }
             };
 
-            const aliveOpponents = state.players.filter(p => !p.eliminated && p.id !== currentPlayer.id);
-            if (aliveOpponents.length === 1 || state.skipDamageConfirm) {
+            const selectableTargets = state.players.filter(p => canDealDamageTo(currentPlayer, p));
+            if (selectableTargets.length === 1 || state.skipDamageConfirm) {
                 applyAttack();
             } else {
                 showAttackConfirmModal(currentHitValue, targetPlayer.name, damage, modLabel, applyAttack);
@@ -5745,7 +5899,7 @@
             if (!player) return;
             playerStatsModalPlayerId = playerId;
             playerStatsTitle.textContent = player.name;
-            playerStatsAvatar.innerHTML = getPlayerAvatarHtml(player, { size: 64, className: '' });
+            playerStatsAvatar.innerHTML = getPlayerAvatarHtml(player, { size: 140, className: '' });
             playerStatsHp.textContent = `${player.hp} / ${player.maxHp} HP`;
             const playerStatsRole = document.getElementById('player-stats-role');
             if (playerStatsRole) {
@@ -5819,7 +5973,21 @@
                     const itemId = inv[i];
                     const locked = isItemLocked(player, i);
                     const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
-                    return '<div class="inv-slot ' + (ITEM ? 'has-item' : '') + (ITEM && locked ? ' locked-item' : '') + '" data-player="'+playerId+'" data-slot="' + i + '" title="' + (ITEM ? (locked ? ITEM.name + ': usable next turn' : ITEM.name + ': ' + ITEM.effect) : 'Empty') + '" ' + (ITEM && !locked ? 'style="cursor:pointer"' : '') + '>' + (ITEM ? ITEM.svg : '') + '</div>';
+                    const usable = !!(ITEM && !locked && canUseItems);
+                    if (!ITEM) {
+                        return '<div class="inv-slot" data-player="'+playerId+'" data-slot="' + i + '">' +
+                            '<div class="inv-slot-empty">Empty</div></div>';
+                    }
+                    return '<div class="inv-slot has-item' + (locked ? ' locked-item' : '') + '" data-player="'+playerId+'" data-slot="' + i + '" style="--accent:' + ITEM.accent + (usable ? ';cursor:pointer' : '') + '">' +
+                        '<div class="inv-slot-icon">' + ITEM.svg + '</div>' +
+                        '<div class="inv-slot-meta">' +
+                            '<div class="inv-slot-name" style="color:' + ITEM.accent + '">' + escapeHtml(ITEM.name) + '</div>' +
+                            '<div class="inv-slot-effect">' + escapeHtml(ITEM.effect) + '</div>' +
+                            '<div class="inv-slot-type">' + escapeHtml(ITEM.type) +
+                                (locked ? ' · usable next turn' : '') +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
                 }).join('');
                 invHint.textContent = canUseItems ? 'Tap an item to use it (max 1 per turn). Newly found items unlock next turn.' : 'Items can be used once per turn on your turn before score confirmation.';
             } else if (invSection) {
@@ -5886,20 +6054,25 @@
         function makeItemTargetCardButton(user, item, target, opts = {}) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'item-target-card-btn' + (target.id === user.id ? ' self-target' : '');
-            btn.style.borderLeftColor = target.color ? target.color.hex : 'rgba(255,255,255,0.4)';
+            const isSelf = target.id === user.id;
+            btn.className = 'item-target-card-btn' + (isSelf ? ' self-target' : '');
+            btn.setAttribute('aria-label', isSelf
+                ? `Use ${item.name} on yourself, ${target.name}`
+                : `Use ${item.name} on ${target.name}`);
             const statuses = getPlayerStatusEffectsForItemModal(target);
             const labelPrefix = opts.labelPrefix ? `${opts.labelPrefix} ` : '';
-            const nameLabel = target.id === user.id ? `${target.name} (self)` : target.name;
             const statusHtml = statuses.length > 0
                 ? `<div class="item-target-status-row">${statuses.map(s => `<span class="item-target-status-chip ${s.kind}">${s.label}</span>`).join('')}</div>`
-                : `<div class="item-target-status-row"><span class="item-target-status-chip">No status</span></div>`;
+                : '';
             const hpPct = Math.max(0, Math.min(100, (target.hp / Math.max(1, target.maxHp)) * 100));
             btn.innerHTML = `
                 <div class="item-target-card-inner">
-                    ${getPlayerAvatarHtml(target, { size: 28, className: '' })}
+                    <div class="item-target-avatar-wrap${isSelf ? ' is-self' : ''}">
+                        ${getPlayerAvatarHtml(target, { size: 52 })}
+                        ${isSelf ? '<div class="item-target-you-badge">You</div>' : ''}
+                    </div>
                     <div class="item-target-card-meta">
-                        <div class="item-target-card-name">${labelPrefix}${nameLabel}</div>
+                        <div class="item-target-card-name">${labelPrefix}${target.name}</div>
                         <div class="item-target-card-hp">${target.hp} / ${target.maxHp} HP</div>
                         <div class="item-target-hp-bar"><div class="item-target-hp-fill" style="width:${hpPct}%; background:${target.color ? target.color.hex : '#48dbfb'};"></div></div>
                         ${statusHtml}
@@ -5908,6 +6081,26 @@
             `;
             btn.addEventListener('click', () => { applyItemEffect(user, item, target); });
             return btn;
+        }
+
+        function getItemTargetHint(item, includesSelf) {
+            if (item.targetType === 'eliminated') return 'Tap a player to resurrect.';
+            if (item.targetType === 'opponent') return 'Tap an opponent to use this item.';
+            if (includesSelf) return 'Tap a player. The pulsing gold card is you.';
+            return 'Tap a player to use this item.';
+        }
+
+        function renderItemTargetGrid(user, item, targets, opts = {}) {
+            itemUseTargets.className = 'item-target-list';
+            itemUseTargets.innerHTML = '';
+            const includesSelf = targets.some(t => t.id === user.id);
+            const hint = document.createElement('p');
+            hint.className = 'item-target-grid-hint';
+            hint.textContent = getItemTargetHint(item, includesSelf);
+            itemUseTargets.appendChild(hint);
+            targets.forEach(t => {
+                itemUseTargets.appendChild(makeItemTargetCardButton(user, item, t, opts));
+            });
         }
 
         function countDropDamageForPlayer(playerName) {
@@ -5921,6 +6114,7 @@
             const itemId = user.inventory[slotIdx];
             const item = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null;
             if (!item || !target) return false;
+            if (item.targetType === 'opponent' && !canDealDamageTo(user, target)) return false;
 
             if (item.id === 'scroll') {
                 target.hp = Math.min(target.maxHp, target.hp + 15);
@@ -6036,7 +6230,7 @@
 
         function getValidTargetsForItem(user, item) {
             if (item.targetType === 'eliminated') return state.players.filter(p => p.eliminated);
-            if (item.targetType === 'opponent') return state.players.filter(p => !p.eliminated && p.id !== user.id);
+            if (item.targetType === 'opponent') return state.players.filter(p => canDealDamageTo(user, p));
             return state.players.filter(p => !p.eliminated);
         }
 
@@ -6046,14 +6240,14 @@
             const eliminated = state.players.filter(p => p.eliminated);
             const byLowestHp = (arr) => arr.slice().sort((a, b) => a.hp - b.hp)[0] || null;
             const byHighestHp = (arr) => arr.slice().sort((a, b) => b.hp - a.hp)[0] || null;
-            const isTeamMode = state.modParty && user.teamId;
-            const enemies = isTeamMode ? opponents.filter(p => p.teamId !== user.teamId) : opponents;
-            const hostileTargets = enemies.length > 0 ? enemies : opponents;
-            const eliminatedAllies = isTeamMode ? eliminated.filter(p => p.teamId === user.teamId) : [];
-            const aliveAllies = isTeamMode ? alive.filter(p => p.id !== user.id && p.teamId === user.teamId) : [];
+            const enemies = opponents.filter(p => !playersAreAllies(user, p));
+            const hostileTargets = enemies.length > 0 ? enemies : (isFriendlyFireOn() ? opponents : []);
+            const eliminatedAllies = eliminated.filter(p => playersAreAllies(user, p));
+            const aliveAllies = alive.filter(p => p.id !== user.id && playersAreAllies(user, p));
+            const hasAllies = aliveAllies.length > 0 || eliminatedAllies.length > 0;
 
             if (item.id === 'orb') {
-                if (isTeamMode && eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
+                if (eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
                 return null;
             }
             if (item.id === 'monkey-paw') return byHighestHp(hostileTargets);
@@ -6066,14 +6260,14 @@
             if (item.id === 'toy-rocket') return (state.hasRolled && !user.aimActive && state.hits && state.hits.length > 0) ? user : null;
 
             if (item.id === 'scroll') {
-                if (isTeamMode) {
+                if (hasAllies) {
                     const hurtAlly = byLowestHp([user, ...aliveAllies].filter(p => p.hp < p.maxHp));
                     return hurtAlly || null;
                 }
                 return user.hp < user.maxHp ? user : null;
             }
             if (item.id === 'feather') {
-                if (isTeamMode) {
+                if (hasAllies) {
                     const hurtAlly = byLowestHp([user, ...aliveAllies].filter(p => p.hp < p.maxHp && (p.regenTurns || 0) === 0));
                     return hurtAlly || null;
                 }
@@ -6083,7 +6277,7 @@
                 return countDropDamageForPlayer(user.name) > 0 ? user : null;
             }
             if (item.id === 'medkit') {
-                if (isTeamMode) {
+                if (hasAllies) {
                     const debuffedAlly = [user, ...aliveAllies].find(p => p.nerfActive || (p.poisonRemaining || 0) > 0);
                     return debuffedAlly || null;
                 }
@@ -6092,7 +6286,7 @@
 
             if (item.targetType === 'opponent') return byLowestHp(hostileTargets);
             if (item.targetType === 'eliminated') {
-                if (isTeamMode && eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
+                if (eliminatedAllies.length > 0) return byHighestHp(eliminatedAllies);
                 return byHighestHp(eliminated);
             }
             if (profile && profile.smartChoiceChance < 0.7) {
@@ -6179,8 +6373,9 @@
             if (!item) return;
             itemUseContext = { playerId, slotIdx, itemId };
             itemUseTitle.textContent = item.name;
-            itemUseDetail.innerHTML = '<div class="item-use-icon-wrap" style="--accent:' + item.accent + '">' + item.svg + '</div><div style="color: #48dbfb; font-size: 0.9rem;">' + item.effect + '</div><div style="font-size: 0.75rem; opacity: 0.7;">' + item.type + '</div>';
+            itemUseDetail.innerHTML = '<div class="item-use-icon-wrap" style="--accent:' + item.accent + '">' + item.svg + '</div><div style="color: #48dbfb; font-size: 1.08rem;">' + item.effect + '</div><div style="font-size: 0.88rem; opacity: 0.7;">' + item.type + '</div>';
             const targetsDiv = itemUseTargets;
+            targetsDiv.className = 'item-target-list';
             targetsDiv.innerHTML = '';
             if (item.id === 'toy-rocket') {
                 const current = getCurrentPlayer();
@@ -6191,9 +6386,7 @@
                 }
                 const uniqueRolls = [...new Set(state.currentRoll)];
                 const help = document.createElement('p');
-                help.style.color = '#8feaff';
-                help.style.fontSize = '0.9rem';
-                help.style.margin = '0 0 6px 0';
+                help.className = 'item-target-grid-hint';
                 help.textContent = 'Call one rolled zone. If you hit it, gain +3 DP.';
                 targetsDiv.appendChild(help);
                 uniqueRolls.forEach(roll => {
@@ -6214,19 +6407,17 @@
                 if (eliminated.length === 0) {
                     targetsDiv.innerHTML = '<p style="color: #888;">No eliminated players to resurrect.</p>';
                 } else {
-                    eliminated.forEach(t => {
-                        targetsDiv.appendChild(makeItemTargetCardButton(player, item, t, { labelPrefix: 'Resurrect' }));
-                    });
+                    renderItemTargetGrid(player, item, eliminated, { labelPrefix: 'Resurrect' });
                 }
             } else {
                 const canTargetAnyAlive = item.targetType === 'self';
-                const alive = state.players.filter(p => !p.eliminated && (canTargetAnyAlive || p.id !== player.id));
+                const alive = canTargetAnyAlive
+                    ? state.players.filter(p => !p.eliminated)
+                    : getValidTargetsForItem(player, item);
                 if (alive.length === 0) {
                     targetsDiv.innerHTML = '<p style="color: #888;">No valid players to target.</p>';
                 } else {
-                    alive.forEach(t => {
-                        targetsDiv.appendChild(makeItemTargetCardButton(player, item, t));
-                    });
+                    renderItemTargetGrid(player, item, alive);
                 }
             }
             itemUseModal.classList.add('open');
@@ -7023,6 +7214,7 @@ ${itemRows}
                     MOD_VAMPIRE_KEY,
                     MOD_PARTY_KEY,
                     MOD_BOSS_KEY,
+                    MOD_FRIENDLY_FIRE_KEY,
                     BOSS_HP_KEY,
                     ITEMS_ENABLED_KEY,
                     ITEMS_START_WITH_RANDOM_KEY,
