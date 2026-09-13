@@ -663,10 +663,14 @@
             border-color: #48dbfb;
             box-shadow: 0 0 12px rgba(72, 219, 251, 0.4);
         }
-        .team-avatar-btn svg {
+        .team-avatar-btn svg,
+        .team-avatar-btn img {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 40px;
+            height: 40px;
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: contain;
         }
         .team-picker-modal-overlay {
             display: none;
@@ -736,10 +740,14 @@
             border-radius: 6px;
             overflow: hidden;
         }
-        .team-picker-option .team-emblem svg {
+        .team-picker-option .team-emblem svg,
+        .team-picker-option .team-emblem img {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 56px;
+            height: 56px;
+            max-width: 56px;
+            max-height: 56px;
+            object-fit: contain;
         }
         .team-picker-option .team-name {
             font-size: 0.75rem;
@@ -1170,6 +1178,11 @@
         });
 
         const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+        function teamGraphic(team, prefix) {
+            if (!team) return '';
+            if (typeof DAGGERDIE_TEAM_MARKUP === 'function') return DAGGERDIE_TEAM_MARKUP(team, prefix);
+            return prefixTeamSvgIds(team.svg, prefix);
+        }
 
         function partyEnabled() {
             return localStorage.getItem(MOD_PARTY_KEY) === 'true';
@@ -1182,7 +1195,7 @@
         function buildTeamPickerGrid() {
             teamPickerGrid.innerHTML = TEAMS.map((t, idx) => `
                 <button type="button" class="team-picker-option" data-team-id="${t.id}" title="${t.name}">
-                    <div class="team-emblem">${prefixTeamSvgIds(t.svg, 'cs-tgrid-' + idx)}</div>
+                    <div class="team-emblem">${teamGraphic(t, 'cs-tgrid-' + idx)}</div>
                     <span class="team-name">${t.name}</span>
                 </button>
             `).join('');
@@ -1196,7 +1209,7 @@
                             row.dataset.teamId = teamId;
                             const teamBtn = row.querySelector('.team-avatar-btn');
                             if (teamBtn) {
-                                teamBtn.innerHTML = prefixTeamSvgIds(team.svg, 'cs-tp' + currentTeamPlayerIndex);
+                                teamBtn.innerHTML = teamGraphic(team, 'cs-tp' + currentTeamPlayerIndex);
                                 teamBtn.title = team.name + ' – click to change';
                             }
                         }
@@ -1282,7 +1295,7 @@
                         </button>
                 ` : '';
                 const teamButtonHtml = showTeams ? `
-                        <button type="button" class="team-avatar-btn" data-player="${i}" title="${selectedTeam ? selectedTeam.name + ' – click to change' : 'Pick team'}">${selectedTeam ? prefixTeamSvgIds(selectedTeam.svg, 'cs-tp' + i) : ''}</button>
+                        <button type="button" class="team-avatar-btn" data-player="${i}" title="${selectedTeam ? selectedTeam.name + ' – click to change' : 'Pick team'}">${selectedTeam ? teamGraphic(selectedTeam, 'cs-tp' + i) : ''}</button>
                 ` : '';
                 div.innerHTML = `
                     <span>P${i + 1}</span>
