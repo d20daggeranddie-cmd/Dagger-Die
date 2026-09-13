@@ -86,6 +86,7 @@
     padding: 1.6vh 2.4vw 1vh;
   }
   .container {
+    position: relative;
     max-width: none; margin: 0 auto; padding: 0;
     width: 100%; flex: 1; min-height: 0;
     display: flex; flex-direction: column;
@@ -610,6 +611,103 @@
     pointer-events: none; letter-spacing: 0.02em;
   }
 
+  .items-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    align-items: center;
+    justify-content: center;
+    padding: 3vh 4vw;
+    background: rgba(6, 8, 18, 0.92);
+  }
+  .items-overlay.visible { display: flex; }
+  .items-overlay-panel {
+    width: min(920px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.4vh;
+  }
+  .items-overlay-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(1.2rem, 3.2vh, 2rem);
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+  .items-overlay-heading .player-avatar,
+  .items-overlay-heading .player-avatar-char {
+    width: clamp(42px, 6vh, 56px);
+    height: clamp(42px, 6vh, 56px);
+    border-radius: 50%;
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+  .items-overlay-heading-rest { color: #feca57; }
+  .items-overlay-empty {
+    font-size: clamp(1rem, 2.4vh, 1.4rem);
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.04em;
+  }
+  .items-overlay-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6vh;
+  }
+  .items-overlay-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid color-mix(in srgb, var(--accent, #feca57) 55%, rgba(255,255,255,0.18));
+  }
+  .items-overlay-card.locked { opacity: 0.7; }
+  .items-overlay-icon {
+    flex: 0 0 auto;
+    width: clamp(64px, 9vh, 88px);
+    height: clamp(64px, 9vh, 88px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid color-mix(in srgb, var(--accent, #feca57) 50%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent, #feca57) 35%, transparent);
+  }
+  .items-overlay-icon svg {
+    width: 78%;
+    height: 78%;
+    image-rendering: pixelated;
+  }
+  .items-overlay-meta { min-width: 0; flex: 1; }
+  .items-overlay-name {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(1.15rem, 2.8vh, 1.7rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .items-overlay-effect {
+    color: #8feaff;
+    font-size: clamp(0.95rem, 2.2vh, 1.25rem);
+    margin-top: 4px;
+  }
+  .items-overlay-type {
+    margin-top: 6px;
+    font-size: clamp(0.7rem, 1.5vh, 0.9rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+
   @media (orientation: landscape) and (max-height: 900px) {
     .players-panel.count-5,
     .players-panel.count-6 {
@@ -702,6 +800,9 @@
           <div class="players-panel" id="players-panel"></div>
         </div>
       </div>
+      <div class="items-overlay" id="items-overlay">
+        <div class="items-overlay-panel" id="items-overlay-panel"></div>
+      </div>
     </div>
 
     <footer>Dagger &amp; Die &mdash; Brawl Mode</footer>
@@ -725,6 +826,8 @@
     const playersPanelFit = document.getElementById('players-panel-fit');
     const playersPanel = document.getElementById('players-panel');
     const finalizedBanner = document.getElementById('finalized-banner');
+    const itemsOverlay = document.getElementById('items-overlay');
+    const itemsOverlayPanel = document.getElementById('items-overlay-panel');
     const ITEM_FLASH_CLASSES = {
       HEALING: 'item-flash-heal', REGEN: 'item-flash-heal', RESURRECT: 'item-flash-heal',
       DEFENSE: 'item-flash-neutral', CLEANSE: 'item-flash-neutral',
@@ -792,6 +895,53 @@
           (ITEM ? ITEM.svg : '') +
           '</div>';
       }).join('') + '</div>';
+    }
+
+    function renderItemsOverlay(data) {
+      if (!itemsOverlay || !itemsOverlayPanel) return;
+      const show = !!(data && data.itemsOverlayVisible && data.itemsEnabled && data.phase !== 'finished');
+      itemsOverlay.classList.toggle('visible', show);
+      if (!show) {
+        itemsOverlayPanel.innerHTML = '';
+        return;
+      }
+      const players = data.players || [];
+      const current = players.find(function(p) { return p.isCurrent; })
+        || players.find(function(p) { return p.id === data.currentPlayerId; });
+      if (!current) {
+        itemsOverlayPanel.innerHTML = '<div class="items-overlay-empty">No items</div>';
+        return;
+      }
+      const ITEM_BY_ID = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID : {};
+      const inv = current.inventory || [null, null, null];
+      const lock = current.inventoryLocked || [false, false, false];
+      const held = [];
+      for (let i = 0; i < 3; i++) {
+        const item = ITEM_BY_ID[inv[i]];
+        if (item) held.push({ item: item, locked: !!lock[i] });
+      }
+      const playerColor = escHtml(current.color || '#feca57');
+      let html = '<div class="items-overlay-heading">' + getPlayerAvatarHtml(current) +
+        '<span class="items-overlay-player" style="color:' + playerColor + '">' +
+        escHtml(current.name) + '</span><span class="items-overlay-heading-rest">\'s Items</span></div>';
+      if (!held.length) {
+        html += '<div class="items-overlay-empty">No items</div>';
+      } else {
+        html += '<div class="items-overlay-list">' + held.map(function(entry) {
+          const item = entry.item;
+          return '<div class="items-overlay-card' + (entry.locked ? ' locked' : '') + '" style="--accent:' + escHtml(item.accent) + '">' +
+            '<div class="items-overlay-icon" style="--accent:' + escHtml(item.accent) + '">' + item.svg + '</div>' +
+            '<div class="items-overlay-meta">' +
+              '<div class="items-overlay-name" style="color:' + escHtml(item.accent) + '">' + escHtml(item.name) + '</div>' +
+              '<div class="items-overlay-effect">' + escHtml(item.effect) + '</div>' +
+              '<div class="items-overlay-type">' + escHtml(item.type) +
+                (entry.locked ? ' · usable next turn' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+      }
+      itemsOverlayPanel.innerHTML = html;
     }
 
     function getPlayerRollsHtml(p, data) {
@@ -1041,6 +1191,7 @@
 
         if (msg.type === 'leaderboard') {
           renderPlayers(msg);
+          renderItemsOverlay(msg);
           if (msg.phase === 'finished') {
             finalizedBanner.classList.add('visible');
             statusText.textContent = 'Game over';
