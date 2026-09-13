@@ -747,6 +747,114 @@
             text-align: center;
         }
 
+        .confirm-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(5, 6, 16, 0.72);
+            animation: confirm-overlay-in 0.2s ease-out;
+        }
+        .confirm-modal-overlay.open {
+            display: flex;
+        }
+        .confirm-modal {
+            width: 100%;
+            max-width: 420px;
+            padding: 28px;
+            text-align: center;
+            border: 2px solid rgba(212, 168, 75, 0.4);
+            border-radius: 24px;
+            background: linear-gradient(180deg, #1a2440 0%, #12192e 50%, #0e1225 100%);
+            box-shadow:
+                0 0 40px rgba(212, 168, 75, 0.15),
+                0 24px 70px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            animation: confirm-pop-in 0.28s ease-out;
+        }
+        .confirm-modal-eyebrow {
+            margin: 0 auto 14px;
+            width: fit-content;
+            padding: 5px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(212, 168, 75, 0.45);
+            background: rgba(212, 168, 75, 0.12);
+            color: #d4a84b;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .confirm-modal h3 {
+            font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+            font-size: 1.35rem;
+            color: #feca57;
+            text-shadow: 0 0 20px rgba(254, 202, 87, 0.3), 0 2px 4px rgba(0,0,0,0.5);
+            margin: 0 0 12px;
+            letter-spacing: 0.04em;
+        }
+        .confirm-modal-detail {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+            line-height: 1.45;
+            margin: 0 0 10px;
+        }
+        .confirm-modal-roster {
+            margin: 0 0 20px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f0d78c;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .confirm-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .confirm-modal-actions .btn {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 14px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .btn-secondary {
+            font-family: 'Cinzel', Georgia, serif;
+            letter-spacing: 1.1px;
+            color: rgba(255,255,255,0.88);
+            background: linear-gradient(180deg, #2a3348 0%, #1a2236 52%, #12182a 100%);
+            border: 1px solid rgba(180, 190, 220, 0.35);
+            box-shadow:
+                0 0 0 1px #0c1018,
+                0 2px 0 #0a0e16,
+                0 4px 10px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .btn-secondary:hover {
+            color: #fff;
+            border-color: rgba(212, 168, 75, 0.45);
+            transform: translateY(-1px);
+            background: linear-gradient(180deg, #364058 0%, #222c42 52%, #171e32 100%);
+        }
+        @keyframes confirm-overlay-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes confirm-pop-in {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 420px) {
+            .confirm-modal-actions {
+                flex-direction: column-reverse;
+            }
+        }
+
         .hidden { display: none !important; }
 
         .m3-logo {
@@ -859,6 +967,19 @@
             <h3>Join a Party</h3>
             <p class="team-picker-hint">At least two different teams are required.</p>
             <div class="team-picker-grid" id="team-picker-grid"></div>
+        </div>
+    </div>
+
+    <div class="confirm-modal-overlay" id="new-game-confirm-modal" role="dialog" aria-labelledby="new-game-confirm-title" aria-modal="true" aria-hidden="true">
+        <div class="confirm-modal">
+            <div class="confirm-modal-eyebrow">Saved Match</div>
+            <h3 id="new-game-confirm-title">Start a new game?</h3>
+            <p class="confirm-modal-detail">This replaces the match in progress. There is no undo.</p>
+            <p class="confirm-modal-roster" id="new-game-confirm-roster"></p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="btn btn-secondary" id="new-game-confirm-cancel-btn">Keep Match</button>
+                <button type="button" class="btn btn-primary" id="new-game-confirm-yes-btn">Start New</button>
+            </div>
         </div>
     </div>
 
@@ -1357,19 +1478,58 @@
             }
         }
 
-        startGameBtn.addEventListener('click', () => {
-            if (!validatePlayerNames()) return;
+        const newGameConfirmModal = document.getElementById('new-game-confirm-modal');
+        const newGameConfirmRoster = document.getElementById('new-game-confirm-roster');
+        const newGameConfirmYesBtn = document.getElementById('new-game-confirm-yes-btn');
+        const newGameConfirmCancelBtn = document.getElementById('new-game-confirm-cancel-btn');
+        let newGameConfirmResolve = null;
 
-            const savedMatch = readSavedBrawl();
-            if (savedMatch) {
-                const names = savedMatch.players.map(p => p.name).filter(Boolean).join(', ');
-                const msg = 'Start a new game?\n\nThis replaces the saved match'
-                    + (names ? ' (' + names + ')' : '')
-                    + '.\nThere is no undo.\n\nOK = Start new game\nCancel = Keep the saved match';
-                if (!confirm(msg)) return;
+        function closeNewGameConfirm(confirmed) {
+            if (!newGameConfirmModal) return;
+            newGameConfirmModal.classList.remove('open');
+            newGameConfirmModal.setAttribute('aria-hidden', 'true');
+            const resolve = newGameConfirmResolve;
+            newGameConfirmResolve = null;
+            if (resolve) resolve(!!confirmed);
+        }
+
+        function confirmReplaceSavedMatch(names) {
+            if (!newGameConfirmModal) return Promise.resolve(true);
+            if (newGameConfirmRoster) {
+                if (names) {
+                    newGameConfirmRoster.textContent = names;
+                    newGameConfirmRoster.hidden = false;
+                } else {
+                    newGameConfirmRoster.textContent = '';
+                    newGameConfirmRoster.hidden = true;
+                }
             }
+            newGameConfirmModal.classList.add('open');
+            newGameConfirmModal.setAttribute('aria-hidden', 'false');
+            if (newGameConfirmYesBtn) newGameConfirmYesBtn.focus();
+            return new Promise((resolve) => {
+                newGameConfirmResolve = resolve;
+            });
+        }
 
-            const nameInputs = playerSetup.querySelectorAll('input[type="text"]');
+        if (newGameConfirmYesBtn) {
+            newGameConfirmYesBtn.addEventListener('click', () => closeNewGameConfirm(true));
+        }
+        if (newGameConfirmCancelBtn) {
+            newGameConfirmCancelBtn.addEventListener('click', () => closeNewGameConfirm(false));
+        }
+        if (newGameConfirmModal) {
+            newGameConfirmModal.addEventListener('click', (e) => {
+                if (e.target === newGameConfirmModal) closeNewGameConfirm(false);
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && newGameConfirmModal.classList.contains('open')) {
+                    closeNewGameConfirm(false);
+                }
+            });
+        }
+
+        function beginNewGame() {
             const payload = [];
             const allowBots = botsEnabled();
             playerSetup.querySelectorAll('.player-input').forEach((row, idx) => {
@@ -1402,6 +1562,19 @@
                 return;
             }
             window.location.href = 'game.html';
+        }
+
+        startGameBtn.addEventListener('click', async () => {
+            if (!validatePlayerNames()) return;
+
+            const savedMatch = readSavedBrawl();
+            if (savedMatch) {
+                const names = savedMatch.players.map(p => p.name).filter(Boolean).join(', ');
+                const replace = await confirmReplaceSavedMatch(names);
+                if (!replace) return;
+            }
+
+            beginNewGame();
         });
 
         document.querySelector('.player-count-btn[data-count="2"]')?.classList.add('selected');
@@ -1429,6 +1602,7 @@
                         'daggerdie_modVampire',
                         'daggerdie_modParty',
                         'daggerdie_modBoss',
+                        'daggerdie_modFriendlyFire',
                         'daggerdie_bossHp'
                     ].forEach(k => localStorage.removeItem(k));
                     window.location.href = 'startgame.html';
