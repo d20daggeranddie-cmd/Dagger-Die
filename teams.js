@@ -1,7 +1,7 @@
 /**
  * Team definitions for Dagger & Die Party mode.
- * Emblems extracted from assets/dnd_class_emblems.svg.
- * Use DAGGERDIE_PREFIX_TEAM_SVG_IDS(svg, prefix) when injecting to avoid duplicate IDs.
+ * HD emblems live at assets/HD Teams/{image}.
+ * Pixel SVGs remain as a fallback. Use DAGGERDIE_TEAM_MARKUP(team, prefix) when injecting.
  */
 (function (global) {
     function prefixTeamSvgIds(svgString, prefix) {
@@ -14,7 +14,7 @@
 
     var TEAMS = [
         {
-            id: 'fighter', name: 'The Ironbound', color: '#7f1d1d',
+            id: 'fighter', image: 'ironbound.png', name: 'The Ironbound', color: '#7f1d1d',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#7f1d1d"/>' +
                 '<line x1="22" y1="22" x2="68" y2="68" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>' +
@@ -28,7 +28,7 @@
                 '</svg>'
         },
         {
-            id: 'rogue', name: 'The Ashen Veil', color: '#1e1b4b',
+            id: 'rogue', image: 'ashenveil.png', name: 'The Ashen Veil', color: '#1e1b4b',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#1e1b4b"/>' +
                 '<polygon points="45,12 50,45 45,50 40,45" fill="#e2e8f0"/>' +
@@ -40,7 +40,7 @@
                 '</svg>'
         },
         {
-            id: 'wizard', name: 'The Starforged', color: '#1e3a5f',
+            id: 'wizard', image: 'starforged.png', name: 'The Starforged', color: '#1e3a5f',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#1e3a5f"/>' +
                 '<polygon points="45,10 49,36 68,20 52,39 78,43 52,47 68,66 49,50 45,76 41,50 22,66 38,47 12,43 38,39 22,20 41,36" fill="#60a5fa"/>' +
@@ -49,7 +49,7 @@
                 '</svg>'
         },
         {
-            id: 'cleric', name: 'The Sunwoken', color: '#78350f',
+            id: 'cleric', image: 'sunwoken.png', name: 'The Sunwoken', color: '#78350f',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#78350f"/>' +
                 '<rect x="38" y="14" width="14" height="62" rx="4" fill="#fbbf24"/>' +
@@ -59,7 +59,7 @@
                 '</svg>'
         },
         {
-            id: 'ranger', name: 'The Duskwalkers', color: '#14532d',
+            id: 'ranger', image: 'duskwalkers.png', name: 'The Duskwalkers', color: '#14532d',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#14532d"/>' +
                 '<path d="M22 14 Q8 45 22 76" fill="none" stroke="#86efac" stroke-width="5" stroke-linecap="round"/>' +
@@ -71,7 +71,7 @@
                 '</svg>'
         },
         {
-            id: 'bard', name: 'The Echoing', color: '#701a75',
+            id: 'bard', image: 'echoing.png', name: 'The Echoing', color: '#701a75',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#701a75"/>' +
                 '<ellipse cx="50" cy="60" rx="22" ry="24" fill="#c026d3"/>' +
@@ -87,7 +87,7 @@
                 '</svg>'
         },
         {
-            id: 'paladin', name: 'The Oathsworn', color: '#1e3a5f',
+            id: 'paladin', image: 'oathsworn.png', name: 'The Oathsworn', color: '#1e3a5f',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#1e3a5f"/>' +
                 '<path d="M45 10 L74 22 L74 52 Q74 72 45 82 Q16 72 16 52 L16 22 Z" fill="#2563eb"/>' +
@@ -99,7 +99,7 @@
                 '</svg>'
         },
         {
-            id: 'druid', name: 'The Rootborn', color: '#365314',
+            id: 'druid', image: 'rootborn.png', name: 'The Rootborn', color: '#365314',
             svg: '<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="0" y="0" width="90" height="90" rx="12" fill="#365314"/>' +
                 '<circle cx="48" cy="35" r="22" fill="#4ade80"/>' +
@@ -114,7 +114,30 @@
     var TEAM_BY_ID = {};
     TEAMS.forEach(function (t) { TEAM_BY_ID[t.id] = t; });
 
+    function escapeAttr(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+    }
+
+    function getTeamImagePath(team) {
+        if (!team || !team.image) return '';
+        return 'assets/HD%20Teams/' + team.image;
+    }
+
+    function getTeamMarkup(team, prefix) {
+        if (!team) return '';
+        var path = getTeamImagePath(team);
+        if (path) {
+            return '<img src="' + path + '" alt="' + escapeAttr(team.name || '') + '" draggable="false">';
+        }
+        return prefixTeamSvgIds(team.svg, prefix);
+    }
+
     global.DAGGERDIE_TEAMS = TEAMS;
     global.DAGGERDIE_TEAM_BY_ID = TEAM_BY_ID;
     global.DAGGERDIE_PREFIX_TEAM_SVG_IDS = prefixTeamSvgIds;
+    global.DAGGERDIE_TEAM_IMAGE_PATH = getTeamImagePath;
+    global.DAGGERDIE_TEAM_MARKUP = getTeamMarkup;
 })(typeof window !== 'undefined' ? window : this);
