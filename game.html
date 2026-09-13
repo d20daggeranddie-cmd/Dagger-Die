@@ -958,7 +958,9 @@
             transform: scale(1.03);
         }
         .item-swap-card .swap-item-icon { width: 56px; height: 56px; }
-        .item-swap-card .swap-item-icon svg { width: 100%; height: 100%; }
+        .item-swap-card .swap-item-icon svg,
+        .item-swap-card .swap-item-icon img { width: 100%; height: 100%; display: block; }
+        .item-swap-card .swap-item-icon img { object-fit: contain; }
         .item-swap-card .swap-item-name { font-size: 1rem; font-weight: 700; text-align: center; }
         .item-swap-card .swap-item-effect { font-size: 0.85rem; color: rgba(255,255,255,0.7); text-align: center; }
         .item-swap-card .swap-item-slot-label { font-size: 0.75rem; color: #ff8f8f; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -1020,16 +1022,23 @@
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
             justify-content: center;
+            box-sizing: border-box;
+            width: 100vw;
+            max-width: 100vw;
+            margin: 0 0 30px;
+            margin-left: calc(50% - 50vw);
+            padding: 6px 24px 0;
         }
 
         .player-card {
             position: relative;
             background: rgba(255,255,255,0.1);
             border-radius: 18px;
-            padding: 22px 18px 18px;
-            min-width: 188px;
+            padding: 22px 12px 18px;
+            width: 220px;
+            min-width: 220px;
+            max-width: 220px;
             text-align: center;
             transition: all 0.3s;
             border: 3px solid transparent;
@@ -1235,12 +1244,14 @@
             z-index: 9999;
             animation: item-applied-anim 1.4s ease-out forwards;
         }
-        .item-applied-overlay svg {
+        .item-applied-overlay svg,
+        .item-applied-overlay img {
             width: 72px;
             height: 72px;
-            image-rendering: pixelated;
             filter: drop-shadow(0 0 12px var(--item-glow)) drop-shadow(0 0 24px var(--item-glow));
         }
+        .item-applied-overlay svg { image-rendering: pixelated; }
+        .item-applied-overlay img { object-fit: contain; display: block; }
         .item-applied-overlay .item-label {
             margin-top: 4px;
             font-size: 0.75rem;
@@ -1294,15 +1305,19 @@
 
         .player-card-inventory {
             display: flex;
-            gap: 4px;
+            gap: 8px;
             justify-content: center;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         .player-card-inventory-slot {
-            width: 28px;
-            height: 28px;
+            flex: 0 0 56px;
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            min-height: 56px;
+            max-width: 56px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 6px;
+            border-radius: 10px;
             background: rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
@@ -1329,9 +1344,17 @@
             box-shadow: none;
         }
         .player-card-inventory-slot svg {
-            width: 20px;
-            height: 20px;
+            width: 40px;
+            height: 40px;
             image-rendering: pixelated;
+        }
+        .player-card-inventory-slot img {
+            width: 52px;
+            height: 52px;
+            max-width: 52px;
+            max-height: 52px;
+            object-fit: contain;
+            display: block;
         }
 
         .player-stats-inventory-slots {
@@ -1374,6 +1397,12 @@
             height: 40px;
             image-rendering: pixelated;
         }
+        .player-stats-inventory-slots .inv-slot img {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+            display: block;
+        }
         .player-stats-inventory-slots .inv-slot-meta {
             min-width: 0;
             flex: 1;
@@ -1399,14 +1428,17 @@
             font-size: 0.98rem;
         }
         .item-use-icon-wrap {
-            width: 76px;
-            height: 76px;
+            width: 96px;
+            height: 96px;
         }
-        .item-use-icon-wrap svg {
+        .item-use-icon-wrap svg,
+        .item-use-icon-wrap img {
             width: 100%;
             height: 100%;
-            image-rendering: pixelated;
+            display: block;
         }
+        .item-use-icon-wrap svg { image-rendering: pixelated; }
+        .item-use-icon-wrap img { object-fit: contain; }
         #item-use-modal-content {
             max-width: 480px;
             max-height: min(92vh, 920px);
@@ -1722,10 +1754,10 @@
         }
 
         .player-avatar {
-            width: 96px;
-            height: 96px;
+            width: 128px;
+            height: 128px;
             border-radius: 50%;
-            margin: 0 auto 12px;
+            margin: 0 auto 14px;
         }
         .player-avatar.player-avatar-char {
             overflow: hidden;
@@ -1742,11 +1774,12 @@
 
         .player-name {
             font-weight: bold;
+            font-size: 1.15rem;
             margin-bottom: 10px;
         }
 
         .player-hp {
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             margin-bottom: 5px;
         }
 
@@ -1820,10 +1853,14 @@
             overflow: hidden;
             flex-shrink: 0;
         }
-        .player-card-team-badge .team-badge-icon svg {
+        .player-card-team-badge .team-badge-icon svg,
+        .player-card-team-badge .team-badge-icon img {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 20px;
+            height: 20px;
+            max-width: 20px;
+            max-height: 20px;
+            object-fit: contain;
         }
         .turn-order-team-badge {
             width: 22px;
@@ -1832,10 +1869,23 @@
             overflow: hidden;
             flex-shrink: 0;
         }
-        .turn-order-team-badge svg {
+        .turn-order-team-badge svg,
+        .turn-order-team-badge img {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 22px;
+            height: 22px;
+            max-width: 22px;
+            max-height: 22px;
+            object-fit: contain;
+        }
+        .winner-team-emblem img,
+        .winner-team-emblem svg {
+            display: block;
+            width: 80px;
+            height: 80px;
+            max-width: 80px;
+            max-height: 80px;
+            object-fit: contain;
         }
 
         /* Game Area */
@@ -2472,12 +2522,10 @@
 
         @media (max-width: 900px) {
             .player-card {
-                min-width: 156px;
-                padding: 16px 14px;
-            }
-            .player-avatar {
-                width: 76px;
-                height: 76px;
+                width: 220px;
+                min-width: 220px;
+                max-width: 220px;
+                padding: 20px 12px 16px;
             }
         }
 
@@ -2505,14 +2553,40 @@
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 8px;
-                margin-bottom: 15px;
+                margin: 0 0 15px;
                 width: 100%;
+                max-width: 100%;
+                padding: 0;
             }
 
             .player-card {
                 padding: 12px 6px;
                 min-width: 0;
+                max-width: none;
                 width: auto;
+            }
+            .player-card-inventory {
+                gap: 4px;
+                margin-top: 8px;
+            }
+            .player-card-inventory-slot {
+                flex-basis: 36px;
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                max-width: 36px;
+                border-radius: 8px;
+            }
+            .player-card-inventory-slot img {
+                width: 32px;
+                height: 32px;
+                max-width: 32px;
+                max-height: 32px;
+            }
+            .player-card-inventory-slot svg {
+                width: 24px;
+                height: 24px;
             }
 
             .player-card.current {
@@ -2520,8 +2594,8 @@
             }
 
             .player-avatar {
-                width: 56px;
-                height: 56px;
+                width: 64px;
+                height: 64px;
                 margin-bottom: 8px;
             }
 
@@ -2621,6 +2695,7 @@
 
             .player-card {
                 min-width: 0;
+                max-width: none;
                 padding: 10px 4px;
             }
 
@@ -4014,13 +4089,19 @@
             }
         }
 
+        function teamGraphic(team, prefix) {
+            if (!team) return '';
+            if (typeof DAGGERDIE_TEAM_MARKUP === 'function') return DAGGERDIE_TEAM_MARKUP(team, prefix);
+            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
+            return prefixTeamSvgIds(team.svg, prefix);
+        }
+
         function getTeamBadgeInlineHtml(p) {
             if (!p.teamId) return '';
             const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
-            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
             const team = TEAM_BY_ID[p.teamId];
             if (!team) return '';
-            return `<div class="turn-order-team-badge" title="${team.name}">${prefixTeamSvgIds(team.svg, 'game-to-tb' + p.id)}</div>`;
+            return `<div class="turn-order-team-badge" title="${team.name}">${teamGraphic(team, 'game-to-tb' + p.id)}</div>`;
         }
 
         function showTurnOrderScreen() {
@@ -4317,11 +4398,10 @@
         function getTeamBadgeHtml(p, cssClass) {
             if (!state.modParty || !p.teamId) return '';
             const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
-            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
             const team = TEAM_BY_ID[p.teamId];
             if (!team) return '';
             const cls = cssClass || 'player-card-team-badge';
-            return `<div class="${cls}"><div class="team-badge-icon">${prefixTeamSvgIds(team.svg, 'game-tb' + p.id)}</div><span>${team.name}</span></div>`;
+            return `<div class="${cls}"><div class="team-badge-icon">${teamGraphic(team, 'game-tb' + p.id)}</div><span>${team.name}</span></div>`;
         }
 
         function ensurePlayerItemStats(player) {
@@ -4397,6 +4477,12 @@
             if (!player || slotIdx < 0) return false;
             const lock = player.inventoryLocked || [false, false, false];
             return !!lock[slotIdx];
+        }
+
+        function itemGraphic(item) {
+            if (!item) return '';
+            if (typeof DAGGERDIE_ITEM_MARKUP === 'function') return DAGGERDIE_ITEM_MARKUP(item);
+            return item.svg || '';
         }
 
         function compactInventory(player) {
@@ -4680,7 +4766,7 @@
             overlay.style.left = (rect.left + rect.width / 2 - 44) + 'px';
             overlay.style.top = (rect.top + rect.height / 2 - 48) + 'px';
             overlay.style.width = '88px';
-            overlay.innerHTML = item.svg + `<span class="item-label">${item.name}</span>`;
+            overlay.innerHTML = itemGraphic(item) + `<span class="item-label">${item.name}</span>`;
             document.body.appendChild(overlay);
             setTimeout(() => overlay.remove(), 1500);
 
@@ -4716,7 +4802,7 @@
                     ${p.isBot ? '<div class="player-card-bot-skill" data-player="'+p.id+'">Bot: ' + capitalizeBotSkill(p.botSkill) + '</div>' : ''}
                     ${getTeamBadgeHtml(p)}
                     ${getPlayerStatusEffectsForItemModal(p).map(s => '<div class="player-card-status ' + s.kind + '">' + s.label + '</div>').join('')}
-                    ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; const usable = ITEM && !lock[i] && canPlayerUseItemsNow(p.id); return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + (usable ? ' usable-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : (usable ? 'Tap to use: ' : '') + ITEM.name + ': ' + ITEM.effect) : 'Empty') + '"' + (usable ? ' style="cursor:pointer"' : '') + '>' + (ITEM ? ITEM.svg : '') + '</div>'; }).join('') + '</div>' : ''}
+                    ${state.itemsEnabled ? '<div class="player-card-inventory" data-player="'+p.id+'">' + [0,1,2].map(i => { const inv = p.inventory || [null,null,null]; const lock = p.inventoryLocked || [false,false,false]; const itemId = inv[i]; const ITEM = typeof DAGGERDIE_ITEM_BY_ID !== 'undefined' ? DAGGERDIE_ITEM_BY_ID[itemId] : null; const usable = ITEM && !lock[i] && canPlayerUseItemsNow(p.id); return '<div class="player-card-inventory-slot ' + (ITEM ? 'has-item' : '') + (ITEM && lock[i] ? ' locked-item' : '') + (usable ? ' usable-item' : '') + '" data-player="'+p.id+'" data-slot="'+i+'" title="' + (ITEM ? (lock[i] ? ITEM.name + ': usable next turn' : (usable ? 'Tap to use: ' : '') + ITEM.name + ': ' + ITEM.effect) : 'Empty') + '"' + (usable ? ' style="cursor:pointer"' : '') + '>' + (ITEM ? itemGraphic(ITEM) : '') + '</div>'; }).join('') + '</div>' : ''}
                 </div>
             `).join('');
             if (newHtml !== _lastPlayersPanelHtml) {
@@ -5173,7 +5259,7 @@
             criticalItemProceedCallback = onDismiss;
             criticalItemDisplay.innerHTML = `
                 <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
-                <div class="item-use-icon-wrap" style="--accent:${item.accent}">${item.svg}</div>
+                <div class="item-use-icon-wrap" style="--accent:${item.accent}">${itemGraphic(item)}</div>
                 <div class="critical-item-name" style="color: var(--accent,${item.accent});">${item.name}</div>
                 <div class="critical-item-effect">${item.effect}</div>
                 <div class="critical-item-type">${item.type}</div>
@@ -5207,7 +5293,7 @@
 
             itemSwapNewItem.innerHTML = `
                 <div class="critical-item-roll">D12 Roll: ${d12Roll}</div>
-                <div class="item-use-icon-wrap" style="--accent:${newItem.accent}">${newItem.svg}</div>
+                <div class="item-use-icon-wrap" style="--accent:${newItem.accent}">${itemGraphic(newItem)}</div>
                 <div class="critical-item-name" style="color:var(--accent,${newItem.accent});">${newItem.name}</div>
                 <div class="critical-item-effect">${newItem.effect}</div>
                 <div class="critical-item-type">${newItem.type}</div>`;
@@ -5220,7 +5306,7 @@
                 cards.push(`
                     <button type="button" class="item-swap-card" data-slot="${i}">
                         <span class="swap-item-slot-label">Drop${lock[i] ? ' (locked)' : ''}</span>
-                        <div class="swap-item-icon" style="--accent:${item.accent}">${item.svg}</div>
+                        <div class="swap-item-icon" style="--accent:${item.accent}">${itemGraphic(item)}</div>
                         <span class="swap-item-name" style="color:var(--accent,${item.accent});">${item.name}</span>
                         <span class="swap-item-effect">${item.effect}</span>
                     </button>`);
@@ -5979,7 +6065,7 @@
                             '<div class="inv-slot-empty">Empty</div></div>';
                     }
                     return '<div class="inv-slot has-item' + (locked ? ' locked-item' : '') + '" data-player="'+playerId+'" data-slot="' + i + '" style="--accent:' + ITEM.accent + (usable ? ';cursor:pointer' : '') + '">' +
-                        '<div class="inv-slot-icon">' + ITEM.svg + '</div>' +
+                        '<div class="inv-slot-icon">' + itemGraphic(ITEM) + '</div>' +
                         '<div class="inv-slot-meta">' +
                             '<div class="inv-slot-name" style="color:' + ITEM.accent + '">' + escapeHtml(ITEM.name) + '</div>' +
                             '<div class="inv-slot-effect">' + escapeHtml(ITEM.effect) + '</div>' +
@@ -6373,7 +6459,7 @@
             if (!item) return;
             itemUseContext = { playerId, slotIdx, itemId };
             itemUseTitle.textContent = item.name;
-            itemUseDetail.innerHTML = '<div class="item-use-icon-wrap" style="--accent:' + item.accent + '">' + item.svg + '</div><div style="color: #48dbfb; font-size: 1.08rem;">' + item.effect + '</div><div style="font-size: 0.88rem; opacity: 0.7;">' + item.type + '</div>';
+            itemUseDetail.innerHTML = '<div class="item-use-icon-wrap" style="--accent:' + item.accent + '">' + itemGraphic(item) + '</div><div style="color: #48dbfb; font-size: 1.08rem;">' + item.effect + '</div><div style="font-size: 0.88rem; opacity: 0.7;">' + item.type + '</div>';
             const targetsDiv = itemUseTargets;
             targetsDiv.className = 'item-target-list';
             targetsDiv.innerHTML = '';
@@ -6668,15 +6754,14 @@
             winnerScreen.style.display = 'block';
 
             const TEAM_BY_ID = window.DAGGERDIE_TEAM_BY_ID || {};
-            const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || (s => s);
             const team = TEAM_BY_ID[teamId];
             const survivors = state.players.filter(p => !p.eliminated && p.teamId === teamId);
             const survivorNames = survivors.map(p => `<span style="color:${p.color.hex};">${p.name}</span>`).join(', ');
-            const teamSvg = team ? prefixTeamSvgIds(team.svg, 'game-win-team') : '';
+            const teamArt = teamGraphic(team, 'game-win-team');
             const teamName = team ? team.name : teamId;
 
             document.getElementById('winner-name').innerHTML = `
-                ${teamSvg ? `<div style="margin: 0 auto 16px; width: 80px; height: 80px;">${teamSvg}</div>` : ''}
+                ${teamArt ? `<div class="winner-team-emblem" style="margin: 0 auto 16px; width: 80px; height: 80px;">${teamArt}</div>` : ''}
                 <div>Team <span style="color: #48dbfb;">${teamName}</span> Wins!</div>
                 <div style="font-size: 0.9rem; margin-top: 12px; opacity: 0.85;">Survivors: ${survivorNames}</div>
             `;
