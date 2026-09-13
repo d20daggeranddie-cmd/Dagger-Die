@@ -174,10 +174,24 @@ Players throw knives at the targets based on what they roll on the dice!`;
       background:rgba(0,0,0,.2);white-space:nowrap;
     }
     .readme-md td{
-      padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88);
+      padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88);
+      vertical-align:middle;
     }
     .readme-md tr:hover td{background:rgba(255,255,255,.04)}
     .readme-md tbody tr:last-child td{border-bottom:none}
+    .readme-item-cell{display:flex;align-items:center;gap:12px;white-space:nowrap}
+    .readme-item-icon{
+      flex:0 0 64px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 0 12px color-mix(in srgb, var(--item-accent, #feca57) 40%, transparent);
+    }
+    .readme-item-icon svg{
+      width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges;
+    }
+    .readme-item-icon img{
+      width:100%;height:100%;object-fit:contain;display:block;
+    }
     @media (max-width:600px){
       .readme-modal{width:95vw;max-height:88vh}
       .readme-modal-header{padding:14px}
@@ -349,9 +363,57 @@ Players throw knives at the targets based on what they roll on the dice!`;
     return `<div class="readme-md">${html.join('')}</div>`;
   }
 
+  function withItems(callback) {
+    if (window.DAGGERDIE_ITEMS && window.DAGGERDIE_ITEMS.length) {
+      callback();
+      return;
+    }
+    const existing = document.querySelector('script[src="items.js"], script[src$="/items.js"]');
+    if (existing) {
+      existing.addEventListener('load', callback, { once: true });
+      existing.addEventListener('error', callback, { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'items.js';
+    script.onload = callback;
+    script.onerror = callback;
+    document.head.appendChild(script);
+  }
+
+  function enhanceItemTable() {
+    const items = window.DAGGERDIE_ITEMS;
+    if (!items || !items.length) return;
+
+    const byName = {};
+    items.forEach((item) => {
+      byName[item.name.toLowerCase()] = item;
+    });
+
+    readmeContent.querySelectorAll('table').forEach((table) => {
+      const headers = Array.from(table.querySelectorAll('th')).map((th) => th.textContent.trim().toLowerCase());
+      const itemCol = headers.indexOf('item');
+      if (itemCol === -1) return;
+
+      table.querySelectorAll('tbody tr').forEach((row) => {
+        const cells = row.querySelectorAll('td');
+        const nameCell = cells[itemCol];
+        if (!nameCell || nameCell.querySelector('.readme-item-icon')) return;
+        const item = byName[nameCell.textContent.trim().toLowerCase()];
+        const graphic = typeof window.DAGGERDIE_ITEM_MARKUP === 'function'
+          ? window.DAGGERDIE_ITEM_MARKUP(item)
+          : (item.svg || '');
+        if (!graphic) return;
+        const labelHtml = nameCell.innerHTML;
+        nameCell.innerHTML = `<span class="readme-item-cell"><span class="readme-item-icon" style="--item-accent:${item.accent}" aria-hidden="true">${graphic}</span><span>${labelHtml}</span></span>`;
+      });
+    });
+  }
+
   function setReadme(mdText) {
     readmeContent.innerHTML = renderMarkdown(mdText);
     readmeLoaded = true;
+    withItems(enhanceItemTable);
   }
 
   function loadReadme() {
