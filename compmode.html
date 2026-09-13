@@ -2092,8 +2092,9 @@
       if (compState.phase === 'tiebreaker' && !player.tbActive) return;
 
       const existing = inTb ? (player.tbHits || new Array(9).fill(null)) : player.hits;
-      // Tri-state: null = unmarked, true = hit (green), false = miss (red)
-      const draft = existing.map(h => (h === true ? true : h === false ? false : null));
+      // Tri-state: null = unmarked, true = hit (green), false = miss (red).
+      // Unmarked throws open as miss so admins only click hits.
+      const draft = existing.map(h => (h === true ? true : false));
 
       const overlay = document.createElement('div');
       overlay.className = 'hm-overlay';
@@ -2102,7 +2103,7 @@
       overlay.setAttribute('aria-label', 'Score ' + player.name);
 
       const title = inTb ? 'Tiebreaker Score' : 'Score Player';
-      const subtitle = 'Mark each throw — Hit turns green, Miss turns red. Unmarked count as miss on submit.';
+      const subtitle = 'Miss starts selected — click Hit on throws that scored.';
 
       function draftTotal() {
         return draft.reduce((sum, hit, i) => sum + (hit === true ? compState.targets[i] : 0), 0);
