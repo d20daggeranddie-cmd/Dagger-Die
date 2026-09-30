@@ -2209,7 +2209,7 @@
             filter: url(#glow-hit-combined);
         }
 
-        .highlight-zone text {
+        .highlight-zone text.d20-num {
             font-family: serif;
             fill: #b0a8c8;
             pointer-events: none;
@@ -2220,19 +2220,45 @@
             font-weight: bold;
         }
 
-        .highlight-zone.active text {
+        .highlight-zone.active text.d20-num {
             fill: #fbbf24;
         }
 
-        .highlight-zone.claimed text {
+        .highlight-zone.claimed text.d20-num {
             fill: #22c55e;
         }
-        .highlight-zone.aimed text {
+        .highlight-zone.aimed text.d20-num {
             fill: #67e8f9;
             font-weight: 700;
         }
-        .highlight-zone.aimed.claimed text {
+        .highlight-zone.aimed.claimed text.d20-num {
             fill: #f5d0fe;
+        }
+
+        .throw-overlay {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .highlight-zone.active .throw-overlay,
+        .highlight-zone.claimed .throw-overlay {
+            opacity: 1;
+        }
+        .highlight-zone.claimed:not(.active) .throw-overlay {
+            opacity: 0.65;
+        }
+        .throw-badge-bg {
+            fill: #111111;
+            stroke: #ffe566;
+            stroke-width: 2;
+        }
+        .throw-label {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 13px;
+            font-weight: 700;
+            fill: #fbbf24;
+            text-anchor: middle;
+            dominant-baseline: central;
         }
 
         @keyframes pulse {
@@ -4908,11 +4934,79 @@
 
         rollDiceBtn.addEventListener('click', () => performDiceRoll());
 
+        function setThrowBadgeSize(zone, text) {
+            const bg = zone.querySelector('.throw-badge-bg');
+            if (!bg) return;
+            const wide = !!(text && text.length > 3);
+            const w = wide ? 36 : 26;
+            const h = 26;
+            bg.setAttribute('x', String(-w / 2));
+            bg.setAttribute('y', String(-h / 2));
+            bg.setAttribute('width', String(w));
+            bg.setAttribute('height', String(h));
+            bg.setAttribute('rx', '10');
+        }
+
+        function initThrowOverlays() {
+            const ns = 'http://www.w3.org/2000/svg';
+            document.querySelectorAll('.highlight-zone').forEach(zone => {
+                if (zone.querySelector('.throw-overlay')) return;
+                const nums = zone.querySelectorAll('.d20-num');
+                if (!nums.length) return;
+                const first = nums[0];
+                const last = nums[nums.length - 1];
+                const x = parseFloat(first.getAttribute('x'));
+                const y1 = parseFloat(first.getAttribute('y'));
+                const y2 = parseFloat(last.getAttribute('y'));
+                const midY = nums.length > 1 ? (y1 + y2) / 2 : y1;
+                const badgeX = Math.max(18, Math.min(382, x + (nums.length > 1 ? 32 : 22)));
+                const badgeY = Math.max(16, Math.min(444, midY - (nums.length > 1 ? 0 : 18)));
+
+                const g = document.createElementNS(ns, 'g');
+                g.setAttribute('class', 'throw-overlay');
+                g.setAttribute('transform', `translate(${badgeX},${badgeY})`);
+
+                const bg = document.createElementNS(ns, 'rect');
+                bg.setAttribute('class', 'throw-badge-bg');
+
+                const t = document.createElementNS(ns, 'text');
+                t.setAttribute('class', 'throw-label');
+                t.setAttribute('x', '0');
+                t.setAttribute('y', '1');
+
+                g.appendChild(bg);
+                g.appendChild(t);
+                zone.appendChild(g);
+                setThrowBadgeSize(zone, '');
+            });
+        }
+
+        initThrowOverlays();
+
+        function syncThrowOverlays(rolls) {
+            const zoneThrows = new Map();
+            (rolls || []).forEach((roll, i) => {
+                getZonesForNumber(roll).forEach(zone => {
+                    if (!zoneThrows.has(zone)) zoneThrows.set(zone, []);
+                    zoneThrows.get(zone).push(i + 1);
+                });
+            });
+            document.querySelectorAll('.highlight-zone').forEach(zone => {
+                const lbl = zone.querySelector('.throw-label');
+                const nums = zoneThrows.get(zone);
+                const text = nums && nums.length ? '#' + nums.join('/') : '';
+                if (lbl) lbl.textContent = text;
+                setThrowBadgeSize(zone, text);
+            });
+        }
+
         function highlightTargets(rolls) {
+            initThrowOverlays();
             clearHighlights();
             rolls.forEach(roll => {
                 getZonesForNumber(roll).forEach(zone => zone.classList.add('active'));
             });
+            syncThrowOverlays(rolls);
             const aimZone = syncAimHighlights();
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll, aim: aimZone });
@@ -4922,6 +5016,9 @@
         function clearHighlights() {
             document.querySelectorAll('.highlight-zone').forEach(zone => {
                 zone.classList.remove('active', 'aimed', 'claimed');
+                const lbl = zone.querySelector('.throw-label');
+                if (lbl) lbl.textContent = '';
+                setThrowBadgeSize(zone, '');
             });
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'clear' });
