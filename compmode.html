@@ -1559,17 +1559,41 @@
 
     applyBoardMode();
 
+    const THROW_BADGE_POS = {
+      15: [48, 298], 12: [48, 298],
+      9: [352, 298], 14: [352, 298],
+      13: [132, 404], 18: [132, 404],
+      19: [268, 404], 16: [268, 404],
+      17: [100, 78], 10: [100, 78],
+      11: [300, 78], 20: [300, 78],
+      3: [108, 206], 4: [108, 206],
+      7: [292, 206], 6: [292, 206],
+      5: [255, 340], 8: [255, 340],
+      1: [254, 274], 2: [254, 274],
+      '15,12': [48, 298], '9,14': [352, 298],
+      '13,18': [132, 404], '19,16': [268, 404],
+      '17,10': [100, 78], '11,20': [300, 78],
+      '3,4': [108, 206], '7,6': [292, 206],
+      '5,8': [255, 340], '1,2': [254, 274]
+    };
+    const THROW_BADGE_COMPACT = new Set([12, 15, 9, 14, 13, 18, 16, 19, 17, 10, 11, 20, '15,12', '9,14', '13,18', '19,16', '17,10', '11,20']);
+
+    function throwBadgeKey(zone) {
+      return zone.getAttribute('data-number') || zone.getAttribute('data-numbers') || '';
+    }
+
     function setThrowBadgeSize(zone, text) {
       const bg = zone.querySelector('.throw-badge-bg');
       if (!bg) return;
+      const compact = THROW_BADGE_COMPACT.has(Number(throwBadgeKey(zone))) || THROW_BADGE_COMPACT.has(throwBadgeKey(zone));
       const wide = !!(text && text.length > 3);
-      const w = wide ? 36 : 26;
-      const h = 26;
+      const w = compact ? (wide ? 28 : 22) : (wide ? 36 : 26);
+      const h = compact ? 20 : 26;
       bg.setAttribute('x', String(-w / 2));
       bg.setAttribute('y', String(-h / 2));
       bg.setAttribute('width', String(w));
       bg.setAttribute('height', String(h));
-      bg.setAttribute('rx', '10');
+      bg.setAttribute('rx', String(h / 2));
     }
 
     function initThrowOverlays() {
@@ -1578,14 +1602,16 @@
         if (zone.querySelector('.throw-overlay')) return;
         const nums = zone.querySelectorAll('.d20-num');
         if (!nums.length) return;
+        const key = throwBadgeKey(zone);
+        const pos = THROW_BADGE_POS[key] || THROW_BADGE_POS[Number(key)];
         const first = nums[0];
         const last = nums[nums.length - 1];
         const x = parseFloat(first.getAttribute('x'));
         const y1 = parseFloat(first.getAttribute('y'));
         const y2 = parseFloat(last.getAttribute('y'));
         const midY = nums.length > 1 ? (y1 + y2) / 2 : y1;
-        const badgeX = Math.max(18, Math.min(382, x + (nums.length > 1 ? 32 : 22)));
-        const badgeY = Math.max(16, Math.min(444, midY - (nums.length > 1 ? 0 : 18)));
+        const badgeX = pos ? pos[0] : Math.max(28, Math.min(372, x + 22));
+        const badgeY = pos ? pos[1] : Math.max(24, Math.min(436, midY + 18));
 
         const g = document.createElementNS(ns, 'g');
         g.setAttribute('class', 'throw-overlay');
