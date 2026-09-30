@@ -394,14 +394,22 @@
     fill: rgba(251, 191, 36, 0.35); stroke: #fbbf24; stroke-width: 2.5;
     filter: url(#glow-comp); animation: pulse 1.5s infinite;
   }
-  .highlight-zone text,
+  .highlight-zone text.d20-num,
   .d20-num {
     font-family: serif; fill: #b0a8c8; pointer-events: none; transition: fill 0.3s ease;
     text-anchor: middle; dominant-baseline: central;
   }
   .highlight-zone text.d20-num-center,
   .d20-num-center { fill: #c8bfe0; font-weight: bold; }
-  .highlight-zone.active text { fill: #fbbf24; }
+  .highlight-zone.active text.d20-num { fill: #fbbf24; }
+
+  .throw-overlay { pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
+  .highlight-zone.active .throw-overlay { opacity: 1; }
+  .throw-badge-bg { fill: #111; stroke: #ffe566; stroke-width: 2; }
+  .throw-label {
+    font-family: 'Cinzel Decorative', serif; font-size: 13px; font-weight: 700;
+    fill: #fbbf24; text-anchor: middle; dominant-baseline: central;
+  }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
   /* ─── Registration ─── */
@@ -1551,17 +1559,78 @@
 
     applyBoardMode();
 
-    function highlightTargets() {
+    function setThrowBadgeSize(zone, text) {
+      const bg = zone.querySelector('.throw-badge-bg');
+      if (!bg) return;
+      const wide = !!(text && text.length > 3);
+      const w = wide ? 36 : 26;
+      const h = 26;
+      bg.setAttribute('x', String(-w / 2));
+      bg.setAttribute('y', String(-h / 2));
+      bg.setAttribute('width', String(w));
+      bg.setAttribute('height', String(h));
+      bg.setAttribute('rx', '10');
+    }
+
+    function initThrowOverlays() {
+      const ns = 'http://www.w3.org/2000/svg';
       document.querySelectorAll('.highlight-zone').forEach(zone => {
-        zone.classList.remove('active');
-        const single = zone.getAttribute('data-number');
-        const multi = zone.getAttribute('data-numbers');
-        let nums = [];
-        if (single) nums.push(Number(single));
-        if (multi) nums = multi.split(',').map(Number);
-        if (compState.targets.some(t => nums.includes(t))) {
-          zone.classList.add('active');
-        }
+        if (zone.querySelector('.throw-overlay')) return;
+        const nums = zone.querySelectorAll('.d20-num');
+        if (!nums.length) return;
+        const first = nums[0];
+        const last = nums[nums.length - 1];
+        const x = parseFloat(first.getAttribute('x'));
+        const y1 = parseFloat(first.getAttribute('y'));
+        const y2 = parseFloat(last.getAttribute('y'));
+        const midY = nums.length > 1 ? (y1 + y2) / 2 : y1;
+        const badgeX = Math.max(18, Math.min(382, x + (nums.length > 1 ? 32 : 22)));
+        const badgeY = Math.max(16, Math.min(444, midY - (nums.length > 1 ? 0 : 18)));
+
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'throw-overlay');
+        g.setAttribute('transform', `translate(${badgeX},${badgeY})`);
+
+        const bg = document.createElementNS(ns, 'rect');
+        bg.setAttribute('class', 'throw-badge-bg');
+
+        const t = document.createElementNS(ns, 'text');
+        t.setAttribute('class', 'throw-label');
+        t.setAttribute('x', '0');
+        t.setAttribute('y', '1');
+
+        g.appendChild(bg);
+        g.appendChild(t);
+        zone.appendChild(g);
+        setThrowBadgeSize(zone, '');
+      });
+    }
+
+    initThrowOverlays();
+
+    function highlightTargets() {
+      initThrowOverlays();
+      const zoneThrows = new Map();
+      (compState.targets || []).forEach((t, i) => {
+        document.querySelectorAll('.highlight-zone').forEach(zone => {
+          const single = zone.getAttribute('data-number');
+          const multi = zone.getAttribute('data-numbers');
+          let nums = [];
+          if (single) nums.push(Number(single));
+          if (multi) nums = multi.split(',').map(Number);
+          if (nums.includes(t)) {
+            if (!zoneThrows.has(zone)) zoneThrows.set(zone, []);
+            zoneThrows.get(zone).push(i + 1);
+          }
+        });
+      });
+      document.querySelectorAll('.highlight-zone').forEach(zone => {
+        const nums = zoneThrows.get(zone);
+        zone.classList.toggle('active', !!(nums && nums.length));
+        const lbl = zone.querySelector('.throw-label');
+        const text = nums && nums.length ? '#' + nums.join('/') : '';
+        if (lbl) lbl.textContent = text;
+        setThrowBadgeSize(zone, text);
       });
     }
 
