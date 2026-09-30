@@ -46,57 +46,57 @@
             fill: #1e1630;
         }
 
-        /* ── Rolled (active) state — gold glow ── */
+        /* ── Rolled (active) state — translucent gold wash over section values ── */
         .highlight-zone.active .face-shape {
-            fill: #ffd700;
-            stroke: #b8960f;
-            stroke-width: 2;
+            fill: rgba(255, 215, 0, 0.34);
+            stroke: #ffd700;
+            stroke-width: 2.5;
             filter: url(#glow-gold);
         }
 
-        /* ── Claimed (hit) state — green glow ── */
+        /* ── Claimed (hit) state — green wash ── */
         .highlight-zone.claimed .face-shape {
-            fill: #2ecc71;
-            stroke: #1a9c54;
-            stroke-width: 2;
+            fill: rgba(46, 204, 113, 0.4);
+            stroke: #2ecc71;
+            stroke-width: 2.5;
             filter: url(#glow-green);
         }
         /* ── Multi-hit (2+ rolls/hits on same section) — distinct from Aim (cyan) ── */
         .highlight-zone.multi-hit.active .face-shape {
-            fill: #f59e0b;
-            stroke: #d97706;
+            fill: rgba(245, 158, 11, 0.45);
+            stroke: #f59e0b;
             stroke-width: 2.2;
             filter: url(#glow-amber);
         }
         .highlight-zone.multi-hit.claimed .face-shape {
-            fill: #f97316;
-            stroke: #ea580c;
+            fill: rgba(249, 115, 22, 0.45);
+            stroke: #f97316;
             stroke-width: 2.2;
             filter: url(#glow-orange);
         }
         /* ── Triple-hit (3 rolls/hits on same section) — glowing red ── */
         .highlight-zone.triple-hit.active .face-shape {
-            fill: #ef4444;
-            stroke: #dc2626;
+            fill: rgba(239, 68, 68, 0.45);
+            stroke: #ef4444;
             stroke-width: 2.2;
             filter: url(#glow-red);
         }
         .highlight-zone.triple-hit.claimed .face-shape {
-            fill: #ef4444;
-            stroke: #dc2626;
+            fill: rgba(239, 68, 68, 0.45);
+            stroke: #ef4444;
             stroke-width: 2.2;
             filter: url(#glow-red);
         }
         .highlight-zone.aimed .face-shape {
-            fill: #22d3ee;
-            stroke: #0e7490;
+            fill: rgba(34, 211, 238, 0.38);
+            stroke: #22d3ee;
             stroke-width: 2.2;
             filter: url(#glow-cyan);
             stroke-dasharray: 10 6;
         }
         .highlight-zone.aimed.claimed .face-shape {
-            fill: #e879f9;
-            stroke: #a21caf;
+            fill: rgba(232, 121, 249, 0.4);
+            stroke: #e879f9;
             filter: url(#glow-purple);
             stroke-dasharray: 10 6;
         }
@@ -373,26 +373,66 @@
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
 
-        /* ── Roll-number section labels ── */
-        .zone-label {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 38px;
+        /* ── Permanent section (facet) values ── */
+        .section-value {
+            font-family: Georgia, 'Times New Roman', serif;
             font-weight: 700;
-            fill: #000;
-            stroke: rgba(255,255,255,0.7);
+            fill: #ffffff;
+            stroke: rgba(20, 12, 36, 0.7);
             stroke-width: 4;
             paint-order: stroke fill;
             text-anchor: middle;
             dominant-baseline: central;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
-        .highlight-zone.active .zone-label {
+        .highlight-zone.active .section-value {
+            fill: #ffd700;
+            stroke: rgba(20, 12, 36, 0.65);
+            stroke-width: 4;
+        }
+        .highlight-zone.claimed .section-value {
+            fill: #8cffb4;
+            stroke: rgba(6, 36, 16, 0.45);
+        }
+        .highlight-zone.aimed .section-value {
+            fill: #7ef0ff;
+            stroke: rgba(4, 36, 48, 0.45);
+        }
+        .highlight-zone.aimed.claimed .section-value {
+            fill: #f5d0fe;
+            stroke: rgba(42, 8, 48, 0.4);
+        }
+        .highlight-zone.multi-hit.active .section-value,
+        .highlight-zone.triple-hit.active .section-value {
+            fill: #ffe08a;
+        }
+
+        /* ── Throw-number overlay (which throw this section is) ── */
+        .throw-overlay {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .highlight-zone.active .throw-overlay,
+        .highlight-zone.claimed .throw-overlay {
             opacity: 1;
         }
-        .highlight-zone.claimed .zone-label {
-            opacity: 0.45;
+        .highlight-zone.claimed:not(.active) .throw-overlay {
+            opacity: 0.6;
+        }
+        .throw-badge-bg {
+            fill: #111111;
+            stroke: #ffe566;
+            stroke-width: 2.6;
+        }
+        .zone-label {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 15px;
+            font-weight: 700;
+            fill: #ffd700;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
         }
 
         /* ── Dual-target mode ── */
@@ -521,50 +561,73 @@
                     <feComposite in="color" in2="blur" operator="in" result="shadow"/>
                     <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
+                <clipPath id="perimeter-outside-clip" clipPathUnits="userSpaceOnUse">
+                    <path clip-rule="evenodd" d="M -40,-40 H 440 V 500 H -40 Z M 200,2 L 7,119 L 2,346 L 200,458 L 398,346 L 393,119 Z"/>
+                </clipPath>
             </defs>
 
-            <!-- Thick white perimeter border (in/out line) -->
-            <path class="target-perimeter-border" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round" d="M 200,2 L 7,119 L 2,346 L 200,458 L 398,346 L 393,119 Z"/>
+            <!-- In/out ring: stroke is clipped to the outside so it cannot show through edge-face overlays -->
+            <path class="target-perimeter-border" clip-path="url(#perimeter-outside-clip)" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round" d="M 200,2 L 7,119 L 2,346 L 200,458 L 398,346 L 393,119 Z"/>
 
             <!-- D20 faces from resources/d20_blank.html -->
             <g id="face-tl" class="highlight-zone" data-pair="10-17">
                 <polygon class="face-shape d20-face" points="200,2 7,119 200,59"/>
+                <text class="section-value section-odd" x="136" y="50" font-size="24">17</text>
+                <text class="section-value section-even" x="136" y="74" font-size="24">10</text>
                 <text class="zone-label" x="136" y="62"></text>
             </g>
             <g id="face-tr" class="highlight-zone" data-pair="11-20">
                 <polygon class="face-shape d20-face" points="200,2 200,59 393,119"/>
+                <text class="section-value section-odd" x="264" y="50" font-size="24">11</text>
+                <text class="section-value section-even" x="264" y="74" font-size="24">20</text>
                 <text class="zone-label" x="264" y="62"></text>
             </g>
             <g id="face-l" class="highlight-zone" data-pair="3-4">
                 <polygon class="face-shape d20-face" points="7,119 66,316 200,59"/>
+                <text class="section-value section-odd" x="91" y="155" font-size="26">3</text>
+                <text class="section-value section-even" x="91" y="181" font-size="26">4</text>
                 <text class="zone-label" x="91" y="165"></text>
             </g>
             <g id="face-r" class="highlight-zone" data-pair="6-7">
                 <polygon class="face-shape d20-face" points="200,59 334,316 393,119"/>
+                <text class="section-value section-odd" x="309" y="155" font-size="26">7</text>
+                <text class="section-value section-even" x="309" y="181" font-size="26">6</text>
                 <text class="zone-label" x="309" y="165"></text>
             </g>
             <g id="face-fl" class="highlight-zone" data-pair="12-15">
                 <polygon class="face-shape d20-face-outer" points="7,119 2,346 66,316"/>
-                <text class="zone-label" x="26" y="260" font-size="28"></text>
+                <text class="section-value section-odd" x="17" y="248" font-size="22">15</text>
+                <text class="section-value section-even" x="33" y="272" font-size="22">12</text>
+                <text class="zone-label" x="26" y="260"></text>
             </g>
             <g id="face-fr" class="highlight-zone" data-pair="9-14">
                 <polygon class="face-shape d20-face-outer" points="393,119 334,316 398,346"/>
-                <text class="zone-label" x="374" y="260" font-size="28"></text>
+                <text class="section-value section-odd" x="367" y="248" font-size="22">9</text>
+                <text class="section-value section-even" x="383" y="272" font-size="22">14</text>
+                <text class="zone-label" x="374" y="260"></text>
             </g>
             <g id="face-bl" class="highlight-zone" data-pair="13-18">
                 <polygon class="face-shape d20-face-outer" points="66,316 2,346 200,458"/>
+                <text class="section-value section-odd" x="89" y="363" font-size="22">13</text>
+                <text class="section-value section-even" x="89" y="387" font-size="22">18</text>
                 <text class="zone-label" x="90" y="374"></text>
             </g>
             <g id="face-br" class="highlight-zone" data-pair="16-19">
                 <polygon class="face-shape d20-face-outer" points="334,316 200,458 398,346"/>
+                <text class="section-value section-odd" x="311" y="363" font-size="22">19</text>
+                <text class="section-value section-even" x="311" y="387" font-size="22">16</text>
                 <text class="zone-label" x="311" y="374"></text>
             </g>
             <g id="face-bc" class="highlight-zone" data-pair="5-8">
                 <polygon class="face-shape d20-face" points="66,316 200,458 334,316"/>
+                <text class="section-value section-odd" x="200" y="353" font-size="26">5</text>
+                <text class="section-value section-even" x="200" y="379" font-size="26">8</text>
                 <text class="zone-label" x="200" y="365"></text>
             </g>
             <g id="face-center" class="highlight-zone" data-pair="1-2">
                 <polygon class="face-shape d20-face-center" points="200,59 66,316 334,316"/>
+                <text class="section-value section-odd" x="200" y="215" font-size="38">1</text>
+                <text class="section-value section-even" x="200" y="253" font-size="38">2</text>
                 <text class="zone-label" x="200" y="232"></text>
             </g>
         </svg>
@@ -607,11 +670,120 @@
         evenSvg.querySelectorAll('g.highlight-zone[id]').forEach(function(el) {
             el.id = 'even-' + el.id;
         });
+        var evenClip = evenSvg.querySelector('#perimeter-outside-clip');
+        if (evenClip) {
+            evenClip.id = 'perimeter-outside-clip-even';
+            var evenRing = evenSvg.querySelector('.target-perimeter-border');
+            if (evenRing) evenRing.setAttribute('clip-path', 'url(#perimeter-outside-clip-even)');
+        }
         targetWrapperEven.appendChild(evenSvg);
 
         var oddZones = oddBoard.querySelectorAll('.highlight-zone');
         var evenZones = evenSvg.querySelectorAll('.highlight-zone');
         var allZones = document.querySelectorAll('.highlight-zone');
+
+        // odd/even facet values + label anchors for each pair
+        var FACE_LAYOUT = {
+            '10-17': { x: 136, y: 60, x1: 136, y1: 50, x2: 136, y2: 74, fs: 32, fsc: 24, odd: 17, even: 10, bx: 178, by: 48 },
+            '11-20': { x: 264, y: 60, x1: 264, y1: 50, x2: 264, y2: 74, fs: 32, fsc: 24, odd: 11, even: 20, bx: 222, by: 48 },
+            '3-4':   { x: 91,  y: 165, x1: 91,  y1: 155, x2: 91,  y2: 181, fs: 32, fsc: 26, odd: 3,  even: 4,  bx: 108, by: 206 },
+            '6-7':   { x: 309, y: 165, x1: 309, y1: 155, x2: 309, y2: 181, fs: 32, fsc: 26, odd: 7,  even: 6,  bx: 292, by: 206 },
+            '12-15': { x: 26,  y: 260, x1: 17,  y1: 248, x2: 33,  y2: 272, fs: 28, fsc: 22, odd: 15, even: 12, bx: 48,  by: 298 },
+            '9-14':  { x: 374, y: 260, x1: 367, y1: 248, x2: 383, y2: 272, fs: 28, fsc: 22, odd: 9,  even: 14, bx: 352, by: 298 },
+            '13-18': { x: 90,  y: 374, x1: 89,  y1: 363, x2: 89,  y2: 387, fs: 28, fsc: 22, odd: 13, even: 18, bx: 126, by: 398 },
+            '16-19': { x: 311, y: 374, x1: 311, y1: 363, x2: 311, y2: 387, fs: 28, fsc: 22, odd: 19, even: 16, bx: 274, by: 398 },
+            '5-8':   { x: 200, y: 363, x1: 200, y1: 353, x2: 200, y2: 379, fs: 32, fsc: 26, odd: 5,  even: 8,  bx: 255, by: 340 },
+            '1-2':   { x: 200, y: 230, x1: 200, y1: 215, x2: 200, y2: 253, fs: 48, fsc: 38, odd: 1,  even: 2,  bx: 254, by: 274 }
+        };
+
+        function setThrowBadgeSize(zone, text) {
+            var bg = zone.querySelector('.throw-badge-bg');
+            if (!bg) return;
+            var wide = !!(text && text.length > 3);
+            var w = wide ? 36 : 26;
+            var h = 26;
+            bg.setAttribute('x', String(-w / 2));
+            bg.setAttribute('y', String(-h / 2));
+            bg.setAttribute('width', String(w));
+            bg.setAttribute('height', String(h));
+            bg.setAttribute('rx', '13');
+        }
+
+        function positionThrowOverlay(zone, layout) {
+            var g = zone.querySelector('.throw-overlay');
+            if (!g || !layout) return;
+            g.setAttribute('transform', 'translate(' + layout.bx + ',' + layout.by + ')');
+        }
+
+        function applyFaceLabels(zones, kind) {
+            zones.forEach(function(z) {
+                var pair = z.getAttribute('data-pair');
+                var layout = FACE_LAYOUT[pair];
+                if (!layout) return;
+                var oddEl = z.querySelector('.section-odd');
+                var evenEl = z.querySelector('.section-even');
+                if (oddEl) {
+                    oddEl.textContent = String(layout.odd);
+                    oddEl.setAttribute('visibility', kind === 'even' ? 'hidden' : 'visible');
+                }
+                if (evenEl) {
+                    evenEl.textContent = String(layout.even);
+                    evenEl.setAttribute('visibility', kind === 'odd' ? 'hidden' : 'visible');
+                }
+                if (kind === 'both') {
+                    if (oddEl) {
+                        oddEl.setAttribute('x', layout.x1);
+                        oddEl.setAttribute('y', layout.y1);
+                        oddEl.setAttribute('font-size', layout.fsc);
+                    }
+                    if (evenEl) {
+                        evenEl.setAttribute('x', layout.x2);
+                        evenEl.setAttribute('y', layout.y2);
+                        evenEl.setAttribute('font-size', layout.fsc);
+                    }
+                } else {
+                    var shown = kind === 'odd' ? oddEl : evenEl;
+                    if (shown) {
+                        shown.setAttribute('x', layout.x);
+                        shown.setAttribute('y', layout.y);
+                        shown.setAttribute('font-size', layout.fs);
+                    }
+                }
+                positionThrowOverlay(z, layout);
+            });
+        }
+
+        function applySectionLayout() {
+            if (targetMode === 2) {
+                applyFaceLabels(oddZones, 'odd');
+                applyFaceLabels(evenZones, 'even');
+            } else {
+                applyFaceLabels(oddZones, 'both');
+            }
+        }
+
+        function initThrowOverlays() {
+            var ns = 'http://www.w3.org/2000/svg';
+            allZones.forEach(function(z) {
+                if (z.querySelector('.throw-overlay')) return;
+                var lbl = z.querySelector('.zone-label');
+                var g = document.createElementNS(ns, 'g');
+                g.setAttribute('class', 'throw-overlay');
+                var bg = document.createElementNS(ns, 'rect');
+                bg.setAttribute('class', 'throw-badge-bg');
+                if (lbl) {
+                    lbl.setAttribute('x', '0');
+                    lbl.setAttribute('y', '1');
+                    lbl.removeAttribute('font-size');
+                }
+                g.appendChild(bg);
+                if (lbl) g.appendChild(lbl);
+                z.appendChild(g);
+                setThrowBadgeSize(z, '');
+            });
+        }
+
+        initThrowOverlays();
 
         // ── Clear all zones on both targets ──
         function clearAll() {
@@ -619,6 +791,7 @@
                 z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit');
                 var lbl = z.querySelector('.zone-label');
                 if (lbl) lbl.textContent = '';
+                setThrowBadgeSize(z, '');
             });
         }
 
@@ -643,10 +816,13 @@
                     z.classList.add('active');
                     z.classList.toggle('multi-hit', count === 2);
                     z.classList.toggle('triple-hit', count >= 3);
-                    if (lbl) lbl.textContent = pairRollNums[pair].join('/');
+                    var text = '#' + pairRollNums[pair].join('/');
+                    if (lbl) lbl.textContent = text;
+                    setThrowBadgeSize(z, text);
                 } else {
                     z.classList.remove('active', 'multi-hit', 'triple-hit');
                     if (lbl) lbl.textContent = '';
+                    setThrowBadgeSize(z, '');
                 }
             });
         }
@@ -921,6 +1097,7 @@
             }
             if (modeBtn1) modeBtn1.classList.toggle('active', mode === 1);
             if (modeBtn2) modeBtn2.classList.toggle('active', mode === 2);
+            applySectionLayout();
             loadAlignment();
         }
 
@@ -977,6 +1154,8 @@
             var rollsParam = params.get('rolls');
             var claimedParam = params.get('claimed');
             var aimParam = params.get('aim');
+            var targetsParam = parseInt(params.get('targets'), 10);
+            if (targetsParam === 1 || targetsParam === 2) setTargetMode(targetsParam);
             if (rollsParam) {
                 var rolls = rollsParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; });
                 var claimed = claimedParam ? claimedParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; }) : [];
