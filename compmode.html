@@ -891,6 +891,7 @@
         <div class="dice-actions" id="dice-actions">
           <button type="button" class="btn btn-primary" id="roll-btn">Roll Targets</button>
           <button type="button" class="btn btn-secondary" id="lock-btn" disabled>Lock Targets</button>
+          <button type="button" class="btn btn-primary" id="setup-restore-backup-btn" title="Restore from a previously exported backup file">Restore Backup</button>
         </div>
 
         <div class="board-area" id="board-area" style="display:none;">
@@ -1006,8 +1007,8 @@
           <button type="button" class="btn-backup btn-backup-danger" id="new-competition-btn" title="Discard the saved competition and start over">New Competition</button>
           <div class="backup-status" id="backup-status"></div>
         </div>
-        <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
       </div>
+      <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
 
       <footer>
         <p>Game concept and development by Jeff White</p>
@@ -1517,6 +1518,8 @@
 
     exportBackupBtn.addEventListener('click', exportCompBackup);
     restoreBackupBtn.addEventListener('click', promptRestoreFile);
+    const setupRestoreBackupBtn = document.getElementById('setup-restore-backup-btn');
+    if (setupRestoreBackupBtn) setupRestoreBackupBtn.addEventListener('click', promptRestoreFile);
     document.getElementById('new-competition-btn').addEventListener('click', promptNewCompetition);
     restoreFileInput.addEventListener('change', () => {
       const file = restoreFileInput.files && restoreFileInput.files[0];
