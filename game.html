@@ -3143,9 +3143,18 @@
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     Dynamic Target (Projector)
                 </button>
+                <button type="button" id="resources-export-backup-btn">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export match backup
+                </button>
+                <button type="button" id="resources-restore-backup-btn">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Restore match backup
+                </button>
             </div>
         </div>
     </div>
+    <input type="file" id="restore-file-input" accept="application/json,.json" hidden>
 
     <!-- Player stats modal -->
     <div class="player-stats-modal-overlay" id="player-stats-modal" role="dialog" aria-label="Player stats">
@@ -3845,6 +3854,9 @@
         const projectorResourcesModal = document.getElementById('projector-resources-modal');
         const resourcesProjectorBtn = document.getElementById('resources-projector-btn');
         const resourcesLeaderboardBtn = document.getElementById('resources-leaderboard-btn');
+        const resourcesExportBackupBtn = document.getElementById('resources-export-backup-btn');
+        const resourcesRestoreBackupBtn = document.getElementById('resources-restore-backup-btn');
+        const restoreFileInput = document.getElementById('restore-file-input');
 
         function openProjectorResourcesModal() {
             if (!projectorResourcesModal) return;
@@ -3892,6 +3904,127 @@
                     'width=600,height=700,menubar=no,toolbar=no,location=no,status=no,noopener,noreferrer'
                 );
                 setTimeout(broadcastBrawlLeaderboardState, 800);
+            });
+        }
+
+        function validateBrawlSnapshot(data) {
+            if (!data || typeof data !== 'object') return 'Backup file is empty or invalid.';
+            if (data.kind && data.kind !== 'daggerdie-brawl') {
+                return 'This file is not a Brawl match backup.';
+            }
+            if (Array.isArray(data.targets) && data.targets.length === 9 &&
+                (data.phase === 'main' || data.phase === 'tiebreaker' || data.finalized === true || data.finalized === false)) {
+                return 'This looks like a Competition backup. Restore it from Competition Mode.';
+            }
+            if (!Array.isArray(data.players) || data.players.length < 2) {
+                return 'Backup must include at least 2 players.';
+            }
+            if (data.phase !== 'playing' && data.phase !== 'turnOrder') {
+                return 'Backup is not an in-progress Brawl match.';
+            }
+            for (let i = 0; i < data.players.length; i++) {
+                const p = data.players[i];
+                if (!p || typeof p.name !== 'string' || !p.name.trim()) {
+                    return 'Player ' + (i + 1) + ' is missing a name.';
+                }
+            }
+            return null;
+        }
+
+        function toBrawlState(data) {
+            const copy = Object.assign({}, data);
+            delete copy.kind;
+            return copy;
+        }
+
+        function serializeBrawlBackup() {
+            saveGameState();
+            const payload = Object.assign({ kind: 'daggerdie-brawl' }, state);
+            payload.savedAt = payload.savedAt || new Date().toISOString();
+            return payload;
+        }
+
+        function exportBrawlBackup() {
+            if (state.phase !== 'playing' && state.phase !== 'turnOrder') {
+                const raw = readSavedGameStateRaw();
+                if (!raw) {
+                    alert('Nothing to export yet. Start a match first, or restore a backup.');
+                    return;
+                }
+                try {
+                    const saved = JSON.parse(raw);
+                    downloadBrawlBackup(Object.assign({ kind: 'daggerdie-brawl' }, saved));
+                    return;
+                } catch (e) {
+                    alert('Could not export backup: ' + (e.message || 'invalid save'));
+                    return;
+                }
+            }
+            downloadBrawlBackup(serializeBrawlBackup());
+        }
+
+        function downloadBrawlBackup(payload) {
+            const stamp = (payload.savedAt || new Date().toISOString()).replace(/[:.]/g, '-').slice(0, 19);
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'daggerdie-brawl-backup-' + stamp + '.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 500);
+        }
+
+        function promptRestoreFile() {
+            if (state.phase === 'playing' || state.phase === 'turnOrder') {
+                if (!confirm('Restore will replace the current match (players, HP, and turn). Continue?')) {
+                    return;
+                }
+            }
+            if (!restoreFileInput) return;
+            restoreFileInput.value = '';
+            restoreFileInput.click();
+        }
+
+        function restoreBrawlBackupFromFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const data = JSON.parse(String(reader.result || ''));
+                    const err = validateBrawlSnapshot(data);
+                    if (err) throw new Error(err);
+                    restoreGameState(toBrawlState(data));
+                    saveGameState();
+                    alert('Match restored' +
+                        (data.players && data.players.length ? ' — ' + data.players.length + ' player(s).' : '.'));
+                } catch (e) {
+                    alert('Could not restore backup: ' + (e.message || 'invalid file'));
+                }
+            };
+            reader.onerror = () => alert('Could not read the backup file.');
+            reader.readAsText(file);
+        }
+
+        if (resourcesExportBackupBtn) {
+            resourcesExportBackupBtn.addEventListener('click', () => {
+                closeProjectorResourcesModal();
+                exportBrawlBackup();
+            });
+        }
+        if (resourcesRestoreBackupBtn) {
+            resourcesRestoreBackupBtn.addEventListener('click', () => {
+                closeProjectorResourcesModal();
+                promptRestoreFile();
+            });
+        }
+        if (restoreFileInput) {
+            restoreFileInput.addEventListener('change', () => {
+                const file = restoreFileInput.files && restoreFileInput.files[0];
+                restoreBrawlBackupFromFile(file);
             });
         }
 
