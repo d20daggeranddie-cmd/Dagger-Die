@@ -229,6 +229,7 @@
       inset 0 1px 0 rgba(255, 236, 180, 0.3),
       inset 0 -6px 10px rgba(0, 0, 0, 0.32);
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 8px rgba(212, 168, 75, 0.22);
+    cursor: pointer;
     transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
   }
   .game-tile .btn::before,
@@ -581,6 +582,11 @@
             <span id="boss-hp-error" class="custom-hp-error" aria-live="polite"></span>
           </div>
           <div class="option-row" style="margin-top: 16px;">
+            <input type="checkbox" id="mod-friendly-fire-cb" aria-describedby="mod-friendly-fire-hint" disabled>
+            <label for="mod-friendly-fire-cb">Friendly Fire</label>
+          </div>
+          <p id="mod-friendly-fire-hint" class="option-desc" style="margin-top: 8px; font-size: 0.9rem; opacity: 0.85;">Available when Party or Boss Mode is on. When enabled, players can damage allies (teammates, other party members, or other bosses). Off by default.</p>
+          <div class="option-row" style="margin-top: 16px;">
             <input type="checkbox" id="items-enabled-cb" aria-describedby="items-enabled-desc">
             <label for="items-enabled-cb">Items</label>
           </div>
@@ -740,6 +746,7 @@
     const MOD_VAMPIRE_KEY = 'daggerdie_modVampire';
     const MOD_PARTY_KEY = 'daggerdie_modParty';
     const MOD_BOSS_KEY = 'daggerdie_modBoss';
+    const MOD_FRIENDLY_FIRE_KEY = 'daggerdie_modFriendlyFire';
     const BOSS_HP_KEY = 'daggerdie_bossHp';
     const ITEMS_ENABLED_KEY = 'daggerdie_itemsEnabled';
     const ITEMS_START_WITH_RANDOM_KEY = 'daggerdie_itemsStartWithRandom';
@@ -761,7 +768,7 @@
       AUTO_DEAL_DAMAGE_KEY, AUTO_ADVANCE_AFTER_DAMAGE_KEY, SKIP_DAMAGE_CONFIRM_KEY,
       USE_CUSTOM_HP_KEY, CUSTOM_HP_KEY,
       MOD_BUFF_ON_CRITICAL_KEY, MOD_NERF_ON_MISS_KEY, MOD_VAMPIRE_KEY, MOD_PARTY_KEY,
-      MOD_BOSS_KEY, BOSS_HP_KEY,
+      MOD_BOSS_KEY, MOD_FRIENDLY_FIRE_KEY, BOSS_HP_KEY,
       ITEMS_ENABLED_KEY, ITEMS_START_WITH_RANDOM_KEY, BOTTOMLESS_BACKPACK_KEY, BOTS_ENABLED_KEY,
       SOUND_ENABLED_KEY
     ];
@@ -805,6 +812,7 @@
     const modVampireCb = document.getElementById('mod-vampire-cb');
     const modPartyCb = document.getElementById('mod-party-cb');
     const modBossCb = document.getElementById('mod-boss-cb');
+    const modFriendlyFireCb = document.getElementById('mod-friendly-fire-cb');
     const bossHpInput = document.getElementById('boss-hp-input');
     const bossHpError = document.getElementById('boss-hp-error');
 
@@ -818,6 +826,7 @@
     modVampireCb.checked = localStorage.getItem(MOD_VAMPIRE_KEY) === 'true';
     modPartyCb.checked = localStorage.getItem(MOD_PARTY_KEY) === 'true';
     modBossCb.checked = localStorage.getItem(MOD_BOSS_KEY) === 'true';
+    if (modFriendlyFireCb) modFriendlyFireCb.checked = localStorage.getItem(MOD_FRIENDLY_FIRE_KEY) === 'true';
     const savedBossHp = localStorage.getItem(BOSS_HP_KEY);
     bossHpInput.value = (savedBossHp !== null && savedBossHp !== '') ? savedBossHp : '100';
     bossHpInput.disabled = !modBossCb.checked;
@@ -869,7 +878,16 @@
     modBuffOnCriticalCb.addEventListener('change', () => localStorage.setItem(MOD_BUFF_ON_CRITICAL_KEY, String(modBuffOnCriticalCb.checked)));
     modNerfOnMissCb.addEventListener('change', () => localStorage.setItem(MOD_NERF_ON_MISS_KEY, String(modNerfOnMissCb.checked)));
     modVampireCb.addEventListener('change', () => localStorage.setItem(MOD_VAMPIRE_KEY, String(modVampireCb.checked)));
-    modPartyCb.addEventListener('change', () => localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked)));
+    function syncFriendlyFireAvailability() {
+      if (!modFriendlyFireCb) return;
+      const available = !!(modPartyCb && modPartyCb.checked) || !!(modBossCb && modBossCb.checked);
+      modFriendlyFireCb.disabled = !available;
+    }
+
+    modPartyCb.addEventListener('change', () => {
+      localStorage.setItem(MOD_PARTY_KEY, String(modPartyCb.checked));
+      syncFriendlyFireAvailability();
+    });
 
     function validateAndPersistBossHp() {
       const val = bossHpInput.value.trim();
@@ -893,12 +911,20 @@
       localStorage.setItem(BOSS_HP_KEY, String(n));
     }
 
+    if (modFriendlyFireCb) {
+      modFriendlyFireCb.addEventListener('change', () => {
+        localStorage.setItem(MOD_FRIENDLY_FIRE_KEY, String(modFriendlyFireCb.checked));
+      });
+    }
+
     modBossCb.addEventListener('change', () => {
       bossHpInput.disabled = !modBossCb.checked;
       localStorage.setItem(MOD_BOSS_KEY, String(modBossCb.checked));
       if (modBossCb.checked && !bossHpInput.value.trim()) bossHpInput.value = '100';
       validateAndPersistBossHp();
+      syncFriendlyFireAvailability();
     });
+    syncFriendlyFireAvailability();
     bossHpInput.addEventListener('input', validateAndPersistBossHp);
     bossHpInput.addEventListener('blur', validateAndPersistBossHp);
     if (modBossCb.checked) validateAndPersistBossHp();
