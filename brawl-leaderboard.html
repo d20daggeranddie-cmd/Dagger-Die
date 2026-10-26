@@ -138,14 +138,547 @@
     transform: scale(var(--fit-scale, 1));
     transform-origin: center center;
   }
-  .players-panel {
+  .players-panel.layout-grid {
     display: grid;
     grid-template-columns: max-content max-content;
     gap: 10px 12px;
     justify-content: center;
     align-content: center;
   }
-  .players-panel.count-1 { grid-template-columns: max-content; }
+  .players-panel.layout-grid.count-1 { grid-template-columns: max-content; }
+
+  body[data-layout="gallery"] .players-board {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 1.2vh 2.4vw 1.6vh;
+  }
+  body[data-layout="gallery"] .players-panel-fit {
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+  .players-panel.layout-gallery {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: repeat(var(--gallery-others, 1), minmax(0, 300px));
+    width: 100%;
+    height: 100%;
+    padding: clamp(12px, 2vh, 28px) clamp(28px, 6vw, 80px) clamp(14px, 2.4vh, 28px);
+    gap: clamp(10px, 1.6vh, 18px) clamp(16px, 2.2vw, 28px);
+    justify-content: center;
+    align-content: stretch;
+    box-sizing: border-box;
+  }
+  .players-panel.layout-gallery .player-card {
+    min-width: 0;
+    width: 100%;
+    transform: none;
+  }
+  .players-panel.layout-gallery .player-card.current,
+  .players-panel.layout-gallery .player-card.current.damage-shake,
+  .players-panel.layout-gallery .player-card.current.hp-change-down.damage-shake {
+    transform: none;
+  }
+  .player-card:not(.gallery-hero) .player-card-body,
+  .player-card:not(.gallery-hero) .player-card-info,
+  .player-card:not(.gallery-hero) .player-card-identity,
+  .player-card:not(.gallery-hero) .player-card-identity-row,
+  .player-card:not(.gallery-hero) .player-card-details,
+  .player-card:not(.gallery-hero) .player-card-details-main,
+  .player-card:not(.gallery-hero) .player-card-meta {
+    display: contents;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero {
+    grid-area: 1 / 1 / 2 / -1;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    align-self: stretch;
+    justify-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: clamp(12px, 2vh, 22px) clamp(22px, 3vw, 44px) clamp(12px, 1.8vh, 20px);
+    overflow: hidden;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero-enter {
+    animation: gallery-hero-in 0.38s ease;
+  }
+  @keyframes gallery-hero-in {
+    0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+    100% { opacity: 1; transform: none; }
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-body {
+    display: contents;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-avatar-slot {
+    order: -1;
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 4px;
+    padding: clamp(10px, 1.6vh, 20px);
+    overflow: visible;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-avatar,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-avatar-char {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-avatar-char img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(4px, 0.8vh, 8px);
+    width: min(100%, 1120px);
+    min-width: 0;
+    justify-self: center;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-boss-badge {
+    position: absolute;
+    top: clamp(12px, 1.8vh, 20px);
+    right: clamp(16px, 2vw, 28px);
+    margin: 0;
+    font-size: 1rem;
+    z-index: 2;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-boss-badge svg {
+    width: 18px;
+    height: 18px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-identity-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    width: 100%;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-details,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-details-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(6px, 1vh, 10px);
+    width: 100%;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: start;
+    column-gap: clamp(18px, 2.6vw, 36px);
+    text-align: left;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-details-main {
+    grid-column: 1;
+    min-width: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-identity,
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-identity-row {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .hp-bar {
+    width: 100%;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-name {
+    font-size: clamp(1.7rem, 4vh, 2.55rem);
+    margin: 0;
+    line-height: 1.1;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-hp {
+    font-size: clamp(2.05rem, 5vh, 3.05rem);
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+    color: #feca57;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .hp-bar {
+    width: min(100%, 520px);
+    max-width: 100%;
+    height: 16px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-rolls {
+    align-items: center;
+    margin: 2px 0 0;
+    gap: 8px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-rolls {
+    align-items: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-rolls-seq {
+    justify-content: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-meta,
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-bot-skill {
+    justify-content: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-rolls-label {
+    font-size: 1rem;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-rolls-seq {
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-roll-chip {
+    flex: 0 1 auto;
+    min-width: 2.4em;
+    padding: 10px 14px 8px;
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    border-radius: 14px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-roll-chip .roll-order {
+    display: none;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-roll-chip .roll-hp {
+    font-size: 0.78rem;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-rolls-arrow {
+    font-size: 1.75rem;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-turn-order,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-bot-skill {
+    font-size: 1.08rem;
+    margin-top: 0;
+    justify-content: flex-start;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-status {
+    margin-top: 0;
+    font-size: 0.92rem;
+    padding: 5px 10px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-team-badge {
+    order: 0;
+    flex: 0 0 auto;
+    align-self: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    padding: 6px 14px;
+    font-size: 1.28rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #f3e6c4;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(254, 202, 87, 0.28);
+    border-radius: 999px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-team-badge .team-badge-icon,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-team-badge .team-badge-icon svg,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-team-badge .team-badge-icon img {
+    width: 36px;
+    height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-stats {
+    width: 100%;
+    margin-top: 2px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px 8px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-stat {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 7px 10px;
+    text-align: left;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-stat-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-stat-value {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #feca57;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-inventory {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 0;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot,
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot:not(.has-item) {
+    flex: 1 1 0;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 88px;
+    max-width: none;
+    padding: 10px 12px;
+    gap: 8px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-inventory-slot,
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-inventory-slot:not(.has-item) {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 48px;
+    padding: 6px 10px;
+    gap: 10px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-meta {
+    display: block;
+    min-width: 0;
+    text-align: center;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-inventory-meta {
+    text-align: left;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-name {
+    font-weight: 700;
+    font-size: 1.02rem;
+    line-height: 1.2;
+    color: var(--item-accent, #feca57);
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-effect {
+    margin-top: 3px;
+    font-size: 0.86rem;
+    line-height: 1.25;
+    color: rgba(255,255,255,0.78);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot svg {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot img {
+    width: 48px;
+    height: 48px;
+    max-width: 48px;
+    max-height: 48px;
+    flex-shrink: 0;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) {
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 12px 12px;
+    border-width: 2px;
+    border-radius: 16px;
+    max-width: none;
+    height: 100%;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-status-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 1.7em;
+    margin-top: 4px;
+  }
+  .players-panel.layout-gallery .player-card.gallery-hero .player-card-status-slot {
+    display: contents;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-avatar,
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-avatar-char {
+    width: clamp(56px, 8vh, 76px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 4px;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-name {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-hp {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .hp-bar {
+    height: 8px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-rolls {
+    margin: 6px 0 0;
+    gap: 4px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-rolls-label {
+    font-size: 0.55rem;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-roll-chip {
+    min-width: 1.85em;
+    padding: 8px 6px 3px;
+    font-size: 0.82rem;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-turn-order,
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-bot-skill,
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-team-badge,
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-status {
+    font-size: 0.7rem;
+    margin-top: 4px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-inventory {
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-inventory-slot {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 44px;
+    border-radius: 8px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-inventory-slot svg {
+    width: 30px;
+    height: 30px;
+  }
+  .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-inventory-slot img {
+    width: 40px;
+    height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+  }
+  .players-panel.layout-gallery .player-card.current.damage-shake {
+    animation: card-damage-shake 0.5s ease;
+  }
+  .players-panel.layout-gallery .player-card.current.hp-change-down.damage-shake {
+    animation: hp-damage-flash 0.55s ease, card-damage-shake 0.5s ease;
+  }
+  @media (max-width: 760px) {
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-details {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-details-main,
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-rolls,
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-meta,
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-identity,
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-card-identity-row {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero.has-inventory .player-rolls-seq {
+      justify-content: center;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-height: 800px) {
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot,
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-slot:not(.has-item) {
+      min-height: 64px;
+      padding: 6px 8px;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-name {
+      font-size: 0.88rem;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-inventory-effect {
+      font-size: 0.72rem;
+      -webkit-line-clamp: 1;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-roll-chip {
+      min-width: 2.2em;
+      padding: 8px 12px 6px;
+      font-size: 1.45rem;
+    }
+  }
+  @media (max-width: 860px) {
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-identity-row {
+      justify-content: center;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-info,
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-rolls,
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-meta {
+      align-items: center;
+      text-align: center;
+    }
+    .players-panel.layout-gallery .player-card.gallery-hero .player-rolls-seq,
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-team-badge,
+    .players-panel.layout-gallery .player-card.gallery-hero .player-card-bot-skill {
+      justify-content: center;
+    }
+  }
+  @media (max-height: 700px) {
+    .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-rolls,
+    .players-panel.layout-gallery .player-card:not(.gallery-hero) .player-card-inventory {
+      display: none;
+    }
+  }
 
   .player-card {
     position: relative;
@@ -408,6 +941,10 @@
     100% { box-shadow: none; }
   }
 
+  .player-avatar-slot {
+    display: flex;
+    justify-content: center;
+  }
   .player-avatar {
     width: 128px;
     height: 128px;
@@ -415,16 +952,30 @@
     margin: 0 auto 14px;
   }
   .player-avatar.player-avatar-char {
+    position: relative;
     overflow: hidden;
+    border-radius: 0;
+    background: transparent;
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
   .player-avatar.player-avatar-char svg,
   .player-avatar-char img {
     display: block;
     width: 100%;
-    height: 100%;
+    height: auto;
   }
   .player-avatar-char img {
+    /* Square clip only — no CSS circle. Overscan from the top so the
+       painted frame meets the bottom of the card instead of leaving a gap. */
+    position: static;
+    width: 100%;
+    height: 103%;
+    max-width: none;
     object-fit: cover;
+    object-position: center top;
+    background: transparent;
+    vertical-align: top;
   }
 
   .player-name {
@@ -438,14 +989,29 @@
   }
   .player-card-rolls {
     display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
     margin: 8px 0 2px;
   }
+  .player-rolls-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #feca57;
+  }
+  .player-rolls-seq {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
   .player-roll-chip {
+    position: relative;
     min-width: 2.1em;
-    padding: 4px 7px;
+    padding: 10px 8px 4px;
     border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 800;
@@ -454,6 +1020,32 @@
     border: 2px solid rgba(255, 255, 255, 0.28);
     color: rgba(255, 255, 255, 0.92);
     line-height: 1.15;
+  }
+  .player-roll-chip .roll-order {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #111;
+    border: 1px solid #feca57;
+    color: #feca57;
+    font-size: 0.58rem;
+    font-weight: 800;
+    line-height: 14px;
+  }
+  .player-roll-chip.next {
+    border-color: #fff1a8;
+    box-shadow: 0 0 10px rgba(254, 202, 87, 0.45);
+  }
+  .player-rolls-arrow {
+    color: #feca57;
+    font-weight: 900;
+    font-size: 0.95rem;
+    opacity: 0.85;
   }
   .player-roll-chip.hit {
     background: rgba(46, 204, 113, 0.92);
@@ -609,6 +1201,7 @@
     object-fit: contain;
     display: block;
   }
+  .player-card-inventory-meta { display: none; }
 
   .no-data {
     text-align: center; padding: 60px 20px;
@@ -628,6 +1221,127 @@
     position: fixed; bottom: 10px; left: 14px; z-index: 50;
     font-size: 12px; color: rgba(255,255,255,0.45); font-family: sans-serif;
     pointer-events: none; letter-spacing: 0.02em;
+  }
+
+  .m3-logo {
+    position: fixed; bottom: 10px; right: 10px; z-index: 50;
+    width: 36px; height: auto; pointer-events: auto; cursor: pointer;
+    opacity: 0.88; transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+  .m3-logo:hover,
+  .m3-logo:focus-visible {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(254,202,87,0.55));
+    outline: none;
+  }
+  @media (max-width: 480px) { .m3-logo { width: 28px; bottom: 8px; right: 8px; } }
+
+  .settings-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .settings-modal-overlay.open { display: flex; }
+  .settings-modal {
+    background: linear-gradient(180deg, #1e2a3a 0%, #16213e 100%);
+    border-radius: 20px;
+    padding: 28px 30px 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .settings-modal:focus { outline: none; }
+  .settings-modal-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .settings-modal h3 {
+    margin: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.35rem;
+    color: #feca57;
+    letter-spacing: 0.04em;
+  }
+  .settings-close-btn {
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(0,0,0,0.22);
+    color: rgba(255,255,255,0.92);
+    border-radius: 8px;
+    min-width: 38px;
+    height: 34px;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .settings-close-btn:hover,
+  .settings-close-btn:focus-visible {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(240,192,64,0.4);
+    outline: none;
+  }
+  .settings-modal label {
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(255,255,255,0.9);
+    font-size: 1.05rem;
+  }
+  .settings-modal select {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    background-color: rgba(255,255,255,0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23feca57' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    color: #fff;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .settings-modal select:focus {
+    outline: none;
+    border-color: #48dbfb;
+  }
+  .settings-modal select option {
+    background: #1e2a3a;
+    color: #fff;
+  }
+  .settings-modal .setting-hint {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
+    margin-top: 10px;
+  }
+  .settings-gallery-options {
+    margin-top: 20px;
+  }
+  .settings-gallery-options[hidden] { display: none; }
+  .settings-modal .option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .settings-modal .option-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #48dbfb;
+    cursor: pointer;
+  }
+  .settings-modal .option-row label {
+    margin-bottom: 0;
+    cursor: pointer;
   }
 
   .items-overlay {
@@ -673,6 +1387,12 @@
     display: grid;
     place-items: center;
   }
+  .items-overlay-heading .player-avatar-slot {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
   .items-overlay-heading .player-avatar,
   .items-overlay-heading .player-avatar-char {
     width: min(92cqi, 90cqh);
@@ -684,12 +1404,14 @@
     box-shadow: 0 0 28px rgba(254, 202, 87, 0.28);
   }
   .items-overlay-heading .player-avatar svg,
-  .items-overlay-heading .player-avatar-char svg,
-  .items-overlay-heading .player-avatar-char img {
+  .items-overlay-heading .player-avatar-char svg {
     width: 100%;
     height: 100%;
     display: block;
+  }
+  .items-overlay-heading .player-avatar-char img {
     object-fit: cover;
+    object-position: center top;
   }
   .items-overlay-title {
     white-space: nowrap;
@@ -762,8 +1484,8 @@
   }
 
   @media (orientation: landscape) and (max-height: 900px) {
-    .players-panel.count-5,
-    .players-panel.count-6 {
+    .players-panel.layout-grid.count-5,
+    .players-panel.layout-grid.count-6 {
       grid-template-columns: max-content max-content max-content;
     }
   }
@@ -850,7 +1572,7 @@
       <div class="no-data" id="no-data">No players yet&hellip;</div>
       <div class="players-board" id="players-board" style="display:none;">
         <div class="players-panel-fit" id="players-panel-fit">
-          <div class="players-panel" id="players-panel"></div>
+          <div class="players-panel layout-grid" id="players-panel"></div>
         </div>
       </div>
       <div class="items-overlay" id="items-overlay">
@@ -862,6 +1584,29 @@
   </div>
 
   <div class="fs-hint">Press F for full screen</div>
+  <img src="assets/m3.png" alt="M3" class="m3-logo" id="logo-btn" role="button" tabindex="0" title="Leaderboard settings" aria-label="Open leaderboard settings" aria-haspopup="dialog" aria-controls="settings-modal">
+
+  <div class="settings-modal-overlay" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" aria-hidden="true">
+    <div class="settings-modal" tabindex="-1">
+      <div class="settings-modal-header-row">
+        <h3 id="settings-modal-title">Leaderboard Settings</h3>
+        <button type="button" class="settings-close-btn" id="settings-close-btn" aria-label="Close leaderboard settings">&times;</button>
+      </div>
+      <label for="layout-select">Layout</label>
+      <select id="layout-select" aria-describedby="layout-hint">
+        <option value="grid" selected>Grid</option>
+        <option value="gallery">Gallery</option>
+      </select>
+      <p id="layout-hint" class="setting-hint">Grid shows all players together. Gallery highlights the active player and cycles as turns change.</p>
+      <div class="settings-gallery-options" id="gallery-options" hidden>
+        <div class="option-row">
+          <input type="checkbox" id="display-stats-cb">
+          <label for="display-stats-cb">Display Stats</label>
+        </div>
+        <p class="setting-hint">Show the active player's match stats on their card.</p>
+      </div>
+    </div>
+  </div>
 
   <script src="rpg-bg-particles.js"
     data-particle-container="idxCssParticles" data-particle-class="idx-bg-particle"
@@ -900,6 +1645,36 @@
     };
     const previousHpByPlayerId = {};
     let pendingFxQueue = [];
+    let lastGalleryHeroId = null;
+    let lastBoardData = null;
+    let displayStats = false;
+    const LAYOUT_KEY = 'daggerdie_brawl_leaderboard_layout';
+    const DISPLAY_STATS_KEY = 'daggerdie_brawl_leaderboard_display_stats';
+    const LAYOUTS = ['grid', 'gallery'];
+
+    function normalizeLayout(value) {
+      return LAYOUTS.indexOf(value) !== -1 ? value : 'grid';
+    }
+
+    function getGalleryHeroId(players) {
+      const list = players || [];
+      const current = list.find(function(p) { return p.isCurrent; });
+      if (current) return current.id;
+      const living = list.find(function(p) { return !p.eliminated; });
+      return (living || list[0] || {}).id;
+    }
+
+    function syncGalleryHero() {
+      if (!playersPanel) return;
+      const cards = Array.prototype.slice.call(playersPanel.querySelectorAll('.player-card'));
+      let hero = playersPanel.querySelector('.player-card.current') ||
+        playersPanel.querySelector('.player-card:not(.eliminated)') ||
+        cards[0] || null;
+      cards.forEach(function(card) { card.classList.remove('gallery-hero'); });
+      if (hero) hero.classList.add('gallery-hero');
+      const otherCount = Math.max(1, cards.length - (hero ? 1 : 0));
+      playersPanel.style.setProperty('--gallery-others', String(otherCount));
+    }
 
     function escHtml(str) {
       const d = document.createElement('div');
@@ -915,11 +1690,10 @@
       const CHAR_BY_ID = window.DAGGERDIE_CHARACTER_BY_ID || {};
       const getAvatarMarkup = window.DAGGERDIE_CHARACTER_AVATAR_MARKUP || ((c, prefix, gender) => (window.DAGGERDIE_PREFIX_SVG_IDS || (s => s))(c.svg, prefix));
       const char = p.characterId && CHAR_BY_ID[p.characterId];
-      if (char) {
-        const markup = getAvatarMarkup(char, 'lb-p' + p.id, p.gender);
-        return '<div class="player-avatar player-avatar-char">' + markup + '</div>';
-      }
-      return '<div class="player-avatar" style="background:' + escHtml(p.color) + ';"></div>';
+      const avatar = char
+        ? '<div class="player-avatar player-avatar-char">' + getAvatarMarkup(char, 'lb-p' + p.id, p.gender) + '</div>'
+        : '<div class="player-avatar" style="background:' + escHtml(p.color) + ';"></div>';
+      return '<div class="player-avatar-slot">' + avatar + '</div>';
     }
 
     function getBossBadgeHtml(p, bossMode) {
@@ -932,6 +1706,29 @@
       if (typeof DAGGERDIE_TEAM_MARKUP === 'function') return DAGGERDIE_TEAM_MARKUP(team, prefix);
       const prefixTeamSvgIds = window.DAGGERDIE_PREFIX_TEAM_SVG_IDS || function(s) { return s; };
       return prefixTeamSvgIds(team.svg, prefix);
+    }
+
+    function formatStatRatio(num, den) {
+      if (!den) return '—';
+      return num + '/' + den + ' (' + (num / den * 100).toFixed(1) + '%)';
+    }
+
+    function getPlayerStatsHtml(p, layout, isHero) {
+      if (layout !== 'gallery' || !displayStats || !isHero) return '';
+      const efficiency = formatStatRatio(p.hitCount || 0, p.totalThrows || 0);
+      const points = formatStatRatio(p.totalClaimed || 0, p.totalRolled || 0);
+      const stats = [
+        { label: 'Efficiency', value: efficiency },
+        { label: 'Points', value: points },
+        { label: 'Criticals', value: String(p.criticals || 0) },
+        { label: 'Drops', value: String(p.dropCount || 0) }
+      ];
+      return '<div class="player-card-stats" aria-label="Player stats">' + stats.map(function(stat) {
+        return '<div class="player-card-stat">' +
+          '<span class="player-card-stat-label">' + escHtml(stat.label) + '</span>' +
+          '<span class="player-card-stat-value">' + escHtml(stat.value) + '</span>' +
+          '</div>';
+      }).join('') + '</div>';
     }
 
     function getTeamBadgeHtml(p, partyMode) {
@@ -955,8 +1752,14 @@
         return '<div class="player-card-inventory-slot' +
           (ITEM ? ' has-item' : '') +
           (ITEM && lock[i] ? ' locked-item' : '') +
-          '" title="' + (ITEM ? escHtml(ITEM.name + ': ' + ITEM.effect) : 'Empty') + '">' +
-          (ITEM ? itemGraphic(ITEM) : '') +
+          '" title="' + (ITEM ? escHtml(ITEM.name + ': ' + ITEM.effect) : 'Empty') + '"' +
+          (ITEM ? ' style="--item-accent:' + escHtml(ITEM.accent || '#feca57') + '"' : '') + '>' +
+          (ITEM ? itemGraphic(ITEM) +
+            '<div class="player-card-inventory-meta">' +
+              '<div class="player-card-inventory-name">' + escHtml(ITEM.name) + '</div>' +
+              '<div class="player-card-inventory-effect">' + escHtml(ITEM.effect) + '</div>' +
+            '</div>'
+          : '') +
           '</div>';
       }).join('') + '</div>';
     }
@@ -1007,26 +1810,51 @@
       itemsOverlayPanel.innerHTML = html;
     }
 
+    function getThrowSteps(rolls) {
+      const list = rolls || [];
+      let nextIdx = -1;
+      for (let i = 0; i < list.length; i++) {
+        if (!list[i].result) { nextIdx = i; break; }
+      }
+      return list.map(function(die, i) {
+        return {
+          die: die,
+          order: i + 1,
+          done: !!die.result,
+          next: i === nextIdx
+        };
+      });
+    }
+
     function getPlayerRollsHtml(p, data) {
       if (!p.isCurrent) return '';
       if (data.currentRollOwnerId != null && p.id !== data.currentRollOwnerId) return '';
       const rolls = data.currentRolls || [];
       if (!rolls.length) return '';
       const claimed = !!data.damageClaimed;
-      return '<div class="player-card-rolls" aria-label="Player rolls">' + rolls.map(function(die) {
-        const result = claimed ? (die.result || null) : null;
+      const steps = getThrowSteps(rolls);
+      return '<div class="player-card-rolls" aria-label="Throw in order">' +
+        '<div class="player-rolls-label">Throw in order</div>' +
+        '<div class="player-rolls-seq">' + steps.map(function(step, i) {
+        const die = step.die;
+        const result = die.result || null;
         const classes = ['player-roll-chip'];
         if (result) classes.push(result);
+        if (step.next && !claimed) classes.push('next');
         const showHp = claimed && result === 'hit';
         const value = showHp && die.hp != null ? die.hp : die.roll;
         const title = showHp
-          ? ('Hit: ' + die.roll + ' → ' + die.hp + ' HP')
-          : (result === 'miss' ? 'Miss: ' + die.roll : (result === 'drop' ? 'Drop: ' + die.roll : 'Rolled ' + die.roll));
-        return '<div class="' + classes.join(' ') + '" title="' + escHtml(title) + '">' +
+          ? ('Throw ' + step.order + ' hit: ' + die.roll + ' → ' + die.hp + ' HP')
+          : (result === 'miss' ? 'Throw ' + step.order + ' miss: ' + die.roll
+            : (result === 'drop' ? 'Throw ' + step.order + ' drop: ' + die.roll
+              : 'Throw ' + step.order + ': ' + die.roll));
+        return (i ? '<div class="player-rolls-arrow" aria-hidden="true">→</div>' : '') +
+          '<div class="' + classes.join(' ') + '" title="' + escHtml(title) + '">' +
+          '<span class="roll-order">' + step.order + '</span>' +
           escHtml(String(value)) +
           (showHp ? '<span class="roll-hp">HP</span>' : '') +
           '</div>';
-      }).join('') + '</div>';
+      }).join('') + '</div></div>';
     }
 
     function renderPlayers(data) {
@@ -1039,7 +1867,11 @@
       noData.style.display = 'none';
       const ordered = players.slice().sort((a, b) => (a.turnOrder || 0) - (b.turnOrder || 0));
       playersBoard.style.display = 'flex';
-      playersPanel.className = 'players-panel count-' + Math.min(6, Math.max(1, ordered.length));
+      const layout = normalizeLayout(document.body.dataset.layout);
+      const heroId = getGalleryHeroId(ordered);
+      playersPanel.className = 'players-panel count-' + Math.min(6, Math.max(1, ordered.length)) + ' layout-' + layout;
+      playersPanel.dataset.layout = layout;
+      playersPanel.style.setProperty('--gallery-others', String(Math.max(1, ordered.length - (heroId != null ? 1 : 0))));
 
       const hpDeltas = [];
       const impactIds = {};
@@ -1055,6 +1887,10 @@
       playersPanel.innerHTML = ordered.map(p => {
         const classes = ['player-card'];
         if (p.isCurrent) classes.push('current');
+        if (p.id === heroId) {
+          classes.push('gallery-hero');
+          if (layout === 'gallery' && heroId !== lastGalleryHeroId) classes.push('gallery-hero-enter');
+        }
         if (p.eliminated) classes.push('eliminated');
         if (p.buffActive) classes.push('buffed');
         if (p.nerfActive) classes.push('nerfed');
@@ -1066,26 +1902,46 @@
         if (p.freeDrops) classes.push('free-drops');
         if (p.aiming) classes.push('aiming');
         if (data.bossMode && p.isBoss) classes.push('is-boss');
+        if (layout === 'gallery' && p.id === heroId && data.itemsEnabled) classes.push('has-inventory');
 
         const hpPct = p.maxHp > 0 ? Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100)) : 0;
-        const statusHtml = (p.effects || []).map(s =>
-          '<div class="player-card-status ' + escHtml(s.kind) + '">' + escHtml(s.label) + '</div>'
-        ).join('');
+        const statusHtml = '<div class="player-card-status-slot">' +
+          (p.effects || []).map(s =>
+            '<div class="player-card-status ' + escHtml(s.kind) + '">' + escHtml(s.label) + '</div>'
+          ).join('') +
+          '</div>';
+        const isHero = layout === 'gallery' && p.id === heroId;
+        const teamHtml = getTeamBadgeHtml(p, data.partyMode);
 
         return '<div class="' + classes.join(' ') + '" data-player="' + p.id + '">' +
+          '<div class="player-card-body">' +
           getBossBadgeHtml(p, data.bossMode) +
           getPlayerAvatarHtml(p) +
+          (isHero ? teamHtml : '') +
+          '<div class="player-card-info">' +
+          '<div class="player-card-details">' +
+          '<div class="player-card-details-main">' +
+          '<div class="player-card-identity">' +
+          '<div class="player-card-identity-row">' +
           '<div class="player-name">' + escHtml(p.name) + '</div>' +
           '<div class="player-hp">' + p.hp + ' HP</div>' +
+          '</div>' +
           '<div class="hp-bar"><div class="hp-fill" style="width:' + hpPct + '%;background:' + escHtml(p.color) + ';"></div></div>' +
+          '</div>' +
           getPlayerRollsHtml(p, data) +
+          '<div class="player-card-meta">' +
           '<div class="player-turn-order">Turn Order: #' + (p.turnOrder || '—') + '</div>' +
           (p.isBot ? '<div class="player-card-bot-skill">Bot: ' + escHtml(capitalizeBotSkill(p.botSkill)) + '</div>' : '') +
-          getTeamBadgeHtml(p, data.partyMode) +
+          (isHero ? '' : teamHtml) +
           statusHtml +
+          '</div>' +
+          '</div>' +
           getInventoryHtml(p, data.itemsEnabled) +
-          '</div>';
+          '</div>' +
+          getPlayerStatsHtml(p, layout, p.id === heroId) +
+          '</div></div></div>';
       }).join('');
+      lastGalleryHeroId = heroId;
       requestAnimationFrame(function() {
         fitLeaderboardCards();
         requestAnimationFrame(function() {
@@ -1235,8 +2091,49 @@
       });
     }
 
+    let galleryHeroObserver = null;
+
+    function sizeGalleryHeroAvatar() {
+      const hero = playersPanel && playersPanel.querySelector('.player-card.gallery-hero');
+      const slot = hero && hero.querySelector('.player-avatar-slot');
+      const avatar = slot && slot.querySelector('.player-avatar');
+      const info = hero && hero.querySelector('.player-card-info');
+      if (!hero || !avatar || !slot) return;
+      const slotStyles = window.getComputedStyle(slot);
+      const padX = (parseFloat(slotStyles.paddingLeft) || 0) + (parseFloat(slotStyles.paddingRight) || 0);
+      const padY = (parseFloat(slotStyles.paddingTop) || 0) + (parseFloat(slotStyles.paddingBottom) || 0);
+      const heroStyles = window.getComputedStyle(hero);
+      const heroPad = (parseFloat(heroStyles.paddingTop) || 0) + (parseFloat(heroStyles.paddingBottom) || 0);
+      const team = hero.querySelector('.player-card-team-badge');
+      const teamH = team ? team.offsetHeight + 8 : 0;
+      const leftover = hero.clientHeight - (info ? info.offsetHeight : 0) - heroPad - padY - teamH - 8;
+      const innerW = slot.clientWidth - padX;
+      const innerH = Math.max(slot.clientHeight - padY, leftover);
+      const size = Math.floor(Math.min(innerW, innerH));
+      if (size < 48) return;
+      avatar.style.width = size + 'px';
+      avatar.style.height = size + 'px';
+    }
+
+    function observeGalleryHero() {
+      const hero = playersPanel && playersPanel.querySelector('.player-card.gallery-hero');
+      if (typeof ResizeObserver === 'undefined' || !hero) return;
+      if (galleryHeroObserver) galleryHeroObserver.disconnect();
+      galleryHeroObserver = new ResizeObserver(sizeGalleryHeroAvatar);
+      galleryHeroObserver.observe(hero);
+      const slot = hero.querySelector('.player-avatar-slot');
+      if (slot) galleryHeroObserver.observe(slot);
+    }
+
     function fitLeaderboardCards() {
       if (!playersBoard || !playersPanelFit || playersBoard.style.display === 'none') return;
+      if (normalizeLayout(document.body.dataset.layout) === 'gallery') {
+        playersPanelFit.style.setProperty('--fit-scale', '1');
+        observeGalleryHero();
+        sizeGalleryHeroAvatar();
+        requestAnimationFrame(sizeGalleryHeroAvatar);
+        return;
+      }
       const bw = playersBoard.clientWidth;
       const bh = playersBoard.clientHeight;
       const cw = playersPanelFit.offsetWidth;
@@ -1253,6 +2150,7 @@
         statusText.textContent = 'Connected — live updates';
 
         if (msg.type === 'leaderboard') {
+          lastBoardData = msg;
           renderPlayers(msg);
           renderItemsOverlay(msg);
           if (msg.phase === 'finished') {
@@ -1277,11 +2175,133 @@
       }
     }
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.fullscreenElement) {
-        document.exitFullscreen();
+    const logoBtn = document.getElementById('logo-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+    const layoutSelect = document.getElementById('layout-select');
+    const galleryOptions = document.getElementById('gallery-options');
+    const displayStatsCb = document.getElementById('display-stats-cb');
+
+    function rerenderBoard() {
+      if (!lastBoardData) return;
+      const replay = Object.assign({}, lastBoardData, { impacts: [] });
+      renderPlayers(replay);
+    }
+
+    function syncGalleryOptionsVisibility() {
+      if (!galleryOptions) return;
+      galleryOptions.hidden = normalizeLayout(document.body.dataset.layout) !== 'gallery';
+    }
+
+    function applyDisplayStats(enabled) {
+      displayStats = !!enabled;
+      document.body.dataset.displayStats = displayStats ? 'on' : 'off';
+      if (displayStatsCb) displayStatsCb.checked = displayStats;
+      try { localStorage.setItem(DISPLAY_STATS_KEY, displayStats ? '1' : '0'); } catch (e) {}
+      rerenderBoard();
+    }
+
+    function applyLayout(layout) {
+      const next = normalizeLayout(layout);
+      document.body.dataset.layout = next;
+      if (playersPanel) {
+        playersPanel.dataset.layout = next;
+        LAYOUTS.forEach(function(name) { playersPanel.classList.remove('layout-' + name); });
+        playersPanel.classList.add('layout-' + next);
+        syncGalleryHero();
+        if (next === 'gallery') {
+          const hero = playersPanel.querySelector('.player-card.gallery-hero');
+          if (hero && !hero.classList.contains('gallery-hero-enter')) {
+            hero.classList.add('gallery-hero-enter');
+          }
+        }
       }
-      if ((e.key === 'f' || e.key === 'F') && !e.target.matches('input, textarea')) {
+      if (layoutSelect && layoutSelect.value !== next) layoutSelect.value = next;
+      try { localStorage.setItem(LAYOUT_KEY, next); } catch (e) {}
+      syncGalleryOptionsVisibility();
+      rerenderBoard();
+      requestAnimationFrame(function() {
+        fitLeaderboardCards();
+      });
+    }
+
+    function openSettings() {
+      if (!settingsModal) return;
+      settingsModal.classList.add('open');
+      settingsModal.setAttribute('aria-hidden', 'false');
+      const dialog = settingsModal.querySelector('.settings-modal');
+      if (dialog) dialog.focus();
+    }
+
+    function closeSettings() {
+      if (!settingsModal) return;
+      settingsModal.classList.remove('open');
+      settingsModal.setAttribute('aria-hidden', 'true');
+      if (logoBtn) logoBtn.focus();
+    }
+
+    function isSettingsOpen() {
+      return !!(settingsModal && settingsModal.classList.contains('open'));
+    }
+
+    try {
+      applyDisplayStats(localStorage.getItem(DISPLAY_STATS_KEY) === '1');
+    } catch (e) {
+      applyDisplayStats(false);
+    }
+    try {
+      applyLayout(localStorage.getItem(LAYOUT_KEY));
+    } catch (e) {
+      applyLayout('grid');
+    }
+
+    if (logoBtn) {
+      logoBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openSettings();
+      });
+      logoBtn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openSettings();
+        }
+      });
+    }
+    if (settingsCloseBtn) {
+      settingsCloseBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        closeSettings();
+      });
+    }
+    if (settingsModal) {
+      settingsModal.addEventListener('click', function(e) {
+        if (e.target === settingsModal) closeSettings();
+      });
+    }
+    if (layoutSelect) {
+      layoutSelect.addEventListener('change', function() {
+        applyLayout(layoutSelect.value);
+      });
+    }
+    if (displayStatsCb) {
+      displayStatsCb.addEventListener('change', function() {
+        applyDisplayStats(displayStatsCb.checked);
+      });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (isSettingsOpen()) {
+          e.preventDefault();
+          closeSettings();
+          return;
+        }
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
+        return;
+      }
+      if ((e.key === 'f' || e.key === 'F') && !e.target.matches('input, textarea, select') && !isSettingsOpen()) {
         toggleFullscreen();
       }
     });
