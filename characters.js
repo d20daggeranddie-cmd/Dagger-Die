@@ -23,7 +23,7 @@
     }
     function getCharacterImagePath(char, gender) {
         if (!char || !char.id) return '';
-        return 'assets/HD%20Avatars/' + normalizeGender(gender) + char.id + '.png';
+        return 'assets/HD%20Avatars/' + normalizeGender(gender) + char.id + '.png?v=4';
     }
     function getCharacterAvatarMarkup(char, prefix, gender) {
         if (!char) return '';
