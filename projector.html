@@ -143,8 +143,8 @@
         }
 
         .m3-logo {
-            position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%); z-index: 200;
-            width: 72px; height: auto; pointer-events: auto; cursor: pointer;
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200;
+            width: 48px; height: auto; pointer-events: auto; cursor: pointer;
             opacity: 0.85;
             transition: opacity 0.3s;
         }
@@ -165,9 +165,9 @@
             position: fixed; inset: 0; z-index: 150;
             pointer-events: none;
             background: radial-gradient(
-                circle 80px at 50% calc(100% - 72px),
-                transparent 38px,
-                rgba(0,0,0,0.82) 72px
+                circle 56px at 50% calc(100% - 48px),
+                transparent 26px,
+                rgba(0,0,0,0.82) 50px
             );
         }
         .logo-spotlight-overlay.show { display: block; }
@@ -220,11 +220,11 @@
         .alignment-hint {
             display: none;
             position: fixed;
-            bottom: 50%;
+            bottom: 16px;
             left: 50%;
-            transform: translate(-50%, 50%);
+            transform: translateX(-50%);
             font-family: sans-serif;
-            font-size: clamp(22px, 4.5vw, 72px);
+            font-size: clamp(13px, 1.6vw, 20px);
             font-weight: 700;
             color: #ffd700;
             text-align: center;
@@ -243,7 +243,7 @@
         .alignment-lock-bar {
             display: none;
             position: fixed;
-            top: 25%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 90;
@@ -255,9 +255,75 @@
             border-radius: clamp(8px, 1.2vw, 16px);
             border: 1px solid rgba(255,215,0,0.25);
             width: min(88vw, 520px);
+            max-height: calc(100vh - 24px);
+            max-height: calc(100dvh - 24px);
+            overflow-x: hidden;
+            overflow-y: auto;
             box-sizing: border-box;
+            cursor: grab;
+            user-select: none;
         }
         body.alignment-mode .alignment-lock-bar { display: flex !important; }
+        body.alignment-mode.alignment-focus .alignment-lock-bar { display: none !important; }
+        body.alignment-mode.alignment-focus .alignment-hint { display: none; }
+        .alignment-focus-bar {
+            display: none;
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 95;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.78);
+            border: 1px solid rgba(255,215,0,0.35);
+            border-radius: 10px;
+            padding: 8px;
+        }
+        body.alignment-mode.alignment-focus .alignment-focus-bar { display: flex; }
+        .alignment-focus-bar .btn {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(0.7rem, 1.3vw, 1.1rem);
+            background: rgba(255,215,0,0.18);
+            border: 2px solid rgba(255,215,0,0.5);
+            color: #ffd700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .alignment-focus-bar .btn:hover {
+            background: rgba(255,215,0,0.35);
+            border-color: rgba(255,215,0,0.85);
+        }
+        .alignment-lock-bar.dragging { cursor: grabbing; }
+        .alignment-lock-bar input,
+        .alignment-lock-bar button,
+        .alignment-lock-bar label {
+            cursor: pointer;
+            user-select: auto;
+        }
+        .alignment-drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: -6px 0 2px;
+            padding: 6px 0 2px;
+            cursor: grab;
+            color: rgba(255,215,0,0.7);
+            font-family: sans-serif;
+            font-size: clamp(11px, 1.3vw, 14px);
+            letter-spacing: 0.08em;
+        }
+        .alignment-drag-handle::before,
+        .alignment-drag-handle::after {
+            content: '';
+            width: 22px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255,215,0,0.4);
+        }
+        .alignment-lock-bar.dragging .alignment-drag-handle { cursor: grabbing; }
 
         /* Row 1 — Scale */
         .alignment-scale-row {
@@ -277,6 +343,29 @@
             accent-color: #ffd700;
             cursor: pointer;
         }
+        .alignment-check-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 1.2vw, 14px);
+        }
+        .alignment-check-row input[type="checkbox"] {
+            width: clamp(18px, 2.2vw, 28px);
+            height: clamp(18px, 2.2vw, 28px);
+            accent-color: #ffd700;
+            cursor: pointer;
+        }
+        .alignment-check-row label {
+            font-size: clamp(13px, 1.7vw, 22px);
+            font-family: sans-serif;
+            color: #f0f0f0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .independent-scale-row,
+        .independent-scale-sliders { display: none; }
+        body.dual-target-mode .independent-scale-row { display: flex; }
+        body.dual-target-mode.independent-scale .independent-scale-sliders { display: flex; }
+        body.dual-target-mode.independent-scale #alignScaleRowLinked { display: none; }
 
         /* Row 3 — action buttons */
         .alignment-lock-bar .btn {
@@ -294,6 +383,7 @@
             background: rgba(255,215,0,0.35);
             border-color: rgba(255,215,0,0.85);
         }
+        #alignFocusBtn { flex: 0 0 auto; width: 100%; }
         .alignment-action-row {
             display: flex;
             gap: clamp(6px, 1vw, 14px);
@@ -358,18 +448,22 @@
         }
 
         .dimensions-label {
+            display: none;
             position: fixed; top: 12px; left: 12px; z-index: 50;
             font-size: 10px; color: #888; font-family: sans-serif;
             pointer-events: none;
         }
         .fs-hint {
+            display: none;
             position: fixed; bottom: 10px; left: 12px; z-index: 50;
             font-size: 10px; color: #888; font-family: sans-serif;
             pointer-events: none;
         }
+        body.alignment-mode .dimensions-label,
+        body.alignment-mode .fs-hint { display: block; }
         body.projector-animated-bg .fs-hint { color: rgba(255,255,255,0.35); }
         @media (max-width: 480px) {
-            .m3-logo { width: 52px; bottom: 28px; }
+            .m3-logo { width: 36px; bottom: 16px; }
             .dimensions-label { font-size: 9px; top: 8px; left: 8px; }
         }
 
@@ -407,32 +501,137 @@
             fill: #ffe08a;
         }
 
-        /* ── Throw-number overlay (which throw this section is) ── */
-        .throw-overlay {
+        .highlight-zone.next-throw .face-shape {
+            stroke-width: 3.4;
+            filter: url(#glow-gold);
+        }
+
+        /* ── Room-readable throw order (players never see the admin screen) ── */
+        .throw-order-hud {
+            position: fixed;
+            bottom: 108px;
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: center center;
+            z-index: 80;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(6px, 1vw, 12px);
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.25s ease;
+            max-width: 96vw;
         }
-        .highlight-zone.active .throw-overlay,
-        .highlight-zone.claimed .throw-overlay {
-            opacity: 1;
+        .throw-order-hud.visible { display: flex; }
+        body.alignment-mode .throw-order-hud {
+            display: flex !important;
+            pointer-events: auto;
+            cursor: grab;
+            outline: 2px dashed rgba(255,215,0,0.45);
+            outline-offset: 10px;
         }
-        .highlight-zone.claimed:not(.active) .throw-overlay {
-            opacity: 0.6;
+        body.alignment-mode .throw-order-hud:active { cursor: grabbing; }
+        body.alignment-mode .throw-order-hud * { pointer-events: none; }
+        body.alignment-mode .throw-order-step.next { animation: none; }
+        .throw-order-hud-seq {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 1.4vw, 20px);
         }
-        .throw-badge-bg {
-            fill: #111111;
-            stroke: #ffe566;
-            stroke-width: 2.6;
+        .throw-order-hud.column .throw-order-hud-seq {
+            flex-direction: column;
         }
-        .zone-label {
+        .throw-order-hud.column .throw-order-arrow {
+            transform: rotate(90deg);
+        }
+        .throw-order-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: clamp(70px, 11vw, 150px);
+            padding: clamp(8px, 1.2vw, 16px) clamp(12px, 1.8vw, 22px);
+            border-radius: clamp(12px, 1.6vw, 20px);
+            background: rgba(0,0,0,0.78);
+            border: 3px solid #ffe566;
+            box-shadow: 0 0 16px rgba(255,215,0,0.28);
+        }
+        .throw-order-step-num {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 15px;
+            font-size: clamp(11px, 1.5vw, 18px);
             font-weight: 700;
-            fill: #ffd700;
-            text-anchor: middle;
-            dominant-baseline: central;
-            pointer-events: none;
+            letter-spacing: 0.16em;
+            color: #ffe566;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        .throw-order-step-val {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: clamp(34px, 6.4vw, 86px);
+            font-weight: 700;
+            line-height: 0.95;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+        .throw-order-step.next {
+            border-color: #fff6b0;
+            box-shadow: 0 0 28px rgba(255,215,0,0.7);
+            animation: throwNowPulse 1.15s ease-in-out infinite;
+        }
+        .throw-order-step.hit {
+            border-color: #2ecc71;
+            box-shadow: 0 0 18px rgba(46, 204, 113, 0.5);
+        }
+        .throw-order-step.hit .throw-order-step-num,
+        .throw-order-step.hit .throw-order-step-val { color: #8cffb4; }
+        .throw-order-step.miss {
+            border-color: #7f8c8d;
+            box-shadow: none;
+            opacity: 0.78;
+        }
+        .throw-order-step.miss .throw-order-step-num,
+        .throw-order-step.miss .throw-order-step-val { color: #b0b6b8; }
+        .throw-order-step.drop {
+            border-color: #e74c3c;
+            box-shadow: 0 0 18px rgba(231, 76, 60, 0.5);
+        }
+        .throw-order-step.drop .throw-order-step-num,
+        .throw-order-step.drop .throw-order-step-val { color: #ff8a80; }
+        .throw-order-arrow {
+            font-size: clamp(26px, 4.2vw, 54px);
+            font-weight: 900;
+            color: #ffe566;
+            text-shadow: 0 0 10px rgba(255,215,0,0.45);
+            line-height: 1;
+        }
+        @keyframes throwNowPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(255,215,0,0.45); }
+            50% { transform: scale(1.06); box-shadow: 0 0 34px rgba(255,215,0,0.85); }
+        }
+        body.projector-bg-white .throw-order-step {
+            background: rgba(255,255,255,0.92);
+            border-color: #c9a227;
+        }
+        body.projector-bg-white .throw-order-step-val { color: #1a1400; text-shadow: none; }
+        body.projector-bg-white .throw-order-step-num { color: #8a6200; }
+        body.projector-bg-white .throw-order-arrow { color: #c9a227; text-shadow: none; }
+        body.projector-bg-white .throw-order-step.hit .throw-order-step-num,
+        body.projector-bg-white .throw-order-step.hit .throw-order-step-val { color: #1e7d46; }
+        body.projector-bg-white .throw-order-step.miss .throw-order-step-num,
+        body.projector-bg-white .throw-order-step.miss .throw-order-step-val { color: #6b7280; }
+        body.projector-bg-white .throw-order-step.drop .throw-order-step-num,
+        body.projector-bg-white .throw-order-step.drop .throw-order-step-val { color: #c0392b; }
+        @media (max-height: 700px) {
+            .throw-order-hud { bottom: 10px; gap: 4px; }
+            .throw-order-step {
+                min-width: 54px;
+                padding: 4px 8px 5px;
+                border-width: 2px;
+                border-radius: 10px;
+            }
+            .throw-order-step-val { font-size: 26px; }
+            .throw-order-step-num { font-size: 9px; }
+            .throw-order-arrow { font-size: 20px; }
         }
 
         /* ── Dual-target mode ── */
@@ -485,12 +684,39 @@
     <div class="dimensions-label">360×315mm · 14.25×12.5"</div>
     <div class="fs-hint">F = fullscreen</div>
     <div class="status-dot" id="status-dot" title="Waiting for game connection..."></div>
+    <div class="throw-order-hud" id="throwOrderHud" aria-live="polite">
+        <div class="throw-order-hud-seq" id="throwOrderSeq"></div>
+    </div>
 
-    <div class="alignment-hint" id="alignmentHint">Drag to move · Scroll or slider to scale</div>
+    <div class="alignment-hint" id="alignmentHint">Drag targets or rolls to move · Scroll or slider to scale</div>
     <div class="alignment-lock-bar" id="alignmentLockBar">
+        <div class="alignment-drag-handle" title="Drag to move settings">Move</div>
+        <div class="alignment-scale-row" id="alignScaleRowLinked">
+            <label for="alignScaleSlider">Targets</label>
+            <input type="range" id="alignScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale targets" />
+        </div>
+        <div class="alignment-check-row independent-scale-row" id="independentScaleRow">
+            <input type="checkbox" id="independentScaleCheck" />
+            <label for="independentScaleCheck">Scale targets separately</label>
+        </div>
+        <div class="alignment-scale-row independent-scale-sliders" id="alignScaleRowOdd">
+            <label for="alignOddScaleSlider">Odd</label>
+            <input type="range" id="alignOddScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale odd target" />
+        </div>
+        <div class="alignment-scale-row independent-scale-sliders" id="alignScaleRowEven">
+            <label for="alignEvenScaleSlider">Even</label>
+            <input type="range" id="alignEvenScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale even target" />
+        </div>
         <div class="alignment-scale-row">
-            <label for="alignScaleSlider">Scale</label>
-            <input type="range" id="alignScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale target" />
+            <label for="alignHudScaleSlider">Rolls</label>
+            <input type="range" id="alignHudScaleSlider" min="0.15" max="2.5" step="0.02" value="1" title="Scale roll indicator" />
+        </div>
+        <div class="target-mode-row">
+            <span>Rolls layout:</span>
+            <div class="bg-selector-btns">
+                <button class="bg-btn" id="hud-layout-row" title="Roll indicator in a row">Row</button>
+                <button class="bg-btn" id="hud-layout-column" title="Roll indicator in a column">Column</button>
+            </div>
         </div>
         <div class="bg-selector">
             <span>Background:</span>
@@ -507,11 +733,16 @@
                 <button class="bg-btn" id="mode-btn-2" title="Separate odd and even targets">2 Targets</button>
             </div>
         </div>
+        <button class="btn" id="alignFocusBtn" title="Hide settings and align on the full screen">Alignment Mode</button>
         <div class="alignment-action-row">
             <button class="btn" id="lockAlignBtn">Lock position</button>
             <button class="btn" id="resetAlignBtn">Reset</button>
             <button class="btn" id="cancelAlignBtn">Cancel</button>
         </div>
+    </div>
+    <div class="alignment-focus-bar" id="alignmentFocusBar">
+        <button type="button" class="btn" id="focusLockBtn">Lock Position</button>
+        <button type="button" class="btn" id="focusSettingsBtn">Settings</button>
     </div>
 
     <div class="targets-container" id="targetsContainer">
@@ -574,61 +805,51 @@
                 <polygon class="face-shape d20-face" points="200,2 7,119 200,59"/>
                 <text class="section-value section-odd" x="148" y="48" font-size="18">17</text>
                 <text class="section-value section-even" x="124" y="70" font-size="18">10</text>
-                <text class="zone-label" x="136" y="62"></text>
             </g>
             <g id="face-tr" class="highlight-zone" data-pair="11-20">
                 <polygon class="face-shape d20-face" points="200,2 200,59 393,119"/>
                 <text class="section-value section-odd" x="252" y="48" font-size="18">11</text>
                 <text class="section-value section-even" x="276" y="70" font-size="18">20</text>
-                <text class="zone-label" x="264" y="62"></text>
             </g>
             <g id="face-l" class="highlight-zone" data-pair="3-4">
                 <polygon class="face-shape d20-face" points="7,119 66,316 200,59"/>
                 <text class="section-value section-odd" x="91" y="155" font-size="26">3</text>
                 <text class="section-value section-even" x="91" y="181" font-size="26">4</text>
-                <text class="zone-label" x="91" y="165"></text>
             </g>
             <g id="face-r" class="highlight-zone" data-pair="6-7">
                 <polygon class="face-shape d20-face" points="200,59 334,316 393,119"/>
                 <text class="section-value section-odd" x="309" y="155" font-size="26">7</text>
                 <text class="section-value section-even" x="309" y="181" font-size="26">6</text>
-                <text class="zone-label" x="309" y="165"></text>
             </g>
             <g id="face-fl" class="highlight-zone" data-pair="12-15">
                 <polygon class="face-shape d20-face-outer" points="7,119 2,346 66,316"/>
                 <text class="section-value section-odd" x="17" y="248" font-size="22">15</text>
                 <text class="section-value section-even" x="33" y="272" font-size="22">12</text>
-                <text class="zone-label" x="26" y="260"></text>
             </g>
             <g id="face-fr" class="highlight-zone" data-pair="9-14">
                 <polygon class="face-shape d20-face-outer" points="393,119 334,316 398,346"/>
                 <text class="section-value section-odd" x="367" y="248" font-size="22">9</text>
                 <text class="section-value section-even" x="383" y="272" font-size="22">14</text>
-                <text class="zone-label" x="374" y="260"></text>
             </g>
             <g id="face-bl" class="highlight-zone" data-pair="13-18">
                 <polygon class="face-shape d20-face-outer" points="66,316 2,346 200,458"/>
                 <text class="section-value section-odd" x="76" y="356" font-size="18">13</text>
                 <text class="section-value section-even" x="108" y="390" font-size="18">18</text>
-                <text class="zone-label" x="90" y="374"></text>
             </g>
             <g id="face-br" class="highlight-zone" data-pair="16-19">
                 <polygon class="face-shape d20-face-outer" points="334,316 200,458 398,346"/>
                 <text class="section-value section-odd" x="324" y="356" font-size="18">19</text>
                 <text class="section-value section-even" x="292" y="390" font-size="18">16</text>
-                <text class="zone-label" x="311" y="374"></text>
             </g>
             <g id="face-bc" class="highlight-zone" data-pair="5-8">
                 <polygon class="face-shape d20-face" points="66,316 200,458 334,316"/>
                 <text class="section-value section-odd" x="200" y="353" font-size="26">5</text>
                 <text class="section-value section-even" x="200" y="379" font-size="26">8</text>
-                <text class="zone-label" x="200" y="365"></text>
             </g>
             <g id="face-center" class="highlight-zone" data-pair="1-2">
                 <polygon class="face-shape d20-face-center" points="200,59 66,316 334,316"/>
                 <text class="section-value section-odd" x="200" y="215" font-size="38">1</text>
                 <text class="section-value section-even" x="200" y="253" font-size="38">2</text>
-                <text class="zone-label" x="200" y="232"></text>
             </g>
         </svg>
     </div>
@@ -684,38 +905,17 @@
 
         // odd/even facet values + label anchors for each pair
         var FACE_LAYOUT = {
-            '10-17': { x: 136, y: 60, x1: 148, y1: 48, x2: 124, y2: 70, fs: 32, fsc: 18, odd: 17, even: 10, bx: 100, by: 78 },
-            '11-20': { x: 264, y: 60, x1: 252, y1: 48, x2: 276, y2: 70, fs: 32, fsc: 18, odd: 11, even: 20, bx: 300, by: 78 },
-            '3-4':   { x: 91,  y: 165, x1: 91,  y1: 155, x2: 91,  y2: 181, fs: 32, fsc: 26, odd: 3,  even: 4,  bx: 108, by: 206 },
-            '6-7':   { x: 309, y: 165, x1: 309, y1: 155, x2: 309, y2: 181, fs: 32, fsc: 26, odd: 7,  even: 6,  bx: 292, by: 206 },
-            '12-15': { x: 26,  y: 260, x1: 17,  y1: 248, x2: 33,  y2: 272, fs: 28, fsc: 22, odd: 15, even: 12, bx: 48,  by: 298 },
-            '9-14':  { x: 374, y: 260, x1: 367, y1: 248, x2: 383, y2: 272, fs: 28, fsc: 22, odd: 9,  even: 14, bx: 352, by: 298 },
-            '13-18': { x: 90,  y: 374, x1: 76,  y1: 356, x2: 108, y2: 390, fs: 28, fsc: 18, odd: 13, even: 18, bx: 132, by: 404 },
-            '16-19': { x: 311, y: 374, x1: 324, y1: 356, x2: 292, y2: 390, fs: 28, fsc: 18, odd: 19, even: 16, bx: 268, by: 404 },
-            '5-8':   { x: 200, y: 363, x1: 200, y1: 353, x2: 200, y2: 379, fs: 32, fsc: 26, odd: 5,  even: 8,  bx: 255, by: 340 },
-            '1-2':   { x: 200, y: 230, x1: 200, y1: 215, x2: 200, y2: 253, fs: 48, fsc: 38, odd: 1,  even: 2,  bx: 254, by: 274 }
+            '10-17': { x: 136, y: 60, x1: 148, y1: 48, x2: 124, y2: 70, fs: 32, fsc: 18, odd: 17, even: 10 },
+            '11-20': { x: 264, y: 60, x1: 252, y1: 48, x2: 276, y2: 70, fs: 32, fsc: 18, odd: 11, even: 20 },
+            '3-4':   { x: 91,  y: 165, x1: 91,  y1: 155, x2: 91,  y2: 181, fs: 32, fsc: 26, odd: 3,  even: 4 },
+            '6-7':   { x: 309, y: 165, x1: 309, y1: 155, x2: 309, y2: 181, fs: 32, fsc: 26, odd: 7,  even: 6 },
+            '12-15': { x: 26,  y: 260, x1: 17,  y1: 248, x2: 33,  y2: 272, fs: 28, fsc: 22, odd: 15, even: 12 },
+            '9-14':  { x: 374, y: 260, x1: 367, y1: 248, x2: 383, y2: 272, fs: 28, fsc: 22, odd: 9,  even: 14 },
+            '13-18': { x: 90,  y: 374, x1: 76,  y1: 356, x2: 108, y2: 390, fs: 28, fsc: 18, odd: 13, even: 18 },
+            '16-19': { x: 311, y: 374, x1: 324, y1: 356, x2: 292, y2: 390, fs: 28, fsc: 18, odd: 19, even: 16 },
+            '5-8':   { x: 200, y: 363, x1: 200, y1: 353, x2: 200, y2: 379, fs: 32, fsc: 26, odd: 5,  even: 8 },
+            '1-2':   { x: 200, y: 230, x1: 200, y1: 215, x2: 200, y2: 253, fs: 48, fsc: 38, odd: 1,  even: 2 }
         };
-
-        function setThrowBadgeSize(zone, text) {
-            var bg = zone.querySelector('.throw-badge-bg');
-            if (!bg) return;
-            var pair = zone.getAttribute('data-pair');
-            var compact = pair === '10-17' || pair === '11-20' || pair === '13-18' || pair === '16-19';
-            var wide = !!(text && text.length > 3);
-            var w = compact ? (wide ? 28 : 22) : (wide ? 36 : 26);
-            var h = compact ? 20 : 26;
-            bg.setAttribute('x', String(-w / 2));
-            bg.setAttribute('y', String(-h / 2));
-            bg.setAttribute('width', String(w));
-            bg.setAttribute('height', String(h));
-            bg.setAttribute('rx', String(h / 2));
-        }
-
-        function positionThrowOverlay(zone, layout) {
-            var g = zone.querySelector('.throw-overlay');
-            if (!g || !layout) return;
-            g.setAttribute('transform', 'translate(' + layout.bx + ',' + layout.by + ')');
-        }
 
         function applyFaceLabels(zones, kind) {
             zones.forEach(function(z) {
@@ -751,7 +951,6 @@
                         shown.setAttribute('font-size', layout.fs);
                     }
                 }
-                positionThrowOverlay(z, layout);
             });
         }
 
@@ -764,83 +963,125 @@
             }
         }
 
-        function initThrowOverlays() {
-            var ns = 'http://www.w3.org/2000/svg';
-            allZones.forEach(function(z) {
-                if (z.querySelector('.throw-overlay')) return;
-                var lbl = z.querySelector('.zone-label');
-                var g = document.createElementNS(ns, 'g');
-                g.setAttribute('class', 'throw-overlay');
-                var bg = document.createElementNS(ns, 'rect');
-                bg.setAttribute('class', 'throw-badge-bg');
-                if (lbl) {
-                    lbl.setAttribute('x', '0');
-                    lbl.setAttribute('y', '1');
-                    lbl.removeAttribute('font-size');
-                }
-                g.appendChild(bg);
-                if (lbl) g.appendChild(lbl);
-                z.appendChild(g);
-                setThrowBadgeSize(z, '');
+        var throwOrderHud = document.getElementById('throwOrderHud');
+        var throwOrderSeq = document.getElementById('throwOrderSeq');
+        var liveThrowRolls = [];
+        var liveThrowResults = [];
+
+        function normalizeThrowResults(rolls, results, resolved) {
+            rolls = rolls || [];
+            if (results && results.length) {
+                return rolls.map(function(_, i) {
+                    var r = results[i];
+                    return (r === 'hit' || r === 'miss' || r === 'drop') ? r : null;
+                });
+            }
+            var resolvedSet = {};
+            (resolved || []).forEach(function(i) { resolvedSet[Number(i)] = true; });
+            return rolls.map(function(_, i) { return resolvedSet[i] ? 'hit' : null; });
+        }
+
+        function getThrowSteps(rolls, results) {
+            rolls = rolls || [];
+            results = results || [];
+            var nextIdx = -1;
+            for (var i = 0; i < rolls.length; i++) {
+                if (!results[i]) { nextIdx = i; break; }
+            }
+            return rolls.map(function(roll, i) {
+                return { roll: roll, order: i + 1, result: results[i] || null, next: i === nextIdx };
             });
         }
 
-        initThrowOverlays();
+        function renderThrowOrderHud(rolls, results) {
+            if (!throwOrderHud || !throwOrderSeq) return;
+            if (!rolls || !rolls.length) {
+                throwOrderHud.classList.remove('visible');
+                throwOrderSeq.innerHTML = '';
+                return;
+            }
+            var steps = getThrowSteps(rolls, results);
+            var html = '';
+            steps.forEach(function(step, i) {
+                if (i) html += '<div class="throw-order-arrow" aria-hidden="true">→</div>';
+                var cls = 'throw-order-step';
+                if (step.next) cls += ' next';
+                if (step.result) cls += ' ' + step.result;
+                html += '<div class="' + cls + '">' +
+                    '<div class="throw-order-step-num">THROW ' + step.order + '</div>' +
+                    '<div class="throw-order-step-val">' + step.roll + '</div>' +
+                    '</div>';
+            });
+            throwOrderSeq.innerHTML = html;
+            throwOrderHud.classList.add('visible');
+        }
+
+        function markNextThrow(rolls, results) {
+            allZones.forEach(function(z) { z.classList.remove('next-throw'); });
+            var steps = getThrowSteps(rolls || [], results);
+            var next = null;
+            for (var i = 0; i < steps.length; i++) {
+                if (steps[i].next) { next = steps[i]; break; }
+            }
+            if (!next) return;
+            var pair = numberToPair[next.roll];
+            if (!pair) return;
+            var zones = (targetMode === 2)
+                ? (next.roll % 2 === 1 ? oddZones : evenZones)
+                : oddZones;
+            zones.forEach(function(z) {
+                if (z.getAttribute('data-pair') === pair) z.classList.add('next-throw');
+            });
+        }
+
+        function applyThrowState(rolls, claimed, aim, resolved, results) {
+            clearAll();
+            liveThrowRolls = rolls || [];
+            liveThrowResults = normalizeThrowResults(liveThrowRolls, results, resolved);
+            highlightRolls(liveThrowRolls);
+            if (claimed && claimed.length) highlightClaimed(claimed);
+            highlightAim(aim);
+            markNextThrow(liveThrowRolls, liveThrowResults);
+            renderThrowOrderHud(liveThrowRolls, liveThrowResults);
+        }
 
         // ── Clear all zones on both targets ──
         function clearAll() {
             allZones.forEach(function(z) {
-                z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit');
-                var lbl = z.querySelector('.zone-label');
-                if (lbl) lbl.textContent = '';
-                setThrowBadgeSize(z, '');
+                z.classList.remove('active', 'claimed', 'aimed', 'multi-hit', 'triple-hit', 'next-throw');
             });
+            liveThrowRolls = [];
+            liveThrowResults = [];
+            if (!document.body.classList.contains('alignment-mode')) {
+                renderThrowOrderHud([], []);
+            }
         }
 
-        // ── Highlight rolls on a specific set of zones ──
-        // originalIndices preserves throw order from the full rolls array
-        function highlightRollsOnZones(zones, rolls, originalIndices) {
+        function highlightRollsOnZones(zones, rolls) {
             var pairCounts = {};
-            var pairRollNums = {};
-            rolls.forEach(function(r, i) {
+            rolls.forEach(function(r) {
                 var pair = numberToPair[r];
-                if (pair) {
-                    pairCounts[pair] = (pairCounts[pair] || 0) + 1;
-                    if (!pairRollNums[pair]) pairRollNums[pair] = [];
-                    pairRollNums[pair].push(originalIndices[i] + 1);
-                }
+                if (pair) pairCounts[pair] = (pairCounts[pair] || 0) + 1;
             });
             zones.forEach(function(z) {
                 var pair = z.getAttribute('data-pair');
                 var count = pairCounts[pair] || 0;
-                var lbl = z.querySelector('.zone-label');
                 if (count > 0) {
                     z.classList.add('active');
                     z.classList.toggle('multi-hit', count === 2);
                     z.classList.toggle('triple-hit', count >= 3);
-                    var text = '#' + pairRollNums[pair].join('/');
-                    if (lbl) lbl.textContent = text;
-                    setThrowBadgeSize(z, text);
                 } else {
                     z.classList.remove('active', 'multi-hit', 'triple-hit');
-                    if (lbl) lbl.textContent = '';
-                    setThrowBadgeSize(z, '');
                 }
             });
         }
 
         function highlightRolls(rolls) {
             if (targetMode === 2) {
-                var oddRolls = [], evenRolls = [];
-                var oddIndices = [], evenIndices = [];
-                rolls.forEach(function(r, idx) {
-                    if (r % 2 === 1) { oddRolls.push(r); oddIndices.push(idx); }
-                    else { evenRolls.push(r); evenIndices.push(idx); }
-                });
-                highlightRollsOnZones(oddZones, oddRolls, oddIndices);
-                highlightRollsOnZones(evenZones, evenRolls, evenIndices);
+                highlightRollsOnZones(oddZones, rolls.filter(function(r) { return r % 2 === 1; }));
+                highlightRollsOnZones(evenZones, rolls.filter(function(r) { return r % 2 === 0; }));
             } else {
-                highlightRollsOnZones(oddZones, rolls, rolls.map(function(_, i) { return i; }));
+                highlightRollsOnZones(oddZones, rolls);
             }
         }
 
@@ -896,21 +1137,151 @@
         // ── Alignment: scalable and individually draggable targets ──
         var ALIGN_STORAGE_KEY = 'daggerdie_projector_alignment';
         var ALIGN_STORAGE_KEY_DUAL = 'daggerdie_projector_alignment_dual';
+        var HUD_ALIGN_STORAGE_KEY = 'daggerdie_projector_throw_hud';
+        var HUD_LAYOUT_KEY = 'daggerdie_projector_hud_layout';
+        var PANEL_POS_KEY = 'daggerdie_projector_settings_pos';
+        var INDEPENDENT_SCALE_KEY = 'daggerdie_projector_independent_scale';
         var logoBtn = document.getElementById('logoBtn');
         var logoCallout = document.getElementById('logoCallout');
         var logoSpotlightOverlay = document.getElementById('logoSpotlightOverlay');
+        var alignmentLockBar = document.getElementById('alignmentLockBar');
         var lockAlignBtn = document.getElementById('lockAlignBtn');
+        var alignFocusBtn = document.getElementById('alignFocusBtn');
+        var focusLockBtn = document.getElementById('focusLockBtn');
+        var focusSettingsBtn = document.getElementById('focusSettingsBtn');
         var cancelAlignBtn = document.getElementById('cancelAlignBtn');
         var resetAlignBtn = document.getElementById('resetAlignBtn');
         var alignScaleSlider = document.getElementById('alignScaleSlider');
-        var alignDragState = { dragging: false, activeEl: null, startX: 0, startY: 0, startOx: 0, startOy: 0, scale: 1 };
+        var alignOddScaleSlider = document.getElementById('alignOddScaleSlider');
+        var alignEvenScaleSlider = document.getElementById('alignEvenScaleSlider');
+        var alignHudScaleSlider = document.getElementById('alignHudScaleSlider');
+        var independentScaleCheck = document.getElementById('independentScaleCheck');
+        var hudLayoutRowBtn = document.getElementById('hud-layout-row');
+        var hudLayoutColumnBtn = document.getElementById('hud-layout-column');
+        var alignDragState = { dragging: false, activeEl: null, isHud: false, startX: 0, startY: 0, startOx: 0, startOy: 0, scale: 1 };
         var ALIGN_SCALE_MIN = 0.15, ALIGN_SCALE_MAX = 2.5, ALIGN_SCALE_STEP = 0.02;
+        var independentScale = false;
+        var hudLayout = 'row';
+
+        function clampAlignScale(s) {
+            return Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, s));
+        }
+
+        function isIndependentScale() {
+            return targetMode === 2 && independentScale;
+        }
+
+        function syncTargetScaleSliders() {
+            var p1 = parseTransformOf(targetWrapper);
+            var p2 = parseTransformOf(targetWrapperEven);
+            if (alignScaleSlider) alignScaleSlider.value = String(p1.s);
+            if (alignOddScaleSlider) alignOddScaleSlider.value = String(p1.s);
+            if (alignEvenScaleSlider) alignEvenScaleSlider.value = String(p2.s);
+        }
+
+        function setIndependentScale(on) {
+            independentScale = !!on;
+            document.body.classList.toggle('independent-scale', independentScale);
+            if (independentScaleCheck) independentScaleCheck.checked = independentScale;
+            try { localStorage.setItem(INDEPENDENT_SCALE_KEY, independentScale ? '1' : '0'); } catch (e) {}
+            syncTargetScaleSliders();
+        }
+
+        var panelDrag = { dragging: false, startX: 0, startY: 0, startOx: 0, startOy: 0 };
+
+        function applyPanelOffset(x, y) {
+            x = typeof x === 'number' ? x : 0;
+            y = typeof y === 'number' ? y : 0;
+            if (alignmentLockBar) {
+                alignmentLockBar.style.transform = 'translate(-50%, -50%) translate(' + x + 'px, ' + y + 'px)';
+            }
+        }
+
+        function parsePanelOffset() {
+            if (!alignmentLockBar) return { x: 0, y: 0 };
+            var t = alignmentLockBar.style.transform || '';
+            var m = t.match(/translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)/);
+            return { x: m ? parseFloat(m[1]) : 0, y: m ? parseFloat(m[2]) : 0 };
+        }
+
+        function loadPanelOffset() {
+            try {
+                var raw = localStorage.getItem(PANEL_POS_KEY);
+                if (raw) {
+                    var o = JSON.parse(raw);
+                    if (typeof o.x === 'number' && typeof o.y === 'number') {
+                        applyPanelOffset(o.x, o.y);
+                        return;
+                    }
+                }
+            } catch (e) {}
+            applyPanelOffset(0, 0);
+        }
+
+        function savePanelOffset() {
+            try {
+                var p = parsePanelOffset();
+                localStorage.setItem(PANEL_POS_KEY, JSON.stringify({ x: p.x, y: p.y }));
+            } catch (e) {}
+        }
+
+        function isPanelDragSource(el) {
+            return el && !el.closest('input, button, label, select, textarea, a');
+        }
+
+        function onPanelMouseDown(e) {
+            if (!document.body.classList.contains('alignment-mode')) return;
+            if (!isPanelDragSource(e.target)) return;
+            var p = parsePanelOffset();
+            panelDrag.dragging = true;
+            panelDrag.startX = e.clientX;
+            panelDrag.startY = e.clientY;
+            panelDrag.startOx = p.x;
+            panelDrag.startOy = p.y;
+            if (alignmentLockBar) alignmentLockBar.classList.add('dragging');
+            document.addEventListener('mousemove', onPanelMouseMove);
+            document.addEventListener('mouseup', onPanelMouseUp);
+            e.preventDefault();
+        }
+
+        function onPanelMouseMove(e) {
+            if (!panelDrag.dragging) return;
+            applyPanelOffset(
+                Math.round(panelDrag.startOx + (e.clientX - panelDrag.startX)),
+                Math.round(panelDrag.startOy + (e.clientY - panelDrag.startY))
+            );
+        }
+
+        function onPanelMouseUp() {
+            panelDrag.dragging = false;
+            if (alignmentLockBar) alignmentLockBar.classList.remove('dragging');
+            document.removeEventListener('mousemove', onPanelMouseMove);
+            document.removeEventListener('mouseup', onPanelMouseUp);
+            savePanelOffset();
+        }
+
+        function applyHudLayout(layout) {
+            hudLayout = layout === 'column' ? 'column' : 'row';
+            if (throwOrderHud) throwOrderHud.classList.toggle('column', hudLayout === 'column');
+            if (hudLayoutRowBtn) hudLayoutRowBtn.classList.toggle('active', hudLayout === 'row');
+            if (hudLayoutColumnBtn) hudLayoutColumnBtn.classList.toggle('active', hudLayout === 'column');
+            try { localStorage.setItem(HUD_LAYOUT_KEY, hudLayout); } catch (e) {}
+        }
 
         function applyTransformTo(el, x, y, s) {
             x = typeof x === 'number' ? x : 0;
             y = typeof y === 'number' ? y : 0;
             s = typeof s === 'number' && s > 0 ? s : 1;
             if (el) el.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+        }
+
+        function applyHudTransform(x, y, s) {
+            x = typeof x === 'number' ? x : 0;
+            y = typeof y === 'number' ? y : 0;
+            s = typeof s === 'number' && s > 0 ? s : 1;
+            if (throwOrderHud) {
+                throwOrderHud.style.transform = 'translateX(-50%) translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+            }
         }
 
         function parseTransformOf(el) {
@@ -925,6 +1296,43 @@
             return { x: x, y: y, s: s };
         }
 
+        function loadHudAlignment() {
+            try {
+                var raw = localStorage.getItem(HUD_ALIGN_STORAGE_KEY);
+                if (raw) {
+                    var o = JSON.parse(raw);
+                    if (typeof o.x === 'number' && typeof o.y === 'number') {
+                        var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
+                        applyHudTransform(o.x, o.y, s);
+                        if (alignHudScaleSlider) alignHudScaleSlider.value = String(s);
+                        return;
+                    }
+                }
+            } catch (e) {}
+            applyHudTransform(0, 0, 1);
+            if (alignHudScaleSlider) alignHudScaleSlider.value = '1';
+        }
+
+        function saveHudAlignment() {
+            try {
+                var p = parseTransformOf(throwOrderHud);
+                localStorage.setItem(HUD_ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
+            } catch (e) {}
+        }
+
+        function showHudForAlignment() {
+            if (liveThrowRolls.length) {
+                renderThrowOrderHud(liveThrowRolls, liveThrowResults);
+            } else {
+                renderThrowOrderHud([7, 13, 9], []);
+            }
+        }
+
+        function restoreHudAfterAlignment() {
+            if (liveThrowRolls.length) renderThrowOrderHud(liveThrowRolls, liveThrowResults);
+            else renderThrowOrderHud([], []);
+        }
+
         function loadAlignment() {
             if (targetMode === 2) {
                 try {
@@ -932,9 +1340,12 @@
                     if (raw) {
                         var o = JSON.parse(raw);
                         var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
-                        applyTransformTo(targetWrapper, typeof o.oddX === 'number' ? o.oddX : 0, typeof o.oddY === 'number' ? o.oddY : 0, s);
-                        applyTransformTo(targetWrapperEven, typeof o.evenX === 'number' ? o.evenX : 0, typeof o.evenY === 'number' ? o.evenY : 0, s);
-                        if (alignScaleSlider) alignScaleSlider.value = String(s);
+                        var oddS = typeof o.oddS === 'number' && o.oddS > 0 ? o.oddS : s;
+                        var evenS = typeof o.evenS === 'number' && o.evenS > 0 ? o.evenS : s;
+                        applyTransformTo(targetWrapper, typeof o.oddX === 'number' ? o.oddX : 0, typeof o.oddY === 'number' ? o.oddY : 0, oddS);
+                        applyTransformTo(targetWrapperEven, typeof o.evenX === 'number' ? o.evenX : 0, typeof o.evenY === 'number' ? o.evenY : 0, evenS);
+                        syncTargetScaleSliders();
+                        loadHudAlignment();
                         return;
                     }
                 } catch (e) {}
@@ -949,12 +1360,14 @@
                             var s = typeof o.s === 'number' && o.s > 0 ? o.s : 1;
                             applyTransformTo(targetWrapper, o.x, o.y, s);
                             if (alignScaleSlider) alignScaleSlider.value = String(s);
+                            loadHudAlignment();
                             return;
                         }
                     }
                 } catch (e) {}
                 applyTransformTo(targetWrapper, 0, 0, 1);
             }
+            loadHudAlignment();
         }
 
         function saveAlignment() {
@@ -962,37 +1375,57 @@
                 if (targetMode === 2) {
                     var p1 = parseTransformOf(targetWrapper);
                     var p2 = parseTransformOf(targetWrapperEven);
-                    localStorage.setItem(ALIGN_STORAGE_KEY_DUAL, JSON.stringify({ oddX: p1.x, oddY: p1.y, evenX: p2.x, evenY: p2.y, s: p1.s }));
+                    localStorage.setItem(ALIGN_STORAGE_KEY_DUAL, JSON.stringify({
+                        oddX: p1.x, oddY: p1.y, evenX: p2.x, evenY: p2.y,
+                        s: p1.s, oddS: p1.s, evenS: p2.s
+                    }));
                 } else {
                     var p = parseTransformOf(targetWrapper);
                     localStorage.setItem(ALIGN_STORAGE_KEY, JSON.stringify({ x: p.x, y: p.y, s: p.s }));
                 }
             } catch (e) {}
+            saveHudAlignment();
         }
 
         function onAlignWheel(e) {
             if (!document.body.classList.contains('alignment-mode')) return;
             var el = document.elementFromPoint(e.clientX, e.clientY);
-            if (!el || !el.closest('.target-wrapper')) return;
+            if (!el) return;
+            var overHud = el.closest('.throw-order-hud');
+            var overTarget = el.closest('.target-wrapper');
+            if (!overHud && !overTarget) return;
             e.preventDefault();
-            var p1 = parseTransformOf(targetWrapper);
             var delta = e.deltaY > 0 ? -ALIGN_SCALE_STEP : ALIGN_SCALE_STEP;
-            var s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, p1.s + delta));
+            if (el.closest('.alignment-lock-bar')) return;
+            if (overHud) {
+                var hp = parseTransformOf(throwOrderHud);
+                var hs = clampAlignScale(hp.s + delta);
+                applyHudTransform(hp.x, hp.y, hs);
+                if (alignHudScaleSlider) alignHudScaleSlider.value = String(hs);
+                return;
+            }
+            if (isIndependentScale()) {
+                var pt = parseTransformOf(overTarget);
+                var ts = clampAlignScale(pt.s + delta);
+                applyTransformTo(overTarget, pt.x, pt.y, ts);
+                syncTargetScaleSliders();
+                return;
+            }
+            var p1 = parseTransformOf(targetWrapper);
+            var s = clampAlignScale(p1.s + delta);
             applyTransformTo(targetWrapper, p1.x, p1.y, s);
             if (targetMode === 2) {
                 var p2 = parseTransformOf(targetWrapperEven);
                 applyTransformTo(targetWrapperEven, p2.x, p2.y, s);
             }
-            if (alignScaleSlider) alignScaleSlider.value = String(s);
+            syncTargetScaleSliders();
         }
 
-        function onAlignMouseDown(e) {
-            if (!document.body.classList.contains('alignment-mode')) return;
-            var wrapper = e.target.closest('.target-wrapper');
-            if (!wrapper) return;
-            var p = parseTransformOf(wrapper);
+        function beginAlignDrag(el, e, isHud) {
+            var p = parseTransformOf(el);
             alignDragState.dragging = true;
-            alignDragState.activeEl = wrapper;
+            alignDragState.activeEl = el;
+            alignDragState.isHud = !!isHud;
             alignDragState.startX = e.clientX;
             alignDragState.startY = e.clientY;
             alignDragState.startOx = p.x;
@@ -1003,25 +1436,49 @@
             e.preventDefault();
         }
 
+        function onAlignMouseDown(e) {
+            if (!document.body.classList.contains('alignment-mode')) return;
+            var wrapper = e.target.closest('.target-wrapper');
+            if (!wrapper) return;
+            beginAlignDrag(wrapper, e, false);
+        }
+
+        function onAlignHudMouseDown(e) {
+            if (!document.body.classList.contains('alignment-mode')) return;
+            if (!throwOrderHud) return;
+            beginAlignDrag(throwOrderHud, e, true);
+        }
+
         function onAlignMouseMove(e) {
             if (!alignDragState.dragging || !alignDragState.activeEl) return;
-            var ox = alignDragState.startOx + (e.clientX - alignDragState.startX);
-            var oy = alignDragState.startOy + (e.clientY - alignDragState.startY);
-            applyTransformTo(alignDragState.activeEl, Math.round(ox), Math.round(oy), alignDragState.scale);
+            var ox = Math.round(alignDragState.startOx + (e.clientX - alignDragState.startX));
+            var oy = Math.round(alignDragState.startOy + (e.clientY - alignDragState.startY));
+            if (alignDragState.isHud) applyHudTransform(ox, oy, alignDragState.scale);
+            else applyTransformTo(alignDragState.activeEl, ox, oy, alignDragState.scale);
         }
 
         function onAlignMouseUp() {
             alignDragState.dragging = false;
             alignDragState.activeEl = null;
+            alignDragState.isHud = false;
             document.removeEventListener('mousemove', onAlignMouseMove);
             document.removeEventListener('mouseup', onAlignMouseUp);
+        }
+
+        function scaleFromSlider(slider, el) {
+            if (!slider || !el) return;
+            var s = parseFloat(slider.value);
+            if (isNaN(s) || s <= 0) return;
+            s = clampAlignScale(s);
+            var p = parseTransformOf(el);
+            applyTransformTo(el, p.x, p.y, s);
         }
 
         function onAlignScaleSliderInput() {
             if (!alignScaleSlider) return;
             var s = parseFloat(alignScaleSlider.value);
             if (isNaN(s) || s <= 0) return;
-            s = Math.max(ALIGN_SCALE_MIN, Math.min(ALIGN_SCALE_MAX, s));
+            s = clampAlignScale(s);
             var p1 = parseTransformOf(targetWrapper);
             applyTransformTo(targetWrapper, p1.x, p1.y, s);
             if (targetMode === 2) {
@@ -1030,28 +1487,84 @@
             }
         }
 
+        function onAlignOddScaleSliderInput() {
+            scaleFromSlider(alignOddScaleSlider, targetWrapper);
+        }
+
+        function onAlignEvenScaleSliderInput() {
+            scaleFromSlider(alignEvenScaleSlider, targetWrapperEven);
+        }
+
+        function onAlignHudScaleSliderInput() {
+            if (!alignHudScaleSlider) return;
+            var s = parseFloat(alignHudScaleSlider.value);
+            if (isNaN(s) || s <= 0) return;
+            s = clampAlignScale(s);
+            var p = parseTransformOf(throwOrderHud);
+            applyHudTransform(p.x, p.y, s);
+        }
+
+        function enterAlignFocus() {
+            document.body.classList.add('alignment-focus');
+        }
+
+        function exitAlignFocus() {
+            document.body.classList.remove('alignment-focus');
+        }
+
         function startAlignmentMode() {
+            if (document.body.classList.contains('alignment-mode')) {
+                exitAlignFocus();
+                return;
+            }
             document.body.classList.add('alignment-mode');
-            var p = parseTransformOf(targetWrapper);
-            if (alignScaleSlider) { alignScaleSlider.value = String(p.s); alignScaleSlider.addEventListener('input', onAlignScaleSliderInput); }
+            exitAlignFocus();
+            showHudForAlignment();
+            syncTargetScaleSliders();
+            if (alignScaleSlider) alignScaleSlider.addEventListener('input', onAlignScaleSliderInput);
+            if (alignOddScaleSlider) alignOddScaleSlider.addEventListener('input', onAlignOddScaleSliderInput);
+            if (alignEvenScaleSlider) alignEvenScaleSlider.addEventListener('input', onAlignEvenScaleSliderInput);
+            if (alignHudScaleSlider) {
+                alignHudScaleSlider.value = String(parseTransformOf(throwOrderHud).s);
+                alignHudScaleSlider.addEventListener('input', onAlignHudScaleSliderInput);
+            }
             if (targetsContainer) targetsContainer.addEventListener('mousedown', onAlignMouseDown);
+            if (throwOrderHud) throwOrderHud.addEventListener('mousedown', onAlignHudMouseDown);
+            if (alignmentLockBar) alignmentLockBar.addEventListener('mousedown', onPanelMouseDown);
             document.addEventListener('wheel', onAlignWheel, { passive: false });
         }
 
         function exitAlignmentMode() {
             document.body.classList.remove('alignment-mode');
+            exitAlignFocus();
             if (targetsContainer) targetsContainer.removeEventListener('mousedown', onAlignMouseDown);
+            if (throwOrderHud) throwOrderHud.removeEventListener('mousedown', onAlignHudMouseDown);
+            if (alignmentLockBar) alignmentLockBar.removeEventListener('mousedown', onPanelMouseDown);
             document.removeEventListener('wheel', onAlignWheel);
+            document.removeEventListener('mousemove', onPanelMouseMove);
+            document.removeEventListener('mouseup', onPanelMouseUp);
+            if (alignmentLockBar) alignmentLockBar.classList.remove('dragging');
+            panelDrag.dragging = false;
             if (alignScaleSlider) alignScaleSlider.removeEventListener('input', onAlignScaleSliderInput);
+            if (alignOddScaleSlider) alignOddScaleSlider.removeEventListener('input', onAlignOddScaleSliderInput);
+            if (alignEvenScaleSlider) alignEvenScaleSlider.removeEventListener('input', onAlignEvenScaleSliderInput);
+            if (alignHudScaleSlider) alignHudScaleSlider.removeEventListener('input', onAlignHudScaleSliderInput);
             document.removeEventListener('mousemove', onAlignMouseMove);
             document.removeEventListener('mouseup', onAlignMouseUp);
+            restoreHudAfterAlignment();
         }
 
         function lockAlignment() { saveAlignment(); exitAlignmentMode(); loadAlignment(); }
         function cancelAlignment() { exitAlignmentMode(); loadAlignment(); }
         function resetAlignment() {
-            try { localStorage.removeItem(ALIGN_STORAGE_KEY); localStorage.removeItem(ALIGN_STORAGE_KEY_DUAL); } catch (e) {}
+            try {
+                localStorage.removeItem(ALIGN_STORAGE_KEY);
+                localStorage.removeItem(ALIGN_STORAGE_KEY_DUAL);
+                localStorage.removeItem(HUD_ALIGN_STORAGE_KEY);
+                localStorage.removeItem(PANEL_POS_KEY);
+            } catch (e) {}
             loadAlignment();
+            loadPanelOffset();
         }
 
         // ── Background mode ──
@@ -1090,6 +1603,7 @@
         function setTargetMode(mode) {
             targetMode = mode;
             try { localStorage.setItem(TARGET_MODE_KEY, String(mode)); } catch(e) {}
+            document.body.classList.toggle('dual-target-mode', mode === 2);
             if (mode === 2) {
                 targetsContainer.classList.add('dual-mode');
                 targetWrapperEven.style.display = '';
@@ -1110,6 +1624,22 @@
             var savedMode = parseInt(localStorage.getItem(TARGET_MODE_KEY), 10);
             if (savedMode === 2) targetMode = 2;
         } catch(e) {}
+        try {
+            if (localStorage.getItem(INDEPENDENT_SCALE_KEY) === '1') independentScale = true;
+        } catch (e) {}
+        try {
+            if (localStorage.getItem(HUD_LAYOUT_KEY) === 'column') hudLayout = 'column';
+        } catch (e) {}
+        setIndependentScale(independentScale);
+        applyHudLayout(hudLayout);
+        loadPanelOffset();
+        if (independentScaleCheck) {
+            independentScaleCheck.addEventListener('change', function() {
+                setIndependentScale(independentScaleCheck.checked);
+            });
+        }
+        if (hudLayoutRowBtn) hudLayoutRowBtn.addEventListener('click', function() { applyHudLayout('row'); });
+        if (hudLayoutColumnBtn) hudLayoutColumnBtn.addEventListener('click', function() { applyHudLayout('column'); });
         setTargetMode(targetMode);
 
         // ── Button and keyboard handlers ──
@@ -1117,6 +1647,9 @@
         if (lockAlignBtn) lockAlignBtn.addEventListener('click', lockAlignment);
         if (cancelAlignBtn) cancelAlignBtn.addEventListener('click', cancelAlignment);
         if (resetAlignBtn) resetAlignBtn.addEventListener('click', resetAlignment);
+        if (alignFocusBtn) alignFocusBtn.addEventListener('click', enterAlignFocus);
+        if (focusLockBtn) focusLockBtn.addEventListener('click', lockAlignment);
+        if (focusSettingsBtn) focusSettingsBtn.addEventListener('click', exitAlignFocus);
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
@@ -1161,11 +1694,16 @@
             if (rollsParam) {
                 var rolls = rollsParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; });
                 var claimed = claimedParam ? claimedParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 20; }) : [];
+                var resolvedParam = params.get('resolved');
+                var resolved = resolvedParam ? resolvedParam.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); }) : [];
+                var resultsParam = params.get('results');
+                var results = resultsParam ? resultsParam.split(',').map(function(s) {
+                    s = s.trim();
+                    return (s === 'hit' || s === 'miss' || s === 'drop') ? s : null;
+                }) : [];
                 var aim = aimParam ? parseInt(aimParam, 10) : null;
                 if (rolls.length) {
-                    highlightRolls(rolls);
-                    if (claimed.length) highlightClaimed(claimed);
-                    if (aim) highlightAim(aim);
+                    applyThrowState(rolls, claimed, aim, resolved, results);
                     statusDot.classList.add('connected', 'active');
                 }
             }
@@ -1188,18 +1726,13 @@
                 }
 
                 if (msg.type === 'roll') {
-                    clearAll();
-                    highlightRolls(msg.rolls || []);
-                    highlightAim(msg.aim);
+                    applyThrowState(msg.rolls || [], [], msg.aim, msg.resolved || [], msg.results || []);
                     statusDot.classList.add('active');
                     return;
                 }
 
                 if (msg.type === 'update') {
-                    clearAll();
-                    highlightRolls(msg.rolls || []);
-                    highlightClaimed(msg.claimed || []);
-                    highlightAim(msg.aim);
+                    applyThrowState(msg.rolls || [], msg.claimed || [], msg.aim, msg.resolved || [], msg.results || []);
                     statusDot.classList.add('active');
                     return;
                 }
