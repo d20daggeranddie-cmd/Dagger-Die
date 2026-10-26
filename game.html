@@ -593,16 +593,26 @@
         }
 
         .player-stats-avatar {
+            position: relative;
             width: 156px;
             height: 156px;
             border-radius: 50%;
             flex-shrink: 0;
             overflow: hidden;
+            background: transparent;
         }
 
         .player-stats-avatar > * {
             width: 100% !important;
             height: 100% !important;
+        }
+        .player-stats-avatar img {
+            position: absolute;
+            inset: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            background: transparent;
         }
 
         .player-stats-avatar svg {
@@ -1781,16 +1791,29 @@
             margin: 0 auto 14px;
         }
         .player-avatar.player-avatar-char {
-            overflow: hidden;
+            position: relative;
+            overflow: visible;
+            border-radius: 0;
+            background: transparent;
+            height: auto;
+            aspect-ratio: 1 / 1;
         }
         .player-avatar.player-avatar-char svg,
         .player-avatar-char img {
             display: block;
             width: 100%;
-            height: 100%;
+            height: auto;
         }
         .player-avatar-char img {
-            object-fit: cover;
+            /* Sit the portrait on the card. No CSS circle — the PNG's
+               transparent corners already let the card show through. */
+            position: static;
+            width: 100%;
+            height: auto;
+            max-width: none;
+            object-fit: contain;
+            background: transparent;
+            vertical-align: top;
         }
 
         .player-name {
@@ -1949,6 +1972,7 @@
         }
 
         .die {
+            position: relative;
             width: 65px;
             height: 65px;
             background: linear-gradient(145deg, #2d3436, #1e272e);
@@ -1961,6 +1985,14 @@
             box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
             transition: all 0.3s;
             border: 2px solid rgba(255,255,255,0.2);
+        }
+        .dice-throw-hint {
+            text-align: center;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(254, 202, 87, 0.88);
+            margin: -6px 0 12px;
         }
 
         .die.rolling {
@@ -2233,32 +2265,6 @@
         }
         .highlight-zone.aimed.claimed text.d20-num {
             fill: #f5d0fe;
-        }
-
-        .throw-overlay {
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .highlight-zone.active .throw-overlay,
-        .highlight-zone.claimed .throw-overlay {
-            opacity: 1;
-        }
-        .highlight-zone.claimed:not(.active) .throw-overlay {
-            opacity: 0.65;
-        }
-        .throw-badge-bg {
-            fill: #111111;
-            stroke: #ffe566;
-            stroke-width: 2;
-        }
-        .throw-label {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 13px;
-            font-weight: 700;
-            fill: #fbbf24;
-            text-anchor: middle;
-            dominant-baseline: central;
         }
 
         @keyframes pulse {
@@ -2919,6 +2925,7 @@
                         <div class="die" id="die2">-</div>
                         <div class="die" id="die3">-</div>
                     </div>
+                    <p class="dice-throw-hint">Throw in this order</p>
                     <button class="btn btn-primary roll-btn" id="roll-dice-btn">Roll Dice</button>
                     <div class="dice-results" id="dice-results"></div>
                     <div class="dice-actions" id="actions-section">
@@ -3445,7 +3452,21 @@
                         aiming: !!(p.aimActive && p.aimCalledZone !== null),
                         effects,
                         isBoss: !!p.isBoss,
-                        isCurrent: !!(current && p.id === current.id && state.phase !== 'finished')
+                        isCurrent: !!(current && p.id === current.id && state.phase !== 'finished'),
+                        totalThrows: p.totalThrows || 0,
+                        totalRolled: p.totalRolled || 0,
+                        totalClaimed: p.totalClaimed || 0,
+                        criticals: p.criticals || 0,
+                        hitCount: (state.gameLog || []).filter(function(e) {
+                            return e.type === 'damage' &&
+                                e.message.startsWith(p.name + ' dealt ') &&
+                                e.message.includes(' damage to ');
+                        }).length,
+                        dropCount: (state.gameLog || []).filter(function(e) {
+                            return e.type === 'damage' &&
+                                e.message.includes('dropped a knife') &&
+                                e.message.includes(p.name);
+                        }).length
                     };
                 });
                 const impacts = pendingBrawlLeaderboardImpacts.splice(0);
@@ -3890,7 +3911,8 @@
                 closeProjectorResourcesModal();
                 const rolls = (state.currentRoll || []).join(',');
                 const claimed = (state.hits || []).map(h => h.roll).join(',');
-                const url = 'projector.html?rolls=' + encodeURIComponent(rolls) + '&claimed=' + encodeURIComponent(claimed);
+                const results = getProjectorResults().map(r => r || '').join(',');
+                const url = 'projector.html?rolls=' + encodeURIComponent(rolls) + '&claimed=' + encodeURIComponent(claimed) + '&results=' + encodeURIComponent(results);
                 const features = 'width=534,height=534,menubar=no,toolbar=no,location=no,status=no';
                 window.open(url, 'DaggerDieProjector', features);
             });
@@ -4566,7 +4588,7 @@
             const char = p.characterId && CHAR_BY_ID[p.characterId];
             if (char) {
                 const markup = getAvatarMarkup(char, 'game-p' + p.id, p.gender);
-                return `<div class="${baseClass} player-avatar-char" style="${sizeStyle}flex-shrink:0;overflow:hidden;border-radius:50%;">${markup}</div>`;
+                return `<div class="${baseClass} player-avatar-char" style="${sizeStyle}flex-shrink:0;">${markup}</div>`;
             }
             return `<div class="${baseClass}" style="${sizeStyle}background:${p.color.hex};flex-shrink:0;border-radius:50%;"></div>`;
         }
@@ -4717,6 +4739,9 @@
             state.confirmingHits = false;
             state.hits = [];
             state.missedDiceIndices = [];
+            state.droppedDiceIndices = [];
+            state.dropsThisTurn = 0;
+            state.dropsThisTurnLogIndices = [];
             state.totalDamage = 0;
             state.currentHitIndex = 0;
             state.remainingHitIndices = [];
@@ -5038,6 +5063,9 @@
             state.currentRoll = [rollD20(), rollD20(), rollD20()];
             state.hits = [];
             state.missedDiceIndices = [];
+            state.droppedDiceIndices = [];
+            state.dropsThisTurn = 0;
+            state.dropsThisTurnLogIndices = [];
             state.totalDamage = 0;
             state.damageClaimedPhase = false;
             state.confirmingHits = false;
@@ -5067,117 +5095,20 @@
 
         rollDiceBtn.addEventListener('click', () => performDiceRoll());
 
-        const THROW_BADGE_POS = {
-            15: [48, 298], 12: [48, 298],
-            9: [352, 298], 14: [352, 298],
-            13: [132, 404], 18: [132, 404],
-            19: [268, 404], 16: [268, 404],
-            17: [100, 78], 10: [100, 78],
-            11: [300, 78], 20: [300, 78],
-            3: [108, 206], 4: [108, 206],
-            7: [292, 206], 6: [292, 206],
-            5: [255, 340], 8: [255, 340],
-            1: [254, 274], 2: [254, 274],
-            '15,12': [48, 298], '9,14': [352, 298],
-            '13,18': [132, 404], '19,16': [268, 404],
-            '17,10': [100, 78], '11,20': [300, 78],
-            '3,4': [108, 206], '7,6': [292, 206],
-            '5,8': [255, 340], '1,2': [254, 274]
-        };
-        const THROW_BADGE_COMPACT = new Set([12, 15, 9, 14, 13, 18, 16, 19, 17, 10, 11, 20, '15,12', '9,14', '13,18', '19,16', '17,10', '11,20']);
-
-        function throwBadgeKey(zone) {
-            return zone.getAttribute('data-number') || zone.getAttribute('data-numbers') || '';
-        }
-
-        function setThrowBadgeSize(zone, text) {
-            const bg = zone.querySelector('.throw-badge-bg');
-            if (!bg) return;
-            const compact = THROW_BADGE_COMPACT.has(Number(throwBadgeKey(zone))) || THROW_BADGE_COMPACT.has(throwBadgeKey(zone));
-            const wide = !!(text && text.length > 3);
-            const w = compact ? (wide ? 28 : 22) : (wide ? 36 : 26);
-            const h = compact ? 20 : 26;
-            bg.setAttribute('x', String(-w / 2));
-            bg.setAttribute('y', String(-h / 2));
-            bg.setAttribute('width', String(w));
-            bg.setAttribute('height', String(h));
-            bg.setAttribute('rx', String(h / 2));
-        }
-
-        function initThrowOverlays() {
-            const ns = 'http://www.w3.org/2000/svg';
-            document.querySelectorAll('.highlight-zone').forEach(zone => {
-                if (zone.querySelector('.throw-overlay')) return;
-                const nums = zone.querySelectorAll('.d20-num');
-                if (!nums.length) return;
-                const key = throwBadgeKey(zone);
-                const pos = THROW_BADGE_POS[key] || THROW_BADGE_POS[Number(key)];
-                const first = nums[0];
-                const last = nums[nums.length - 1];
-                const x = parseFloat(first.getAttribute('x'));
-                const y1 = parseFloat(first.getAttribute('y'));
-                const y2 = parseFloat(last.getAttribute('y'));
-                const midY = nums.length > 1 ? (y1 + y2) / 2 : y1;
-                const badgeX = pos ? pos[0] : Math.max(28, Math.min(372, x + 22));
-                const badgeY = pos ? pos[1] : Math.max(24, Math.min(436, midY + 18));
-
-                const g = document.createElementNS(ns, 'g');
-                g.setAttribute('class', 'throw-overlay');
-                g.setAttribute('transform', `translate(${badgeX},${badgeY})`);
-
-                const bg = document.createElementNS(ns, 'rect');
-                bg.setAttribute('class', 'throw-badge-bg');
-
-                const t = document.createElementNS(ns, 'text');
-                t.setAttribute('class', 'throw-label');
-                t.setAttribute('x', '0');
-                t.setAttribute('y', '1');
-
-                g.appendChild(bg);
-                g.appendChild(t);
-                zone.appendChild(g);
-                setThrowBadgeSize(zone, '');
-            });
-        }
-
-        initThrowOverlays();
-
-        function syncThrowOverlays(rolls) {
-            const zoneThrows = new Map();
-            (rolls || []).forEach((roll, i) => {
-                getZonesForNumber(roll).forEach(zone => {
-                    if (!zoneThrows.has(zone)) zoneThrows.set(zone, []);
-                    zoneThrows.get(zone).push(i + 1);
-                });
-            });
-            document.querySelectorAll('.highlight-zone').forEach(zone => {
-                const lbl = zone.querySelector('.throw-label');
-                const nums = zoneThrows.get(zone);
-                const text = nums && nums.length ? '#' + nums.join('/') : '';
-                if (lbl) lbl.textContent = text;
-                setThrowBadgeSize(zone, text);
-            });
-        }
-
         function highlightTargets(rolls) {
-            initThrowOverlays();
             clearHighlights();
             rolls.forEach(roll => {
                 getZonesForNumber(roll).forEach(zone => zone.classList.add('active'));
             });
-            syncThrowOverlays(rolls);
             const aimZone = syncAimHighlights();
             try {
-                if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll, aim: aimZone });
+                if (projectorChannel) projectorChannel.postMessage({ type: 'roll', rolls: state.currentRoll, aim: aimZone, results: getProjectorResults() });
             } catch (e) {}
         }
 
         function clearHighlights() {
             document.querySelectorAll('.highlight-zone').forEach(zone => {
                 zone.classList.remove('active', 'aimed', 'claimed');
-                const lbl = zone.querySelector('.throw-label');
-                if (lbl) lbl.textContent = '';
-                setThrowBadgeSize(zone, '');
             });
             try {
                 if (projectorChannel) projectorChannel.postMessage({ type: 'clear' });
@@ -5357,8 +5288,9 @@
             });
             const aimZone = syncAimHighlights();
             try {
-                if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll), aim: aimZone });
+                if (projectorChannel) projectorChannel.postMessage({ type: 'update', rolls: state.currentRoll, claimed: (state.hits || []).map(h => h.roll), aim: aimZone, results: getProjectorResults() });
             } catch (e) {}
+            broadcastBrawlLeaderboardState();
 
             if (state.skipDamageConfirm && resolved) {
                 tryAutoConfirmHits();
@@ -5465,7 +5397,11 @@
         function showHitRecorder(initialHits) {
             const currentPlayer = getCurrentPlayer();
 
-            const maxDiceScores = Math.max(0, MAX_SCORES_PER_TURN - state.dropsThisTurn);
+            state.missedDiceIndices = [];
+            state.droppedDiceIndices = [];
+            state.dropsThisTurn = 0;
+            state.dropsThisTurnLogIndices = [];
+            const maxDiceScores = MAX_SCORES_PER_TURN;
             state.hits = initialHits && initialHits.length > 0 ? initialHits.slice(0, maxDiceScores) : [];
             state.confirmingHits = false;
 
@@ -5509,6 +5445,10 @@
             document.getElementById('even-overlay').classList.add('clickable');
             document.getElementById('combined-overlay').classList.add('clickable');
             syncHitRecorderUI();
+            hitInfo.style.pointerEvents = 'none';
+            setTimeout(function() {
+                if (hitInfo) hitInfo.style.pointerEvents = '';
+            }, 400);
 
             hitInfo.querySelectorAll('.hit-toggle').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -5664,6 +5604,10 @@
         const throwResultDropBtn = document.getElementById('throw-result-drop-btn');
         const throwResultCancelBtn = document.getElementById('throw-result-cancel-btn');
         let throwResultDieIdx = null;
+
+        function getProjectorResults() {
+            return (state.currentRoll || []).map((_, i) => getDieResult(i));
+        }
 
         function getDieResult(idx) {
             if ((state.droppedDiceIndices || []).includes(idx)) return 'drop';
